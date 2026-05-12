@@ -38,7 +38,7 @@ const RightAuthForms = () => {
         localStorage.setItem("role", formRole);
       }
 
-      formRole === "advisor" ? navigate("/fa") : navigate("/");
+      formRole === "advisor" ? navigate("/a/dashboard") : navigate("/u/dashboard");
     } catch (error: unknown) {
       const fallbackMessage = mode === "signup" ? "Signup failed. Please try again." : "Login failed. Please check your credentials.";
       const apiError =

@@ -1,5 +1,5 @@
 import { Navigate } from 'react-router-dom'
-import type { Role } from '../types'
+import type { Role } from '../../types'
 
 export function PublicOnlyRoute({ children }: { children: React.ReactNode }) {
   if (typeof window === 'undefined') {
@@ -14,12 +14,12 @@ export function PublicOnlyRoute({ children }: { children: React.ReactNode }) {
   }
 
   if (role === 'advisor') {
-    return <Navigate to="/fa" replace />
+    return <Navigate to="/a/dashboard" replace />
   }
 
   if (role === 'admin') {
     return <Navigate to="/lol" replace />
   }
 
-  return <Navigate to="/" replace />
+  return <Navigate to="/u/dashboard" replace />
 }

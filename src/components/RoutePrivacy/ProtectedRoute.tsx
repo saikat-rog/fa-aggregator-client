@@ -1,5 +1,5 @@
 import { Navigate } from 'react-router-dom'
-import type { Role } from '../types'
+import type { Role } from '../../types'
 
 export function ProtectedRoute({ children, allowedRoles }: { children: React.ReactNode; allowedRoles?: Role[] }) {
   const isAuthenticated = Boolean(localStorage.getItem('token'))
@@ -12,14 +12,14 @@ export function ProtectedRoute({ children, allowedRoles }: { children: React.Rea
 
   if (allowedRoles && !allowedRoles.includes(role)) {
     if (role === 'advisor') {
-      return <Navigate to="/fa" replace />
+      return <Navigate to="/a/dashboard" replace />
     }
 
     if (role === 'admin') {
       return <Navigate to="/lol" replace />
     }
 
-    return <Navigate to="/" replace />
+    return <Navigate to="/u/dashboard" replace />
   }
 
   return children

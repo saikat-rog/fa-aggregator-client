@@ -1,0 +1,354 @@
+import { useEffect, useMemo, useState } from "react";
+import {
+  advisorFormOptionsApi,
+  submitAdvisorApplicationApi,
+  type AdvisorApplicationPayload,
+  type AdvisorFormOptionsResponseData,
+} from "../../services/advisor.service";
+
+
+const HANDLE_REGEX = /^[a-zA-Z0-9._]{2,30}$/;
+const isValidHandle = (value: string) => HANDLE_REGEX.test(value);
+
+const handleOrUndefined = (value: FormDataEntryValue | null) => {
+  const raw = String(value || "").trim();
+  if (!raw) return undefined;
+  return raw.startsWith("@") ? raw.slice(1) : raw;
+};
+
+const ApplicationForm = () => {
+  const [applicationNote, setApplicationNote] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [options, setOptions] = useState<AdvisorFormOptionsResponseData | null>(null);
+  const [isOptionsLoading, setIsOptionsLoading] = useState(true);
+
+  const [selectedCountry, setSelectedCountry] = useState("");
+  const [selectedState, setSelectedState] = useState("");
+  const [selectedMarkets, setSelectedMarkets] = useState<string[]>([]);
+  const [selectedIndices, setSelectedIndices] = useState<string[]>([]);
+
+  useEffect(() => {
+    const loadOptions = async () => {
+      try {
+        setIsOptionsLoading(true);
+        const data = await advisorFormOptionsApi();
+        setOptions(data);
+      } catch (error) {
+        setErrorMessage("Failed to load form options. Please refresh and try again.");
+      } finally {
+        setIsOptionsLoading(false);
+      }
+    };
+
+    loadOptions();
+  }, []);
+
+  const statesForCountry = useMemo(() => {
+    if (!options || !selectedCountry) return [];
+    return options.locations[selectedCountry]?.states ?? [];
+  }, [options, selectedCountry]);
+
+  const allIndices = useMemo(() => {
+    if (!options) return [];
+    return Array.from(
+      new Set(Object.values(options.marketIndicesByCountry).flat()),
+    ).sort((a, b) => a.localeCompare(b));
+  }, [options]);
+
+  const submitListingApplication = async (
+    event: React.FormEvent<HTMLFormElement>,
+  ) => {
+    event.preventDefault();
+    const formElement = event.currentTarget;
+    const formData = new FormData(formElement);
+
+    const socialLinks = {
+      instagram: handleOrUndefined(formData.get("instagram")),
+      linkedin: handleOrUndefined(formData.get("linkedin")),
+      twitter: handleOrUndefined(formData.get("twitter")),
+      facebook: handleOrUndefined(formData.get("facebook")),
+      youtube: handleOrUndefined(formData.get("youtube")),
+    };
+
+    const payload: AdvisorApplicationPayload = {
+      country: String(formData.get("country") || "").trim(),
+      state: String(formData.get("state") || "").trim(),
+      about: String(formData.get("about") || "").trim(),
+      marketFocus: selectedMarkets,
+      emailForContact: String(formData.get("emailForContact") || "").trim(),
+      personalWebsite: String(formData.get("personalWebsite") || "").trim() || undefined,
+      expertiseIndeces: selectedIndices,
+      socialLinks,
+    };
+
+    const socialHandles = [
+      socialLinks.instagram,
+      socialLinks.linkedin,
+      socialLinks.twitter,
+      socialLinks.facebook,
+      socialLinks.youtube,
+    ].filter(Boolean) as string[];
+
+    if (!payload.country) {
+      setErrorMessage("Please select a country.");
+      return;
+    }
+
+    if (statesForCountry.length > 0 && !payload.state) {
+      setErrorMessage("Please select a state.");
+      return;
+    }
+
+    if (payload.marketFocus.length === 0) {
+      setErrorMessage("Please select at least one market focus.");
+      return;
+    }
+
+    if (payload.expertiseIndeces.length === 0) {
+      setErrorMessage("Please select at least one expertise index.");
+      return;
+    }
+
+    if (socialHandles.length === 0) {
+      setErrorMessage("Please provide at least one social media handle.");
+      return;
+    }
+
+    if (!socialHandles.every(isValidHandle)) {
+      setErrorMessage(
+        "One or more social handles are invalid. Use 2-30 chars: letters, numbers, . or _",
+      );
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      setErrorMessage("");
+      setApplicationNote("");
+
+      await submitAdvisorApplicationApi(payload);
+
+      setApplicationNote(
+        "Application submitted successfully. Our team will review it within 24-48 hours.",
+      );
+      formElement.reset();
+      setSelectedCountry("");
+      setSelectedState("");
+      setSelectedMarkets([]);
+      setSelectedIndices([]);
+    } catch (error: unknown) {
+      const apiError =
+        typeof error === "object" &&
+        error !== null &&
+        "response" in error &&
+        typeof (error as { response?: { data?: { msg?: string } } }).response?.data
+          ?.msg === "string"
+          ? (error as { response?: { data?: { msg?: string } } }).response?.data?.msg
+          : "Failed to submit application. Please try again.";
+
+      setErrorMessage(apiError ?? "Failed to submit application. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleField = (name: string, placeholder: string) => (
+    <label className="flex items-center rounded-xl border border-blue-100 bg-white px-4 py-3 focus-within:border-blue-400">
+      <span className="mr-1 text-slate-400">@</span>
+      <input
+        name={name}
+        type="text"
+        placeholder={placeholder}
+        className="w-full outline-none"
+      />
+    </label>
+  );
+
+  const toggleMarket = (market: string) => {
+    setSelectedMarkets((prev) =>
+      prev.includes(market)
+        ? prev.filter((item) => item !== market)
+        : [...prev, market],
+    );
+  };
+
+  const toggleIndex = (indexName: string) => {
+    setSelectedIndices((prev) =>
+      prev.includes(indexName)
+        ? prev.filter((item) => item !== indexName)
+        : [...prev, indexName],
+    );
+  };
+
+  return (
+    <article className="rounded-3xl border border-blue-100 bg-white p-5 shadow-sm">
+      <div className="mb-5 rounded-2xl border border-blue-100 bg-linear-to-r from-blue-50 to-cyan-50 p-4">
+        <p className="inline-flex rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-blue-700">
+          Listing Application
+        </p>
+        <h2 className="mt-2 text-xl font-semibold text-slate-900">
+          Build Your Public Advisor Profile
+        </h2>
+        <p className="mt-1 text-sm text-slate-600">
+          Complete the details below to get reviewed and start receiving qualified leads.
+        </p>
+      </div>
+
+      {isOptionsLoading ? (
+        <p className="mb-4 rounded-xl border border-blue-100 bg-blue-50 p-3 text-sm text-blue-700">
+          Loading advisor form options...
+        </p>
+      ) : null}
+
+      <form onSubmit={submitListingApplication} className="space-y-3">
+        <div className={`grid gap-3 ${statesForCountry.length > 0 ? "md:grid-cols-2" : "md:grid-cols-1"}`}>
+          <select
+            required
+            name="country"
+            value={selectedCountry}
+            onChange={(event) => {
+              setSelectedCountry(event.target.value);
+              setSelectedState("");
+            }}
+            className="w-full rounded-xl border border-blue-100 px-4 py-3 outline-none focus:border-blue-400"
+          >
+            <option value="">Select country</option>
+            {(options?.countries || []).map((country) => (
+              <option key={country} value={country}>
+                {country}
+              </option>
+            ))}
+          </select>
+
+          {statesForCountry.length > 0 ? (
+            <select
+              required
+              name="state"
+              value={selectedState}
+              onChange={(event) => setSelectedState(event.target.value)}
+              className="w-full rounded-xl border border-blue-100 px-4 py-3 outline-none focus:border-blue-400"
+            >
+              <option value="">Select state</option>
+              {statesForCountry.map((state) => (
+                <option key={state} value={state}>
+                  {state}
+                </option>
+              ))}
+            </select>
+          ) : null}
+        </div>
+
+        <input
+          required
+          name="emailForContact"
+          type="email"
+          placeholder="Email to be displayed on your profile"
+          className="w-full rounded-xl border border-blue-100 px-4 py-3 outline-none focus:border-blue-400"
+        />
+
+        <input
+          name="personalWebsite"
+          type="url"
+          placeholder="Your website URL (optional)"
+          className="w-full rounded-xl border border-blue-100 px-4 py-3 outline-none focus:border-blue-400"
+        />
+
+        <p className="text-md text-slate-600 py-2">
+          At least one social handle is required
+        </p>
+        <div className="grid gap-3 md:grid-cols-2">
+          {handleField("instagram", "instagram handle")}
+          {handleField("linkedin", "linkedin handle")}
+          {handleField("twitter", "twitter/x handle")}
+          {handleField("facebook", "facebook handle")}
+          {handleField("youtube", "youtube handle")}
+        </div>
+
+        <textarea
+          required
+          name="about"
+          rows={4}
+          placeholder="Short description for your public profile"
+          className="w-full rounded-xl border border-blue-100 px-4 py-3 outline-none focus:border-blue-400"
+        />
+
+        <div>
+          <p className="text-md text-slate-600 py-2">
+            Market Focus (choose one or more)
+          </p>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {(options?.markets || []).map((market) => {
+              const isSelected = selectedMarkets.includes(market);
+              return (
+                <button
+                  key={market}
+                  type="button"
+                  onClick={() => toggleMarket(market)}
+                  className={`rounded-full border px-2.5 py-1 text-[10px] font-medium transition ${
+                    isSelected
+                      ? "border-blue-600 bg-blue-600 text-white"
+                      : "border-blue-200 bg-blue-50 text-blue-700 hover:border-blue-400"
+                  }`}
+                >
+                  {market}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div>
+          <p className="text-md text-slate-600 py-2">
+            Expertise indices (choose one or more)
+          </p>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {allIndices.map((indexName) => {
+              const isSelected = selectedIndices.includes(indexName);
+              return (
+                <button
+                  key={indexName}
+                  type="button"
+                  onClick={() => toggleIndex(indexName)}
+                  className={`rounded-full border px-2.5 py-1 text-[10px] font-medium transition ${
+                    isSelected
+                      ? "border-cyan-600 bg-cyan-600 text-white"
+                      : "border-cyan-200 bg-cyan-50 text-cyan-700 hover:border-cyan-400"
+                  }`}
+                >
+                  {indexName}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <button
+            disabled={isSubmitting || isOptionsLoading}
+            type="submit"
+            className="rounded-xl bg-blue-600 w-full px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-70"
+          >
+            {isSubmitting ? "Submitting..." : "Submit For Approval"}
+          </button>
+          
+        </div>
+      </form>
+
+      {applicationNote ? (
+        <p className="mt-4 rounded-xl border border-blue-100 bg-blue-50 p-3 text-sm text-blue-700">
+          {applicationNote}
+        </p>
+      ) : null}
+
+      {errorMessage ? (
+        <p className="mt-4 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
+          {errorMessage}
+        </p>
+      ) : null}
+    </article>
+  );
+};
+
+export default ApplicationForm;

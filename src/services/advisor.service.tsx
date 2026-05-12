@@ -1,0 +1,43 @@
+import api from "../lib/axios";
+
+export interface AdvisorApplicationPayload {
+  country: string;
+  state: string;
+  about: string;
+  marketFocus: string[];
+  emailForContact: string;
+  personalWebsite?: string;
+  expertiseIndeces: string[];
+  socialLinks?: {
+    instagram?: string;
+    linkedin?: string;
+    twitter?: string;
+    facebook?: string;
+    youtube?: string;
+  };
+}
+
+export interface AdvisorFormOptionsResponseData {
+  countries: string[];
+  locations: Record<string, { states: string[] }>;
+  markets: string[];
+  marketIndicesByCountry: Record<string, string[]>;
+}
+
+export async function submitAdvisorApplicationApi(
+  params: AdvisorApplicationPayload,
+) {
+  const response = await api.post('/advisor/form-apply', params);
+  return response.data;
+}
+
+export async function advisorFormOptionsApi(){
+  const response = await api.get('/advisor/form-options');
+  const payload = response.data;
+  return (payload?.data ?? payload) as AdvisorFormOptionsResponseData;
+}
+
+export const advisorProfileAnalyticsApi = async () => {
+  const response = await api.get('/advisor/profile-analytics');
+  return response.data;
+};

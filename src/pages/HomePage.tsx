@@ -25,7 +25,7 @@ interface AdvisorCard {
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined) || 'http://localhost:5001/api'
 
-export function UserHomePage() {
+export function HomePage() {
   const [query, setQuery] = useState('')
   const [advisors, setAdvisors] = useState<AdvisorCard[]>([])
   const [isLoading, setIsLoading] = useState(true)
