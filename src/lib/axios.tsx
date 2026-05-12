@@ -56,7 +56,10 @@ api.interceptors.response.use(
           { withCredentials: true },
         );
 
-        const newToken = res.data?.accessToken || res.data?.data?.token;
+        const newToken =
+          res.data?.accessToken ||
+          res.data?.data?.accessToken ||
+          res.data?.data?.token;
         if (!newToken) {
           throw new Error("Refresh succeeded but no access token returned");
         }
