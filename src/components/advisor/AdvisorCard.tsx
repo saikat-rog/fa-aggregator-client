@@ -142,7 +142,7 @@ export function AdvisorCard({ advisor }: AdvisorCardProps) {
                     <button
                       type="button"
                       onClick={() => navigate(`/${advisor.username}`)}
-                      className="truncate text-xl font-semibold tracking-tight text-white hover:underline text-left w-full"
+                      className="truncate text-xl font-semibold tracking-tight text-white hover:cursor-pointer text-left w-full"
                     >
                       {advisor.name}
                     </button>
@@ -167,7 +167,17 @@ export function AdvisorCard({ advisor }: AdvisorCardProps) {
                 <p className="text-[11px] font-semibold uppercase tracking-[0.24em]">
                   About
                 </p>
-                <p className="mt-2 text-sm leading-6">{advisor.about}</p>
+                <p
+                  className="mt-2 text-sm leading-6"
+                  style={{
+                    display: "-webkit-box",
+                    WebkitLineClamp: 3,
+                    WebkitBoxOrient: "vertical",
+                    overflow: "hidden",
+                  }}
+                >
+                  {advisor.about}
+                </p>
               </div>
 
               <div className="space-y-2">

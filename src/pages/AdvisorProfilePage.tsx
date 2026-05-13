@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { FaArrowLeft } from "react-icons/fa6";
 import { useNavigate, useParams } from "react-router-dom";
 import { AboutCard } from "../components/advisor-profile/AboutCard";
 import { ContactFormCard } from "../components/advisor-profile/ContactFormCard";
@@ -8,6 +7,7 @@ import { ExpertiseCard } from "../components/advisor-profile/ExpertiseCard";
 import { ProfessionalConnectCard } from "../components/advisor-profile/ProfessionalConnectCard";
 import { ProfileHeroCard } from "../components/advisor-profile/ProfileHeroCard";
 import { AuthPromptDialog } from "../components/ui/AuthPromptDialog";
+import { NotFoundState } from "../components/ui/NotFoundState";
 import {
   getAdvisorByUsernameApi,
   submitAdvisorQueryApi,
@@ -233,28 +233,7 @@ export function AdvisorProfilePage() {
   }
 
   if (error || !advisor) {
-    return (
-      <div className="min-h-screen bg-linear-to-br from-slate-50 to-slate-100 px-4 py-8">
-        <div className="mx-auto max-w-4xl">
-          <button
-            type="button"
-            onClick={() => navigate("/")}
-            className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white px-4 py-2 text-sm font-semibold text-blue-600 transition hover:bg-blue-50"
-          >
-            <FaArrowLeft /> Back to Advisors
-          </button>
-          <div className="rounded-3xl border border-slate-200 bg-white p-8 text-center">
-            <h2 className="text-2xl font-bold text-slate-900">
-              {error || "Advisor not found"}
-            </h2>
-            <p className="mt-2 text-slate-600">
-              The advisor profile you're looking for doesn't exist or couldn't be
-              loaded.
-            </p>
-          </div>
-        </div>
-      </div>
-    );
+    return <NotFoundState onButtonClick={() => navigate("/")} />;
   }
 
   const advisorData = advisor as Required<typeof advisor>;
