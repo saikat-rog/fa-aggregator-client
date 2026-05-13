@@ -15,12 +15,18 @@ export interface AdvisorApiItem {
     twitter?: string;
     facebook?: string;
     youtube?: string;
+    instagramFollowers?: number;
+    linkedinFollowers?: number;
+    twitterFollowers?: number;
+    facebookFollowers?: number;
+    youtubeSubscribers?: number;
   };
   about?: string;
   marketFocus?: string[];
   expertiseIndeces?: string[];
   emailForContact?: string;
   personalWebsite?: string;
+  username?: string;
 }
 
 export function HomePage() {
@@ -44,6 +50,7 @@ export function HomePage() {
           (item) => ({
             id: item.id,
             name: item.name?.trim() || "Verified Advisor",
+            username: item.username || "Anonymous",
             country: item.country || "Unknown country",
             state: item.state || "Unknown state",
             marketFocus: item.marketFocus || ["All Markets"],

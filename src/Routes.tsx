@@ -5,6 +5,7 @@ import { PublicOnlyRoute } from "./components/RoutePrivacy/PublicOnlyRoute";
 import { AdminPage } from "./pages/AdminPage";
 import { AuthPage } from "./pages/AuthPage";
 import { HomePage } from "./pages/HomePage";
+import { AdvisorProfilePage } from "./pages/AdvisorProfilePage";
 import AdvisorLayout from "./layouts/AdvisorLayout";
 import UserLayout from "./layouts/UserLayout";
 import UserDashboard from "./components/user/UserDashboard";
@@ -47,6 +48,7 @@ function App() {
               <Route path="dashboard" element={<AdvisorDashboardPage />} />
           </Route>
           <Route path="/lol" element={<AdminPage />} />
+          <Route path="/:username" element={<AdvisorProfilePage />} />
         </Routes>
       </AppShell>
     </BrowserRouter>

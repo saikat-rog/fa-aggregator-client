@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
+  FaArrowRight,
   FaChartLine,
   FaCircleCheck,
   FaEnvelope,
@@ -18,6 +19,7 @@ import { AuthPromptDialog } from "../ui/AuthPromptDialog";
 export interface AdvisorCardData {
   id: string;
   name: string;
+  username: string;
   country: string;
   state: string;
   marketFocus: string[];
@@ -137,13 +139,26 @@ export function AdvisorCard({ advisor }: AdvisorCardProps) {
                   </div>
 
                   <div className="min-w-0">
-                    <h3 className="truncate text-xl font-semibold tracking-tight text-white">
+                    <button
+                      type="button"
+                      onClick={() => navigate(`/${advisor.username}`)}
+                      className="truncate text-xl font-semibold tracking-tight text-white hover:underline text-left w-full"
+                    >
                       {advisor.name}
-                    </h3>
-                    <p className="mt-1 flex items-center gap-1.5 text-sm text-blue-100">
-                      <FaLocationDot className="text-blue-100" />
-                      {advisor.state}, {advisor.country}
-                    </p>
+                    </button>
+                    <div className="mt-1 flex flex-wrap items-center gap-2">
+                      <p className="flex items-center gap-1.5 text-sm text-blue-100">
+                        <FaLocationDot className="text-blue-100" />
+                        {advisor.state}, {advisor.country}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => navigate(`/${advisor.username}`)}
+                        className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-[11px] font-semibold tracking-wide text-white/90 hover:bg-white/20 transition"
+                      >
+                        @{advisor.username}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -192,7 +207,10 @@ export function AdvisorCard({ advisor }: AdvisorCardProps) {
                     <button
                       type="button"
                       onClick={() =>
-                        openAction("social", `https://x.com/${socialLinks.twitter}`)
+                        openAction(
+                          "social",
+                          `https://x.com/${socialLinks.twitter}`,
+                        )
                       }
                       className={socialButtonClassName}
                     >
@@ -232,7 +250,7 @@ export function AdvisorCard({ advisor }: AdvisorCardProps) {
             </div>
           </div>
 
-          <div className="space-y-5 p-5">
+          <div className="flex flex-col space-y-5 p-5">
             <div className="space-y-3">
               <div>
                 <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
@@ -269,11 +287,13 @@ export function AdvisorCard({ advisor }: AdvisorCardProps) {
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-3 md:flex-nowrap">
+            <div className="flex flex-wrap items-center gap-3">
               {advisor.personalWebsite ? (
                 <button
                   type="button"
-                  onClick={() => openAction("website", advisor.personalWebsite as string)}
+                  onClick={() =>
+                    openAction("website", advisor.personalWebsite as string)
+                  }
                   className="inline-flex items-center gap-2 rounded-full bg-blue-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-800"
                 >
                   <FaGlobe /> Website
@@ -282,13 +302,23 @@ export function AdvisorCard({ advisor }: AdvisorCardProps) {
               {advisor.emailForContact ? (
                 <button
                   type="button"
-                  onClick={() => openAction("email", `mailto:${advisor.emailForContact}`)}
+                  onClick={() =>
+                    openAction("email", `mailto:${advisor.emailForContact}`)
+                  }
                   className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white px-4 py-2 text-sm font-semibold text-blue-700 transition hover:bg-blue-50"
                 >
                   <FaEnvelope /> Email
                 </button>
               ) : null}
             </div>
+
+            <button
+              type="button"
+              onClick={() => navigate(`/${advisor.username}`)}
+              className="mt-auto inline-flex items-center justify-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 w-full"
+            >
+              View more <FaArrowRight />
+            </button>
           </div>
         </div>
       </article>

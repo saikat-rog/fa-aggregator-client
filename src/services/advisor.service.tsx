@@ -14,6 +14,11 @@ export interface AdvisorApplicationPayload {
     twitter?: string;
     facebook?: string;
     youtube?: string;
+    instagramFollowers?: number;
+    linkedinFollowers?: number;
+    twitterFollowers?: number;
+    facebookFollowers?: number;
+    youtubeSubscribers?: number;
   };
 }
 
@@ -49,5 +54,24 @@ export const getAllAdvisorsApi = async () => {
 
 export const getAdvisorByIdApi = async (advisorId: string) => {
   const response = await api.get(`/advisor/${advisorId}`);
+  return response.data;
+};
+
+export const getAdvisorByUsernameApi = async (username: string) => {
+  const response = await api.get(`/advisor/username/${username}`);
+  return response.data;
+};
+
+export interface AdvisorQueryPayload {
+  advisorUsername: string;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  category?: string;
+}
+
+export const submitAdvisorQueryApi = async (payload: AdvisorQueryPayload) => {
+  const response = await api.post('/advisor/query', payload);
   return response.data;
 };
