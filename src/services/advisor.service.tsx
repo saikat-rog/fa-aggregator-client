@@ -41,3 +41,13 @@ export const advisorProfileAnalyticsApi = async () => {
   const response = await api.get('/advisor/profile-analytics');
   return response.data;
 };
+
+export const getAllAdvisorsApi = async () => {
+  const response = await api.get('/advisor');
+  return response.data;
+};
+
+export const getAdvisorByIdApi = async (advisorId: string) => {
+  const response = await api.get(`/advisor/${advisorId}`);
+  return response.data;
+};
