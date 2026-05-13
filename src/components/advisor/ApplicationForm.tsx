@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
+import { FaCircleCheck, FaCircleXmark } from "react-icons/fa6";
 import {
   advisorFormOptionsApi,
+  duplicateUsernameCheckApi,
   submitAdvisorApplicationApi,
   type AdvisorApplicationPayload,
   type AdvisorFormOptionsResponseData,
@@ -13,6 +15,8 @@ type ApplicationFormProps = {
 
 const HANDLE_REGEX = /^[a-zA-Z0-9._]{2,30}$/;
 const isValidHandle = (value: string) => HANDLE_REGEX.test(value);
+const USERNAME_REGEX = /^[a-zA-Z0-9._]{3,30}$/;
+const isValidUsername = (value: string) => USERNAME_REGEX.test(value);
 
 const handleOrUndefined = (value: FormDataEntryValue | null) => {
   const raw = String(value || "").trim();
@@ -32,6 +36,12 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
   const [selectedState, setSelectedState] = useState("");
   const [selectedMarkets, setSelectedMarkets] = useState<string[]>([]);
   const [selectedIndices, setSelectedIndices] = useState<string[]>([]);
+  const [username, setUsername] = useState("");
+  const [usernameError, setUsernameError] = useState("");
+  const [isCheckingUsername, setIsCheckingUsername] = useState(false);
+  const [isUsernameAvailable, setIsUsernameAvailable] = useState<boolean | null>(
+    null,
+  );
 
   useEffect(() => {
     const loadOptions = async () => {
@@ -68,6 +78,7 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
     const formElement = event.currentTarget;
     const formData = new FormData(formElement);
 
+    const cleanedUsername = username.trim();
     const socialLinks = {
       instagram: handleOrUndefined(formData.get("instagram")),
       linkedin: handleOrUndefined(formData.get("linkedin")),
@@ -77,6 +88,7 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
     };
 
     const payload: AdvisorApplicationPayload = {
+      username: cleanedUsername,
       country: String(formData.get("country") || "").trim(),
       state: String(formData.get("state") || "").trim(),
       about: String(formData.get("about") || "").trim(),
@@ -96,7 +108,22 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
     ].filter(Boolean) as string[];
 
     if (!payload.country) {
+      setUsernameError("");
       setErrorMessage("Please select a country.");
+      return;
+    }
+
+    if (!cleanedUsername) {
+      setErrorMessage("");
+      setUsernameError("Username is required.");
+      return;
+    }
+
+    if (!isValidUsername(cleanedUsername)) {
+      setErrorMessage("");
+      setUsernameError(
+        "Invalid username. Use 3-30 chars: letters, numbers, . or _",
+      );
       return;
     }
 
@@ -131,6 +158,24 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
       setIsSubmitting(true);
       setErrorMessage("");
       setApplicationNote("");
+      setUsernameError("");
+      setIsCheckingUsername(true);
+
+      const availabilityResponse = await duplicateUsernameCheckApi(cleanedUsername);
+      const isTaken =
+        availabilityResponse?.isTaken === true ||
+        availabilityResponse?.exists === true ||
+        availabilityResponse?.available === false ||
+        availabilityResponse?.isAvailable === false ||
+        availabilityResponse?.data?.isTaken === true ||
+        availabilityResponse?.data?.exists === true ||
+        availabilityResponse?.data?.available === false ||
+        availabilityResponse?.data?.isAvailable === false;
+
+      if (isTaken) {
+        setUsernameError("This username is already taken. Please choose another.");
+        return;
+      }
 
       await submitAdvisorApplicationApi(payload);
 
@@ -139,10 +184,12 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
       );
       onSubmitted?.();
       formElement.reset();
+      setUsername("");
       setSelectedCountry("");
       setSelectedState("");
       setSelectedMarkets([]);
       setSelectedIndices([]);
+      setIsUsernameAvailable(null);
     } catch (error: unknown) {
       const apiError =
         typeof error === "object" &&
@@ -156,6 +203,53 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
       setErrorMessage(apiError ?? "Failed to submit application. Please try again.");
     } finally {
       setIsSubmitting(false);
+      setIsCheckingUsername(false);
+    }
+  };
+
+  const checkUsernameAvailability = async (input: string) => {
+    const cleaned = input.trim();
+    if (!cleaned) {
+      setIsUsernameAvailable(null);
+      setUsernameError("");
+      return;
+    }
+
+    if (!isValidUsername(cleaned)) {
+      setIsUsernameAvailable(null);
+      setUsernameError(
+        "Invalid username. Use 3-30 chars: letters, numbers, . or _",
+      );
+      return;
+    }
+
+    try {
+      setIsCheckingUsername(true);
+      setUsernameError("");
+      const availabilityResponse = await duplicateUsernameCheckApi(cleaned);
+      const isTaken =
+        availabilityResponse?.isTaken === true ||
+        availabilityResponse?.exists === true ||
+        availabilityResponse?.available === false ||
+        availabilityResponse?.isAvailable === false ||
+        availabilityResponse?.data?.isTaken === true ||
+        availabilityResponse?.data?.exists === true ||
+        availabilityResponse?.data?.available === false ||
+        availabilityResponse?.data?.isAvailable === false;
+
+      if (isTaken) {
+        setIsUsernameAvailable(false);
+        setUsernameError("This username is already taken.");
+        return;
+      }
+
+      setIsUsernameAvailable(true);
+      setUsernameError("");
+    } catch {
+      setIsUsernameAvailable(null);
+      setUsernameError("Could not verify username availability right now.");
+    } finally {
+      setIsCheckingUsername(false);
     }
   };
 
@@ -208,6 +302,43 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
       ) : null}
 
       <form onSubmit={submitListingApplication} className="space-y-3">
+        <div>
+          <label className="flex items-center rounded-xl border border-blue-100 bg-white px-4 py-3 focus-within:border-blue-400">
+            <span className="mr-1 text-slate-400">@</span>
+            <input
+              required
+              name="username"
+              type="text"
+              value={username}
+              onChange={(event) => {
+                setUsername(event.target.value);
+                setUsernameError("");
+                setIsUsernameAvailable(null);
+              }}
+              onBlur={() => checkUsernameAvailability(username)}
+              placeholder="choose a unique username"
+              className="w-full outline-none"
+            />
+          </label>
+          {isCheckingUsername ? (
+            <p className="mt-1 text-xs text-blue-600">Checking username...</p>
+          ) : null}
+          {!isCheckingUsername && isUsernameAvailable ? (
+            <p className="mt-1 inline-flex items-center gap-1 text-xs text-emerald-600">
+              <FaCircleCheck className="h-3 w-3" />
+              Username is available.
+            </p>
+          ) : null}
+          {usernameError ? (
+            <p className="mt-1 inline-flex items-center gap-1 text-xs text-rose-600">
+              {usernameError.toLowerCase().includes("taken") ? (
+                <FaCircleXmark className="h-3 w-3" />
+              ) : null}
+              {usernameError}
+            </p>
+          ) : null}
+        </div>
+
         <div className={`grid gap-3 ${statesForCountry.length > 0 ? "md:grid-cols-2" : "md:grid-cols-1"}`}>
           <select
             required
@@ -331,7 +462,7 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
 
         <div className="flex items-center gap-3">
           <button
-            disabled={isSubmitting || isOptionsLoading}
+            disabled={isSubmitting || isOptionsLoading || isCheckingUsername}
             type="submit"
             className="rounded-xl bg-blue-600 w-full px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-70"
           >

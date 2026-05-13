@@ -1,6 +1,7 @@
 import api from "../lib/axios";
 
 export interface AdvisorApplicationPayload {
+  username: string;
   country: string;
   state: string;
   about: string;
@@ -73,5 +74,12 @@ export interface AdvisorQueryPayload {
 
 export const submitAdvisorQueryApi = async (payload: AdvisorQueryPayload) => {
   const response = await api.post('/advisor/query', payload);
+  return response.data;
+};
+
+export const duplicateUsernameCheckApi = async (username: string) => {
+  const response = await api.get(
+    `/advisor/username-availability?username=${encodeURIComponent(username)}`,
+  );
   return response.data;
 };

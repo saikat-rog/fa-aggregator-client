@@ -1,5 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { getAllAdvisorsApi } from "../services/advisor.service";
+import {
+  advisorFormOptionsApi,
+  getAllAdvisorsApi,
+  type AdvisorFormOptionsResponseData,
+} from "../services/advisor.service";
 import { AdvisorCard } from "../components/advisor/AdvisorCard";
 import type { AdvisorCardData } from "../components/advisor/AdvisorCard";
 
@@ -31,9 +35,28 @@ export interface AdvisorApiItem {
 
 export function HomePage() {
   const [query, setQuery] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState("");
+  const [selectedState, setSelectedState] = useState("");
   const [advisors, setAdvisors] = useState<AdvisorCardData[]>([]);
+  const [formOptions, setFormOptions] =
+    useState<AdvisorFormOptionsResponseData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const countries = useMemo(
+    () => (formOptions?.countries ?? []).slice().sort((a, b) => a.localeCompare(b)),
+    [formOptions],
+  );
+
+  const states = useMemo(
+    () =>
+      selectedCountry
+        ? (formOptions?.locations[selectedCountry]?.states ?? []).slice().sort((a, b) =>
+            a.localeCompare(b),
+          )
+        : [],
+    [formOptions, selectedCountry],
+  );
 
   useEffect(() => {
     const controller = new AbortController();
@@ -43,8 +66,11 @@ export function HomePage() {
         setIsLoading(true);
         setError("");
 
-        const payload = await getAllAdvisorsApi();
-        const data = payload?.data ?? payload;
+        const [advisorsPayload, optionsPayload] = await Promise.all([
+          getAllAdvisorsApi(),
+          advisorFormOptionsApi(),
+        ]);
+        const data = advisorsPayload?.data ?? advisorsPayload;
 
         const mapped = ((data?.advisors as AdvisorApiItem[]) || []).map(
           (item) => ({
@@ -71,6 +97,7 @@ export function HomePage() {
         );
 
         setAdvisors(mapped);
+        setFormOptions(optionsPayload);
       } catch (err) {
         if (err instanceof DOMException && err.name === "AbortError") {
           return;
@@ -95,23 +122,24 @@ export function HomePage() {
     const term = query.toLowerCase().trim();
 
     return advisors.filter((advisor) => {
-      if (!term) {
-        return true;
-      }
+      const matchesCountry = selectedCountry
+        ? advisor.country === selectedCountry
+        : true;
+      const matchesState = selectedState ? advisor.state === selectedState : true;
 
       const haystack =
         `${advisor.country} ${advisor.state} ${advisor.specialties.join(" ")} ${advisor.name} ${advisor.about}`.toLowerCase();
 
-      return haystack.includes(term);
+      const matchesSearch = term ? haystack.includes(term) : true;
+
+      return matchesCountry && matchesState && matchesSearch;
     });
-  }, [advisors, query]);
+  }, [advisors, query, selectedCountry, selectedState]);
 
   return (
     <div className="space-y-8">
       <section className="overflow-hidden rounded-3xl border border-blue-100 bg-linear-to-r from-blue-700 to-blue-500 p-8 text-white shadow-lg shadow-blue-100">
-        <p className="mb-3 inline-block rounded-full bg-white/20 px-3 py-1 text-xs font-semibold tracking-wide">
-          /u • User Home
-        </p>
+        
         <h1 className="text-3xl font-bold">
           Find Trusted Financial Advisors Near You
         </h1>
@@ -119,14 +147,42 @@ export function HomePage() {
           Search by location, specialty, or advisor name and discover verified
           experts.
         </p>
-        <div className="mt-6 rounded-2xl bg-white p-2">
+        <div className="mt-6 grid gap-2 lg:grid-cols-3">
           <input
             type="text"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search by country, state, service, or advisor name"
-            className="w-full rounded-xl px-4 py-3 text-slate-900 outline-none"
+            className="w-full rounded-xl bg-white px-4 py-3 text-slate-900 outline-none"
           />
+          <select
+            value={selectedCountry}
+            onChange={(event) => {
+              setSelectedCountry(event.target.value);
+              setSelectedState("");
+            }}
+            className="w-full rounded-xl border border-blue-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none focus:border-blue-400"
+          >
+            <option value="">All countries</option>
+            {countries.map((country) => (
+              <option key={country} value={country}>
+                {country}
+              </option>
+            ))}
+          </select>
+          <select
+            value={selectedState}
+            onChange={(event) => setSelectedState(event.target.value)}
+            disabled={states.length === 0}
+            className="w-full rounded-xl border border-blue-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-gray-400 disabled:opacity-100 focus:border-blue-400"
+          >
+            <option value="">All states</option>
+            {states.map((state) => (
+              <option key={state} value={state}>
+                {state}
+              </option>
+            ))}
+          </select>
         </div>
       </section>
 
@@ -136,9 +192,12 @@ export function HomePage() {
         </h2>
 
         {isLoading ? (
-          <p className="rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-700">
-            Loading advisors...
-          </p>
+          <div className="flex items-center justify-center py-8">
+            <div className="inline-flex items-center gap-3 text-sm font-medium text-blue-700">
+              <span className="h-5 w-5 animate-spin rounded-full border-2 border-blue-200 border-t-blue-700" />
+              <span>Loading advisors...</span>
+            </div>
+          </div>
         ) : null}
 
         {error ? (

@@ -148,7 +148,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </MobileNav>
       </Navbar>
 
-      <main className="mx-auto max-w-6xl px-4 py-8 pt-10 lg:pt-28">{children}</main>
+      <main className="mx-auto max-w-6xl px-4 py-8 pt-20 lg:pt-25">{children}</main>
     </div>
   )
 }
