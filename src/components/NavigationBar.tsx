@@ -41,6 +41,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           : []
       : []),
       { to: '/blogs', label: 'Blogs' },
+      { to: '/about', label: 'About Us' },
+      { to: '/contact', label: 'Contact Us' },
   ]
 
   const handleLogout = async () => {
@@ -84,7 +86,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             {isAuthenticated ? (
               <button
                 onClick={handleLogout}
-                className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
+                className="rounded-full bg-red-700 px-8 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
               >
                 Logout
               </button>

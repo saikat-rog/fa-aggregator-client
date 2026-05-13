@@ -81,6 +81,11 @@ const AdvisorDashboardPage = () => {
 
   const completionRate = 78;
 
+  const handleApplicationSubmitted = () => {
+    setApplicationStatus(-1);
+    setRejectionReason("");
+  };
+
   const renderMetricValue = (value: number) =>
     applicationStatus !== 1 ? (
       <span title="Locked" aria-label="Locked">
@@ -221,7 +226,7 @@ const AdvisorDashboardPage = () => {
               </article>
             ) : null}
             {applicationStatus === null || applicationStatus === 0 ? (
-              <ApplicationForm />
+              <ApplicationForm onSubmitted={handleApplicationSubmitted} />
             ) : null}
           </div>
         )}

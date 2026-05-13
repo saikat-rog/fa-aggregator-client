@@ -6,6 +6,10 @@ import {
   type AdvisorFormOptionsResponseData,
 } from "../../services/advisor.service";
 
+type ApplicationFormProps = {
+  onSubmitted?: () => void;
+};
+
 
 const HANDLE_REGEX = /^[a-zA-Z0-9._]{2,30}$/;
 const isValidHandle = (value: string) => HANDLE_REGEX.test(value);
@@ -16,7 +20,7 @@ const handleOrUndefined = (value: FormDataEntryValue | null) => {
   return raw.startsWith("@") ? raw.slice(1) : raw;
 };
 
-const ApplicationForm = () => {
+const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
   const [applicationNote, setApplicationNote] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -133,6 +137,7 @@ const ApplicationForm = () => {
       setApplicationNote(
         "Application submitted successfully. Our team will review it within 24-48 hours.",
       );
+      onSubmitted?.();
       formElement.reset();
       setSelectedCountry("");
       setSelectedState("");
