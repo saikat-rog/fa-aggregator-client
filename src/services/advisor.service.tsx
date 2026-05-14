@@ -2,6 +2,7 @@ import api from "../lib/axios";
 
 export interface AdvisorApplicationPayload {
   username: string;
+  industry: string;
   country: string;
   state: string;
   about: string;
@@ -26,6 +27,7 @@ export interface AdvisorApplicationPayload {
 export interface AdvisorFormOptionsResponseData {
   countries: string[];
   locations: Record<string, { states: string[] }>;
+  industries: string[];
   markets: string[];
   marketIndicesByCountry: Record<string, string[]>;
 }

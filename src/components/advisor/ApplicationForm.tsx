@@ -34,6 +34,7 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
 
   const [selectedCountry, setSelectedCountry] = useState("");
   const [selectedState, setSelectedState] = useState("");
+  const [selectedIndustry, setSelectedIndustry] = useState("");
   const [selectedMarkets, setSelectedMarkets] = useState<string[]>([]);
   const [selectedIndices, setSelectedIndices] = useState<string[]>([]);
   const [username, setUsername] = useState("");
@@ -64,12 +65,27 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
     return options.locations[selectedCountry]?.states ?? [];
   }, [options, selectedCountry]);
 
+  const countryOptions = useMemo(() => {
+    if (!options) return [];
+    if (options.countries?.length) {
+      return [...options.countries].sort((a, b) => a.localeCompare(b));
+    }
+    return Object.keys(options.locations || {}).sort((a, b) =>
+      a.localeCompare(b),
+    );
+  }, [options]);
+
   const allIndices = useMemo(() => {
     if (!options) return [];
     return Array.from(
       new Set(Object.values(options.marketIndicesByCountry).flat()),
     ).sort((a, b) => a.localeCompare(b));
   }, [options]);
+
+  const industryOptions = useMemo(
+    () => [...(options?.industries ?? [])].sort((a, b) => a.localeCompare(b)),
+    [options],
+  );
 
   const submitListingApplication = async (
     event: React.FormEvent<HTMLFormElement>,
@@ -89,6 +105,7 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
 
     const payload: AdvisorApplicationPayload = {
       username: cleanedUsername,
+      industry: selectedIndustry,
       country: String(formData.get("country") || "").trim(),
       state: String(formData.get("state") || "").trim(),
       about: String(formData.get("about") || "").trim(),
@@ -110,6 +127,12 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
     if (!payload.country) {
       setUsernameError("");
       setErrorMessage("Please select a country.");
+      return;
+    }
+
+    if (!payload.industry) {
+      setUsernameError("");
+      setErrorMessage("Please select an industry.");
       return;
     }
 
@@ -187,6 +210,7 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
       setUsername("");
       setSelectedCountry("");
       setSelectedState("");
+      setSelectedIndustry("");
       setSelectedMarkets([]);
       setSelectedIndices([]);
       setIsUsernameAvailable(null);
@@ -351,7 +375,7 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
             className="w-full rounded-xl border border-blue-100 px-4 py-3 outline-none focus:border-blue-400"
           >
             <option value="">Select country</option>
-            {(options?.countries || []).map((country) => (
+            {countryOptions.map((country) => (
               <option key={country} value={country}>
                 {country}
               </option>
@@ -375,6 +399,21 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
             </select>
           ) : null}
         </div>
+
+        <select
+          required
+          name="industry"
+          value={selectedIndustry}
+          onChange={(event) => setSelectedIndustry(event.target.value)}
+          className="w-full rounded-xl border border-blue-100 px-4 py-3 outline-none focus:border-blue-400"
+        >
+          <option value="">Select industry</option>
+          {industryOptions.map((industry) => (
+            <option key={industry} value={industry}>
+              {industry}
+            </option>
+          ))}
+        </select>
 
         <input
           required
