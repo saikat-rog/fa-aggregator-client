@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { AboutCard } from "../components/advisor-profile/AboutCard";
-import { ContactFormCard } from "../components/advisor-profile/ContactFormCard";
-import { EducationalDisclaimer } from "../components/advisor-profile/EducationalDisclaimer";
-import { ExpertiseCard } from "../components/advisor-profile/ExpertiseCard";
-import { ProfileHeroCard } from "../components/advisor-profile/ProfileHeroCard";
+import { AboutCard } from "../components/advisor/profile/AboutCard";
+import { ContactFormCard } from "../components/advisor/profile/ContactFormCard";
+import { EducationalDisclaimer } from "../components/advisor/profile/EducationalDisclaimer";
+import { ExpertiseCard } from "../components/advisor/profile/ExpertiseCard";
+import { ProfileHeroCard } from "../components/advisor/profile/ProfileHeroCard";
 import { AuthPromptDialog } from "../components/ui/AuthPromptDialog";
 import { NotFoundState } from "../components/ui/NotFoundState";
 import { useSavedAdvisors } from "../context/SavedAdvisorsContext";
