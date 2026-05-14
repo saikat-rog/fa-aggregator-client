@@ -1,7 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FaCircleCheck } from "react-icons/fa6";
+import { useSearchParams } from "react-router-dom";
 import ApplicationForm from "../components/advisor/ApplicationForm";
-import { advisorProfileAnalyticsApi } from "../services/advisor.service";
+import {
+  advisorProfileAnalyticsApi,
+  getMyEnquiries,
+  markEnquiryResponded,
+  type Enquiry,
+  type EnquiryPagination,
+} from "../services/advisor.service";
 
 const platformWarnings = [
   {
@@ -29,13 +36,52 @@ const platformWarnings = [
 ];
 
 const AdvisorDashboardPage = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [applicationStatus, setApplicationStatus] = useState<number | null>(
     null,
   );
   const [rejectionReason, setRejectionReason] = useState("");
-  const [profileViews, setProfileViews] = useState<number>(-1);
-  const [leadRequests, setLeadRequests] = useState<number>(-1);
+  const [profileClicks, setProfileClicks] = useState<number>(-1);
+  const [socialClicks, setSocialClicks] = useState<number>(-1);
+  const [emailClicks, setEmailClicks] = useState<number>(-1);
+  const [websiteClicks, setWebsiteClicks] = useState<number>(-1);
+  const [profileShareClicks, setProfileShareClicks] = useState<number>(-1);
   const [analyticsLoading, setAnalyticsLoading] = useState(true);
+  const [enquiries, setEnquiries] = useState<Enquiry[]>([]);
+  const [enquiriesLoading, setEnquiriesLoading] = useState(true);
+  const [enquiriesError, setEnquiriesError] = useState<string | null>(null);
+  const [rowUpdatingId, setRowUpdatingId] = useState<string | null>(null);
+  const [rowActionError, setRowActionError] = useState<string | null>(null);
+  const [enquiryReloadTick, setEnquiryReloadTick] = useState(0);
+
+  const [enquiryPage, setEnquiryPage] = useState(
+    Math.max(1, Number(searchParams.get("enquiryPage") || "1") || 1),
+  );
+  const [enquiryLimit, setEnquiryLimit] = useState(() => {
+    const raw = Number(searchParams.get("enquiryLimit") || "10") || 10;
+    return Math.min(100, Math.max(1, raw));
+  });
+  const [enquiryPagination, setEnquiryPagination] = useState<EnquiryPagination>({
+    page: enquiryPage,
+    limit: enquiryLimit,
+    total: 0,
+    totalPages: 1,
+  });
+
+  const formatDate = useMemo(
+    () => (value: string | null) =>
+      value
+        ? new Date(value).toLocaleString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            timeZone: "Asia/Kolkata",
+          })
+        : "—",
+    [],
+  );
 
   useEffect(() => {
     const loadAnalytics = async () => {
@@ -56,17 +102,31 @@ const AdvisorDashboardPage = () => {
         setRejectionReason(
           typeof data?.rejectionReason === "string" ? data.rejectionReason : "",
         );
-        setProfileViews(
-          typeof data?.profileViews === "number" ? data.profileViews : -1,
+        setProfileClicks(
+          typeof data?.profileClicks === "number" ? data.profileClicks : -1,
         );
-        setLeadRequests(
-          typeof data?.leadRequests === "number" ? data.leadRequests : -1,
+        setSocialClicks(
+          typeof data?.socialClicks === "number" ? data.socialClicks : -1,
+        );
+        setEmailClicks(
+          typeof data?.emailClicks === "number" ? data.emailClicks : -1,
+        );
+        setWebsiteClicks(
+          typeof data?.websiteClicks === "number" ? data.websiteClicks : -1,
+        );
+        setProfileShareClicks(
+          typeof data?.profileShareClicks === "number"
+            ? data.profileShareClicks
+            : -1,
         );
       } catch {
         setApplicationStatus(null);
         setRejectionReason("");
-        setProfileViews(-1);
-        setLeadRequests(-1);
+        setProfileClicks(-1);
+        setSocialClicks(-1);
+        setEmailClicks(-1);
+        setWebsiteClicks(-1);
+        setProfileShareClicks(-1);
       } finally {
         setAnalyticsLoading(false);
       }
@@ -75,11 +135,58 @@ const AdvisorDashboardPage = () => {
     loadAnalytics();
   }, []);
 
-  const totalViews = profileViews;
-  const totalLeads = leadRequests;
-  const totalSocialClicks = -1;
+  useEffect(() => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set("enquiryPage", String(enquiryPage));
+      next.set("enquiryLimit", String(enquiryLimit));
+      return next;
+    });
+  }, [enquiryPage, enquiryLimit, setSearchParams]);
 
-  const completionRate = 78;
+  useEffect(() => {
+    const loadEnquiries = async () => {
+      try {
+        setEnquiriesLoading(true);
+        setEnquiriesError(null);
+        const payload = await getMyEnquiries({
+          page: enquiryPage,
+          limit: enquiryLimit,
+        });
+        const data = payload?.data ?? payload;
+        const list = Array.isArray(data?.enquiries) ? data.enquiries : [];
+        const pagination = data?.pagination;
+        setEnquiries(list);
+        setEnquiryPagination({
+          page: typeof pagination?.page === "number" ? pagination.page : enquiryPage,
+          limit: typeof pagination?.limit === "number" ? pagination.limit : enquiryLimit,
+          total: typeof pagination?.total === "number" ? pagination.total : list.length,
+          totalPages:
+            typeof pagination?.totalPages === "number" ? pagination.totalPages : 1,
+        });
+      } catch (error: unknown) {
+        const msg =
+          typeof error === "object" &&
+          error !== null &&
+          "response" in error &&
+          typeof (error as { response?: { data?: { msg?: string } } }).response?.data
+            ?.msg === "string"
+            ? (error as { response?: { data?: { msg?: string } } }).response?.data?.msg
+            : "Failed to load enquiries.";
+        setEnquiriesError(msg ?? "Failed to load enquiries.");
+      } finally {
+        setEnquiriesLoading(false);
+      }
+    };
+
+    loadEnquiries();
+  }, [enquiryPage, enquiryLimit, enquiryReloadTick]);
+
+  useEffect(() => {
+    if (!rowActionError) return;
+    const timer = window.setTimeout(() => setRowActionError(null), 2800);
+    return () => window.clearTimeout(timer);
+  }, [rowActionError]);
 
   const handleApplicationSubmitted = () => {
     setApplicationStatus(-1);
@@ -99,6 +206,40 @@ const AdvisorDashboardPage = () => {
       value
     );
 
+  const handleMarkResponded = async (enquiryId: string) => {
+    try {
+      setRowUpdatingId(enquiryId);
+      setRowActionError(null);
+      const payload = await markEnquiryResponded(enquiryId);
+      const updated = payload?.data?.enquiry as Enquiry | undefined;
+
+      setEnquiries((prev) =>
+        prev.map((item) =>
+          item._id === enquiryId
+            ? {
+                ...item,
+                status: "responded",
+                respondedAt: updated?.respondedAt ?? item.respondedAt ?? new Date().toISOString(),
+                updatedAt: updated?.updatedAt ?? item.updatedAt,
+              }
+            : item,
+        ),
+      );
+    } catch (error: unknown) {
+      const msg =
+        typeof error === "object" &&
+        error !== null &&
+        "response" in error &&
+        typeof (error as { response?: { data?: { msg?: string } } }).response?.data
+          ?.msg === "string"
+          ? (error as { response?: { data?: { msg?: string } } }).response?.data?.msg
+          : "Failed to update enquiry status.";
+      setRowActionError(msg ?? "Failed to update enquiry status.");
+    } finally {
+      setRowUpdatingId(null);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <section className="rounded-3xl bg-linear-to-r from-blue-700 via-blue-600 to-cyan-500 p-6 text-white shadow-lg shadow-blue-100">
@@ -112,52 +253,55 @@ const AdvisorDashboardPage = () => {
         </p>
       </section>
 
-      <section className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <section className="grid grid-cols-2 gap-4 lg:grid-cols-5">
         <article className="rounded-2xl border border-blue-100 bg-white p-4 shadow-sm">
           <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-            Profile Views
+            Profile Clicks
           </p>
           <p className="mt-2 text-3xl font-bold text-slate-900">
-            {analyticsLoading ? "..." : renderMetricValue(totalViews)}
+            {analyticsLoading ? "..." : renderMetricValue(profileClicks)}
           </p>
-          <p className="mt-1 text-xs text-slate-500">Your total profile views</p>
+          <p className="mt-1 text-xs text-slate-500">Profile opens tracked</p>
         </article>
 
         <article className="rounded-2xl border border-blue-100 bg-white p-4 shadow-sm">
           <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-            Lead Requests
+            Social Clicks
           </p>
           <p className="mt-2 text-3xl font-bold text-slate-900">
-            {analyticsLoading ? "..." : renderMetricValue(totalLeads)}
+            {analyticsLoading ? "..." : renderMetricValue(socialClicks)}
           </p>
-          <p className="mt-1 text-xs text-slate-5000">Your total lead requests</p>
+          <p className="mt-1 text-xs text-slate-500">All social CTA clicks</p>
         </article>
 
         <article className="rounded-2xl border border-blue-100 bg-white p-4 shadow-sm">
           <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-            Social Link Clicks
+            Email Clicks
           </p>
           <p className="mt-2 text-3xl font-bold text-slate-900">
-            {analyticsLoading ? "..." : renderMetricValue(totalSocialClicks)}
+            {analyticsLoading ? "..." : renderMetricValue(emailClicks)}
           </p>
-          <p className="mt-1 text-xs text-slate-500">
-            Across all linked channels
-          </p>
+          <p className="mt-1 text-xs text-slate-500">Email CTA clicks</p>
         </article>
 
         <article className="rounded-2xl border border-blue-100 bg-white p-4 shadow-sm">
           <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-            Profile Completion
+            Website Clicks
           </p>
           <p className="mt-2 text-3xl font-bold text-slate-900">
-            {completionRate}%
+            {analyticsLoading ? "..." : renderMetricValue(websiteClicks)}
           </p>
-          <div className="mt-2 h-2 rounded-full bg-slate-100">
-            <div
-              className="h-2 rounded-full bg-blue-600"
-              style={{ width: `${completionRate}%` }}
-            />
-          </div>
+          <p className="mt-1 text-xs text-slate-500">Website CTA clicks</p>
+        </article>
+
+        <article className="rounded-2xl border border-blue-100 bg-white p-4 shadow-sm">
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+            Profile Shares
+          </p>
+          <p className="mt-2 text-3xl font-bold text-slate-900">
+            {analyticsLoading ? "..." : renderMetricValue(profileShareClicks)}
+          </p>
+          <p className="mt-1 text-xs text-slate-500">Share button clicks</p>
         </article>
       </section>
 
@@ -266,6 +410,168 @@ const AdvisorDashboardPage = () => {
           </div>
         </article>
       </section>
+
+      <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="text-xl font-semibold text-slate-900">My Enquiries</h2>
+            <p className="mt-1 text-sm text-slate-600">
+              Track incoming enquiries and mark them as responded.
+            </p>
+          </div>
+
+          <label className="inline-flex items-center gap-2 text-sm text-slate-600">
+            <span>Per page</span>
+            <select
+              value={enquiryLimit}
+              onChange={(event) => {
+                const nextLimit = Number(event.target.value);
+                setEnquiryLimit(nextLimit);
+                setEnquiryPage(1);
+              }}
+              className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-400"
+            >
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </select>
+          </label>
+        </div>
+
+        {enquiriesLoading ? (
+          <div className="mt-6 flex items-center justify-center py-10">
+            <div className="inline-flex items-center gap-3 text-sm font-medium text-blue-700">
+              <span className="h-5 w-5 animate-spin rounded-full border-2 border-blue-200 border-t-blue-700" />
+              Loading enquiries...
+            </div>
+          </div>
+        ) : enquiriesError ? (
+          <div className="mt-5 rounded-2xl border border-rose-200 bg-rose-50 p-4">
+            <p className="text-sm font-medium text-rose-700">{enquiriesError}</p>
+            <button
+              type="button"
+              onClick={() => setEnquiryReloadTick((prev) => prev + 1)}
+              className="mt-3 rounded-lg bg-rose-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-rose-700"
+            >
+              Retry
+            </button>
+          </div>
+        ) : enquiries.length === 0 ? (
+          <div className="mt-6 rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-8 text-center">
+            <p className="text-base font-semibold text-slate-700">No enquiries yet</p>
+            <p className="mt-1 text-sm text-slate-500">
+              Once users contact you, they will show up here.
+            </p>
+          </div>
+        ) : (
+          <div className="mt-5 overflow-x-auto">
+            <table className="min-w-full divide-y divide-slate-200">
+              <thead>
+                <tr className="text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  <th className="px-3 py-3">Category</th>
+                  <th className="px-3 py-3">Subject</th>
+                  <th className="px-3 py-3">Message</th>
+                  <th className="px-3 py-3">Submitted By</th>
+                  <th className="px-3 py-3">Created</th>
+                  <th className="px-3 py-3">Status</th>
+                  <th className="px-3 py-3">Responded At</th>
+                  <th className="px-3 py-3">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {enquiries.map((enquiry) => (
+                  <tr key={enquiry._id} className="align-top">
+                    <td className="px-3 py-3 text-sm text-slate-700">{enquiry.category}</td>
+                    <td className="px-3 py-3 text-sm font-medium text-slate-800">
+                      {enquiry.subject}
+                    </td>
+                    <td className="px-3 py-3 text-sm text-slate-600">
+                      <p className="max-w-xs whitespace-pre-wrap">{enquiry.message}</p>
+                    </td>
+                    <td className="px-3 py-3 text-sm text-slate-600">
+                      <p className="font-medium text-slate-800">
+                        {enquiry.submittedBy?.name || "Unknown"}
+                      </p>
+                      <p>{enquiry.submittedBy?.email || "N/A"}</p>
+                    </td>
+                    <td className="px-3 py-3 text-sm text-slate-600">
+                      {formatDate(enquiry.createdAt)}
+                    </td>
+                    <td className="px-3 py-3">
+                      <span
+                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
+                          enquiry.status === "responded"
+                            ? "bg-emerald-100 text-emerald-700"
+                            : "bg-amber-100 text-amber-700"
+                        }`}
+                      >
+                        {enquiry.status}
+                      </span>
+                    </td>
+                    <td className="px-3 py-3 text-sm text-slate-600">
+                      {formatDate(enquiry.respondedAt)}
+                    </td>
+                    <td className="px-3 py-3">
+                      {enquiry.status === "pending" ? (
+                        <button
+                          type="button"
+                          disabled={rowUpdatingId === enquiry._id}
+                          onClick={() => handleMarkResponded(enquiry._id)}
+                          className="rounded-lg bg-blue-700 px-3 py-2 text-xs font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-blue-400"
+                        >
+                          {rowUpdatingId === enquiry._id
+                            ? "Updating..."
+                            : "Mark Responded"}
+                        </button>
+                      ) : (
+                        <span className="text-xs font-semibold text-emerald-700">
+                          Responded
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
+              <p className="text-sm text-slate-600">
+                Page {enquiryPagination.page} of {enquiryPagination.totalPages} •{" "}
+                {enquiryPagination.total} total enquiries
+              </p>
+              <div className="inline-flex items-center gap-2">
+                <button
+                  type="button"
+                  disabled={enquiryPagination.page <= 1}
+                  onClick={() => setEnquiryPage((prev) => Math.max(1, prev - 1))}
+                  className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Previous
+                </button>
+                <button
+                  type="button"
+                  disabled={enquiryPagination.page >= enquiryPagination.totalPages}
+                  onClick={() =>
+                    setEnquiryPage((prev) =>
+                      Math.min(enquiryPagination.totalPages, prev + 1),
+                    )
+                  }
+                  className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </section>
+
+      {rowActionError ? (
+        <div className="fixed bottom-4 right-4 z-50 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700 shadow-lg">
+          {rowActionError}
+        </div>
+      ) : null}
     </div>
   );
 };

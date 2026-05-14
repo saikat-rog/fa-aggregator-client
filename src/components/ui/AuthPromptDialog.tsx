@@ -56,13 +56,22 @@ export function AuthPromptDialog({
 
         <div className="mt-6">
           {role === "advisor" ? (
-            <button
-              type="button"
-              onClick={onLogoutAndLoginAsUser}
-              className="inline-flex flex-1 items-center justify-center rounded-full bg-red-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
-            >
-              Logout
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={onClose}
+                className="inline-flex flex-1 items-center justify-center rounded-full border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={onLogoutAndLoginAsUser}
+                className="inline-flex flex-1 items-center justify-center rounded-full bg-red-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+              >
+                Logout
+              </button>
+            </div>
           ) : (
             <button
               type="button"

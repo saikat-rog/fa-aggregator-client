@@ -107,6 +107,34 @@ export interface AdvisorFormOptionsResponseData {
   marketIndicesByCountry: Record<string, string[]>;
 }
 
+export type EnquiryStatus = "pending" | "responded";
+
+export interface EnquiryUser {
+  _id: string;
+  name: string;
+  email: string;
+}
+
+export interface Enquiry {
+  _id: string;
+  advisor: string;
+  submittedBy: EnquiryUser;
+  category: string;
+  subject: string;
+  message: string;
+  status: EnquiryStatus;
+  respondedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface EnquiryPagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
 export async function submitAdvisorApplicationApi(
   params: AdvisorApplicationPayload,
 ) {
@@ -156,6 +184,16 @@ export const duplicateUsernameCheckApi = async (username: string) => {
   const response = await api.get(
     `/advisor/username-availability?username=${encodeURIComponent(username)}`,
   );
+  return response.data;
+};
+
+export const getMyEnquiries = async (params?: { page?: number; limit?: number }) => {
+  const response = await api.get("/advisor/my-enquiries", { params });
+  return response.data;
+};
+
+export const markEnquiryResponded = async (enquiryId: string) => {
+  const response = await api.patch(`/advisor/my-enquiries/${enquiryId}/mark-responded`, {});
   return response.data;
 };
 
