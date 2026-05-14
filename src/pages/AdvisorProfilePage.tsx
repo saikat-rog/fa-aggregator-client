@@ -7,10 +7,11 @@ import { ExpertiseCard } from "../components/advisor-profile/ExpertiseCard";
 import { ProfileHeroCard } from "../components/advisor-profile/ProfileHeroCard";
 import { AuthPromptDialog } from "../components/ui/AuthPromptDialog";
 import { NotFoundState } from "../components/ui/NotFoundState";
+import { useSavedAdvisors } from "../context/SavedAdvisorsContext";
 import {
   ADVISOR_CLICK_TYPES,
   getAdvisorByUsernameApi,
-  submitAdvisorQueryApi,
+  submitAdvisorEnquiry,
   trackAdvisorClick,
 } from "../services/advisor.service";
 import type { AdvisorApiItem } from "./HomePage";
@@ -43,6 +44,15 @@ export function AdvisorProfilePage() {
   const [pendingActionType, setPendingActionType] = useState<
     "website" | "email" | "social" | null
   >(null);
+  const [saveActionError, setSaveActionError] = useState("");
+  const {
+    isSaved,
+    save,
+    unsave,
+    isSavingByAdvisorId,
+    isUnsavingByAdvisorId,
+    setSavedLocally,
+  } = useSavedAdvisors();
 
   const [formData, setFormData] = useState({
     subject: "",
@@ -190,6 +200,34 @@ export function AdvisorProfilePage() {
     setAuthDialogOpen(true);
   };
 
+  const handleToggleSave = async () => {
+    if (!advisor?.id) return;
+    if (!isAuthenticated || role !== "user") {
+      setPendingActionType("website");
+      setAuthDialogOpen(true);
+      return;
+    }
+
+    try {
+      setSaveActionError("");
+      if (isSaved(advisor.id)) {
+        await unsave(advisor.id);
+      } else {
+        await save(advisor.id);
+      }
+    } catch (error: unknown) {
+      const msg =
+        typeof error === "object" &&
+        error !== null &&
+        "response" in error &&
+        typeof (error as { response?: { data?: { msg?: string } } }).response?.data
+          ?.msg === "string"
+          ? (error as { response?: { data?: { msg?: string } } }).response?.data?.msg
+          : "Unable to update saved advisor.";
+      setSaveActionError(msg ?? "Unable to update saved advisor.");
+    }
+  };
+
   const handleFormChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -215,14 +253,14 @@ export function AdvisorProfilePage() {
     setFormMessage(null);
 
     try {
-      const response = await submitAdvisorQueryApi({
-        advisorId: advisorData.id,
+      const response = await submitAdvisorEnquiry(advisorData.id, {
         subject: formData.subject,
         message: formData.message,
         category: formData.category,
       });
 
       if (response.success) {
+        setSavedLocally(advisorData.id);
         setFormMessage({
           type: "success",
           text: `Submitted! ${advisorData.name} will connect you soon.`,
@@ -288,8 +326,19 @@ export function AdvisorProfilePage() {
                 onEmailOpen={(mailto) => openAction("email", mailto)}
                 onShareProfile={shareProfile}
                 onSocialOpen={(url) => openAction("social", url)}
+                isSaved={isSaved(advisorData.id)}
+                saveLoading={
+                  isSavingByAdvisorId[advisorData.id] ||
+                  isUnsavingByAdvisorId[advisorData.id]
+                }
+                onToggleSave={handleToggleSave}
                 getProxiedImageUrl={getProxiedImageUrl}
               />
+              {saveActionError ? (
+                <p className="px-2 text-sm font-medium text-rose-600">
+                  {saveActionError}
+                </p>
+              ) : null}
 
               <div className="grid gap-6 md:grid-cols-2">
                 <AboutCard about={advisorData.about} />

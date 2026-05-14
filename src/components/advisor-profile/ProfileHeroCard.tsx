@@ -1,5 +1,6 @@
 import {
   FaArrowUpRightFromSquare,
+  FaBookmark,
   FaEnvelope,
   FaEyeSlash,
   FaFacebook,
@@ -43,6 +44,9 @@ type ProfileHeroCardProps = {
   onEmailOpen: (mailto: string) => void;
   onShareProfile: () => void;
   onSocialOpen: (url: string) => void;
+  isSaved: boolean;
+  saveLoading: boolean;
+  onToggleSave: () => void;
   getProxiedImageUrl: (url: string) => string;
 };
 
@@ -88,6 +92,9 @@ export function ProfileHeroCard({
   onEmailOpen,
   onShareProfile,
   onSocialOpen,
+  isSaved,
+  saveLoading,
+  onToggleSave,
   getProxiedImageUrl,
 }: ProfileHeroCardProps) {
   const formatCount = (value?: number) =>
@@ -108,14 +115,29 @@ export function ProfileHeroCard({
 
   return (
     <div className="relative flex flex-col gap-5 rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-[0_12px_30px_rgba(15,23,42,0.04)] sm:flex-row sm:items-start">
-      <button
-        type="button"
-        onClick={onShareProfile}
-        className="absolute right-4 top-4 inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
-      >
-        <FaShareNodes />
-        Share
-      </button>
+      <div className="absolute right-4 top-4 inline-flex items-center gap-2">
+        <button
+          type="button"
+          onClick={onToggleSave}
+          disabled={saveLoading}
+          className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition disabled:cursor-not-allowed ${
+            isSaved
+              ? "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+              : "border-blue-200 bg-white text-blue-700 hover:bg-blue-50"
+          }`}
+        >
+          <FaBookmark className="h-3 w-3" />
+          {saveLoading ? "..." : isSaved ? "Saved" : "Save"}
+        </button>
+        <button
+          type="button"
+          onClick={onShareProfile}
+          className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
+        >
+          <FaShareNodes />
+          Share
+        </button>
+      </div>
       <div className="shrink-0">
         {profilePictureUrl ? (
           <img

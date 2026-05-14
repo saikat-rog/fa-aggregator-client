@@ -107,6 +107,36 @@ export interface AdvisorFormOptionsResponseData {
   marketIndicesByCountry: Record<string, string[]>;
 }
 
+export type SavedAdvisorSocialLinks = {
+  instagram?: string;
+  tiktok?: string;
+  linkedin?: string;
+  twitter?: string;
+  facebook?: string;
+  youtube?: string;
+};
+
+export type SavedAdvisor = {
+  id: string;
+  name: string | null;
+  username: string | null;
+  industries: string[];
+  country?: string;
+  state?: string;
+  socialLinks?: SavedAdvisorSocialLinks;
+  about?: string;
+  marketFocus?: string[];
+  expertiseIndeces?: string[];
+  emailForContact?: string;
+  personalWebsite?: string;
+  instagramFollowers?: number;
+  youtubeSubscribers?: number;
+  tiktokFollowers?: number;
+  linkedinFollowers?: number;
+  facebookFollowers?: number;
+  twitterFollowers?: number;
+};
+
 export type EnquiryStatus = "pending" | "responded";
 
 export interface EnquiryUser {
@@ -133,6 +163,31 @@ export interface EnquiryPagination {
   limit: number;
   total: number;
   totalPages: number;
+}
+
+export interface UserEnquiryAdvisorProfile {
+  username?: string;
+  emailForContact?: string;
+  personalWebsite?: string;
+}
+
+export interface UserEnquiryAdvisor {
+  _id: string;
+  name?: string;
+  advisorProfile?: UserEnquiryAdvisorProfile;
+}
+
+export interface UserEnquiry {
+  _id: string;
+  advisor: UserEnquiryAdvisor;
+  submittedBy: string;
+  category: string;
+  subject: string;
+  message: string;
+  status: "pending" | "responded";
+  respondedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export async function submitAdvisorApplicationApi(
@@ -180,6 +235,28 @@ export const submitAdvisorQueryApi = async (payload: AdvisorQueryPayload) => {
   return response.data;
 };
 
+export const submitAdvisorEnquiry = async (
+  advisorId: string,
+  payload: Omit<AdvisorQueryPayload, "advisorId">,
+) => {
+  const response = await api.post(`/user/submit-enquiry/advisor/${advisorId}`, payload);
+  return response.data;
+};
+
+export const saveAdvisor = async (advisorId: string): Promise<void> => {
+  await api.post(`/user/saved-advisors/${advisorId}`);
+};
+
+export const unsaveAdvisor = async (advisorId: string): Promise<void> => {
+  await api.delete(`/user/saved-advisors/${advisorId}`);
+};
+
+export const getSavedAdvisors = async (): Promise<SavedAdvisor[]> => {
+  const response = await api.get("/user/saved-advisors");
+  const payload = response.data;
+  return (payload?.data?.savedAdvisors ?? []) as SavedAdvisor[];
+};
+
 export const duplicateUsernameCheckApi = async (username: string) => {
   const response = await api.get(
     `/advisor/username-availability?username=${encodeURIComponent(username)}`,
@@ -194,6 +271,11 @@ export const getMyEnquiries = async (params?: { page?: number; limit?: number })
 
 export const markEnquiryResponded = async (enquiryId: string) => {
   const response = await api.patch(`/advisor/my-enquiries/${enquiryId}/mark-responded`, {});
+  return response.data;
+};
+
+export const getUserMyEnquiries = async (params?: { page?: number; limit?: number }) => {
+  const response = await api.get("/user/my-enquiries", { params });
   return response.data;
 };
 

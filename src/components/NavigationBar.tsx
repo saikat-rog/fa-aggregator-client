@@ -29,6 +29,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     setIsAuthenticated(Boolean(localStorage.getItem('token')))
     setRole(localStorage.getItem('role'))
     setIsMobileMenuOpen(false)
+    window.scrollTo({ top: 0, behavior: 'auto' })
   }, [location.pathname])
 
   const links = [

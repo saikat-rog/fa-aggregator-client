@@ -1,5 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AppShell } from "./components/NavigationBar";
+import { SavedAdvisorsProvider } from "./context/SavedAdvisorsContext";
 import { ProtectedRoute } from "./components/RoutePrivacy/ProtectedRoute";
 import { PublicOnlyRoute } from "./components/RoutePrivacy/PublicOnlyRoute";
 import { AdminPage } from "./pages/AdminPage";
@@ -14,8 +15,9 @@ import AdvisorDashboardPage from "./pages/AdvisorDashboardPage";
 function App() {
   return (
     <BrowserRouter>
-      <AppShell>
-        <Routes>
+      <SavedAdvisorsProvider>
+        <AppShell>
+          <Routes>
           <Route path="/" element={<HomePage />} />
           <Route
             path="/auth"
@@ -49,8 +51,9 @@ function App() {
           </Route>
           <Route path="/lol" element={<AdminPage />} />
           <Route path="/:username" element={<AdvisorProfilePage />} />
-        </Routes>
-      </AppShell>
+          </Routes>
+        </AppShell>
+      </SavedAdvisorsProvider>
     </BrowserRouter>
   );
 }

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   FaArrowRight,
+  FaBookmark,
   FaChartLine,
   FaCircleCheck,
   FaEnvelope,
@@ -14,6 +15,7 @@ import {
   FaXTwitter,
 } from "react-icons/fa6";
 import type { AdvisorApiItem } from "../../pages/HomePage";
+import { useSavedAdvisors } from "../../context/SavedAdvisorsContext";
 import {
   ADVISOR_CLICK_TYPES,
   trackAdvisorClick,
@@ -60,9 +62,17 @@ export function AdvisorCard({ advisor }: AdvisorCardProps) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [role, setRole] = useState<string | null>(null);
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
+  const [saveActionError, setSaveActionError] = useState("");
   const [pendingActionType, setPendingActionType] = useState<
     "website" | "email" | "social" | null
   >(null);
+  const {
+    isSaved,
+    save,
+    unsave,
+    isSavingByAdvisorId,
+    isUnsavingByAdvisorId,
+  } = useSavedAdvisors();
 
   useEffect(() => {
     const syncAuthState = () => {
@@ -125,9 +135,55 @@ export function AdvisorCard({ advisor }: AdvisorCardProps) {
     navigate(`/${advisor.username}`);
   };
 
+  const handleToggleSave = async () => {
+    if (!isAuthenticated || role !== "user") {
+      setPendingActionType("website");
+      setAuthDialogOpen(true);
+      return;
+    }
+
+    try {
+      setSaveActionError("");
+      if (isSaved(advisor.id)) {
+        await unsave(advisor.id);
+      } else {
+        await save(advisor.id);
+      }
+    } catch (error: unknown) {
+      const msg =
+        typeof error === "object" &&
+        error !== null &&
+        "response" in error &&
+        typeof (error as { response?: { data?: { msg?: string } } }).response?.data
+          ?.msg === "string"
+          ? (error as { response?: { data?: { msg?: string } } }).response?.data?.msg
+          : "Unable to update saved advisor.";
+      setSaveActionError(msg ?? "Unable to update saved advisor.");
+    }
+  };
+
+  const isSavedAdvisor = isSaved(advisor.id);
+  const saveLoading =
+    isSavingByAdvisorId[advisor.id] || isUnsavingByAdvisorId[advisor.id];
+
   return (
     <>
-      <article className="group overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-[0_18px_60px_rgba(15,23,42,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_80px_rgba(15,23,42,0.14)]">
+      <article className="group relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-[0_18px_60px_rgba(15,23,42,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_80px_rgba(15,23,42,0.14)]">
+        <div className="absolute right-3 top-3 z-10">
+          <button
+            type="button"
+            onClick={handleToggleSave}
+            disabled={saveLoading}
+            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition disabled:cursor-not-allowed ${
+              isSavedAdvisor
+                ? "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                : "border-blue-200 bg-white text-blue-700 hover:bg-blue-50"
+            }`}
+          >
+            <FaBookmark className="h-3 w-3" />
+            {saveLoading ? "..." : isSavedAdvisor ? "Saved" : "Save"}
+          </button>
+        </div>
         <div className="grid lg:grid-cols-[280px_1fr]">
           <div className="relative bg-linear-to-br from-blue-700 to-blue-500 p-5 text-white">
             <div className="absolute right-0 top-0 h-24 w-24 rounded-bl-full bg-white/10" />
@@ -343,6 +399,9 @@ export function AdvisorCard({ advisor }: AdvisorCardProps) {
                 </button>
               ) : null}
             </div>
+            {saveActionError ? (
+              <p className="text-xs font-medium text-rose-600">{saveActionError}</p>
+            ) : null}
 
             <button
               type="button"
