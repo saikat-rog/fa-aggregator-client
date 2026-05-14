@@ -5,6 +5,7 @@ interface AuthPromptDialogProps {
   role: string | null;
   actionType: AdvisorActionType;
   onClose: () => void;
+  onLoginAsUser: () => void;
   onLogoutAndLoginAsUser: () => void;
 }
 
@@ -13,6 +14,7 @@ export function AuthPromptDialog({
   role,
   actionType,
   onClose,
+  onLoginAsUser,
   onLogoutAndLoginAsUser,
 }: AuthPromptDialogProps) {
   if (!open) {
@@ -39,18 +41,20 @@ export function AuthPromptDialog({
           <h3 id="advisor-auth-dialog-title" className="text-2xl font-semibold tracking-tight text-slate-900">
             {role === "advisor"
               ? "Switch to a user account to continue"
-              : "Log in as a user to continue"}
+              : "Login to continue"}
           </h3>
           <p className="text-sm leading-6 text-slate-600">
-            {actionType === "email"
-              ? "You need a user account before you can contact this advisor."
-              : actionType === "website"
-                ? "You need a user account before you can open advisor websites."
-                : "You need a user account before you can open social links."}
+            {role === "advisor"
+              ? actionType === "email"
+                ? "You need a user account before you can contact this advisor."
+                : actionType === "website"
+                  ? "You need a user account before you can open advisor websites."
+                  : "You need a user account before you can open social links."
+              : "Please login to continue."}
           </p>
         </div>
 
-        <div className="mt-6 flex flex-wrap gap-3">
+        <div className="mt-6">
           {role === "advisor" ? (
             <button
               type="button"
@@ -59,14 +63,15 @@ export function AuthPromptDialog({
             >
               Logout
             </button>
-          ) : null}
-          <button
-            type="button"
-            onClick={onClose}
-            className="inline-flex flex-1 items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-          >
-            Cancel
-          </button>
+          ) : (
+            <button
+              type="button"
+              onClick={onLoginAsUser}
+              className="inline-flex w-full items-center justify-center rounded-full bg-blue-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-800"
+            >
+              Login
+            </button>
+          )}
         </div>
       </div>
     </div>

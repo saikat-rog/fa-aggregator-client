@@ -4,13 +4,14 @@ import { AboutCard } from "../components/advisor-profile/AboutCard";
 import { ContactFormCard } from "../components/advisor-profile/ContactFormCard";
 import { EducationalDisclaimer } from "../components/advisor-profile/EducationalDisclaimer";
 import { ExpertiseCard } from "../components/advisor-profile/ExpertiseCard";
-import { ProfessionalConnectCard } from "../components/advisor-profile/ProfessionalConnectCard";
 import { ProfileHeroCard } from "../components/advisor-profile/ProfileHeroCard";
 import { AuthPromptDialog } from "../components/ui/AuthPromptDialog";
 import { NotFoundState } from "../components/ui/NotFoundState";
 import {
+  ADVISOR_CLICK_TYPES,
   getAdvisorByUsernameApi,
   submitAdvisorQueryApi,
+  trackAdvisorClick,
 } from "../services/advisor.service";
 import type { AdvisorApiItem } from "./HomePage";
 
@@ -42,16 +43,10 @@ export function AdvisorProfilePage() {
   const [pendingActionType, setPendingActionType] = useState<
     "website" | "email" | "social" | null
   >(null);
-  const [revealedContactInfo, setRevealedContactInfo] = useState({
-    website: false,
-    email: false,
-  });
 
   const [formData, setFormData] = useState({
     subject: "",
     message: "",
-    countryCode: "91",
-    phone: "",
     category: "general",
   });
   const [formSubmitting, setFormSubmitting] = useState(false);
@@ -105,6 +100,11 @@ export function AdvisorProfilePage() {
     fetchAdvisor();
   }, [username]);
 
+  useEffect(() => {
+    if (!advisor?.id) return;
+    void trackAdvisorClick(advisor.id, ADVISOR_CLICK_TYPES.PROFILE);
+  }, [advisor?.id]);
+
   const userCanOpenLinks = isAuthenticated && role === "user";
 
   const socialLinks = useMemo(() => {
@@ -138,8 +138,45 @@ export function AdvisorProfilePage() {
     navigate("/auth");
   };
 
+  const shareProfile = async () => {
+    const profileUrl = typeof window !== "undefined" ? window.location.href : "";
+    const shareTitle = advisor?.name ? `${advisor.name} profile` : "Advisor profile";
+    if (advisor?.id) {
+      void trackAdvisorClick(advisor.id, ADVISOR_CLICK_TYPES.PROFILE_SHARE);
+    }
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: shareTitle,
+          url: profileUrl,
+        });
+        return;
+      }
+
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(profileUrl);
+        setFormMessage({
+          type: "success",
+          text: "Profile link copied. You can share it now.",
+        });
+      }
+    } catch {
+      // user cancelled or share failed; no-op
+    }
+  };
+
   const openAction = (type: "website" | "email" | "social", url: string) => {
     if (userCanOpenLinks) {
+      const clickType =
+        type === "social"
+          ? ADVISOR_CLICK_TYPES.SOCIAL
+          : type === "email"
+            ? ADVISOR_CLICK_TYPES.EMAIL
+            : ADVISOR_CLICK_TYPES.WEBSITE;
+      if (advisor?.id) {
+        void trackAdvisorClick(advisor.id, clickType);
+      }
       if (type === "email") {
         window.location.href = url;
         return;
@@ -153,33 +190,12 @@ export function AdvisorProfilePage() {
     setAuthDialogOpen(true);
   };
 
-  const revealContactInfo = (type: "website" | "email") => {
-    if (!userCanOpenLinks) {
-      setPendingActionType(type);
-      setAuthDialogOpen(true);
-      return;
-    }
-
-    setRevealedContactInfo((prev) => ({
-      ...prev,
-      [type]: !prev[type],
-    }));
-  };
-
   const handleFormChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >,
   ) => {
     const { name, value } = e.target;
-    if (name === "phone" || name === "countryCode") {
-      const numericValue = value.replace(/\D/g, "");
-      setFormData((prev) => ({
-        ...prev,
-        [name]: numericValue,
-      }));
-      return;
-    }
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -195,36 +211,14 @@ export function AdvisorProfilePage() {
       return;
     }
 
-    const countryCodeRegex = /^[0-9]{1,4}$/;
-    const phoneRegex = /^[0-9]{7,15}$/;
-    const hasPhone = formData.phone.trim().length > 0;
-    if (hasPhone && !countryCodeRegex.test(formData.countryCode.trim())) {
-      setFormMessage({
-        type: "error",
-        text: "Please enter a valid country code.",
-      });
-      return;
-    }
-    if (hasPhone && !phoneRegex.test(formData.phone.trim())) {
-      setFormMessage({
-        type: "error",
-        text: "Please enter a valid phone number (7-15 digits).",
-      });
-      return;
-    }
-
     setFormSubmitting(true);
     setFormMessage(null);
 
     try {
-      const fullPhone = hasPhone
-        ? `+${formData.countryCode}${formData.phone}`
-        : "";
       const response = await submitAdvisorQueryApi({
         advisorId: advisorData.id,
         subject: formData.subject,
         message: formData.message,
-        phone: fullPhone,
         category: formData.category,
       });
 
@@ -236,8 +230,6 @@ export function AdvisorProfilePage() {
         setFormData({
           subject: "",
           message: "",
-          countryCode: "91",
-          phone: "",
           category: "general",
         });
       } else {
@@ -288,22 +280,19 @@ export function AdvisorProfilePage() {
                 country={advisorData.country}
                 industry={advisorData.industries?.join(", ")}
                 profilePictureUrl={advisorData.profilePictureUrl || undefined}
+                personalWebsite={advisorData.personalWebsite}
+                emailForContact={advisorData.emailForContact}
+                userCanOpenLinks={userCanOpenLinks}
                 socialLinks={socialLinks}
+                onWebsiteOpen={(url) => openAction("website", url)}
+                onEmailOpen={(mailto) => openAction("email", mailto)}
+                onShareProfile={shareProfile}
                 onSocialOpen={(url) => openAction("social", url)}
                 getProxiedImageUrl={getProxiedImageUrl}
               />
 
               <div className="grid gap-6 md:grid-cols-2">
                 <AboutCard about={advisorData.about} />
-                <ProfessionalConnectCard
-                  personalWebsite={advisorData.personalWebsite}
-                  emailForContact={advisorData.emailForContact}
-                  userCanOpenLinks={userCanOpenLinks}
-                  revealedContactInfo={revealedContactInfo}
-                  onWebsiteOpen={(url) => openAction("website", url)}
-                  onEmailOpen={(mailto) => openAction("email", mailto)}
-                  onReveal={revealContactInfo}
-                />
                 <ExpertiseCard
                   advisorId={advisorData.id}
                   marketFocus={advisorData.marketFocus}
@@ -336,6 +325,10 @@ export function AdvisorProfilePage() {
         role={role}
         actionType={pendingActionType}
         onClose={closeAuthDialog}
+        onLoginAsUser={() => {
+          closeAuthDialog();
+          navigate("/auth");
+        }}
         onLogoutAndLoginAsUser={logoutAndLoginAsUser}
       />
     </div>

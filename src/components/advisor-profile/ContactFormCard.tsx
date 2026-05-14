@@ -3,8 +3,6 @@ import { FaCircleCheck, FaLock } from "react-icons/fa6";
 type FormData = {
   subject: string;
   message: string;
-  countryCode: string;
-  phone: string;
   category: string;
 };
 
@@ -95,39 +93,6 @@ export function ContactFormCard({
             required
             className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:bg-white"
           />
-        </div>
-
-        <div>
-          <label className="mb-2 block text-sm font-medium text-slate-700">
-            Phone
-          </label>
-          <div className="flex items-stretch gap-2">
-            <div className="flex h-12 w-24 overflow-hidden rounded-lg border border-slate-200 bg-white">
-              <div className="flex h-full items-center border-r border-slate-200 bg-slate-50 px-2 text-sm font-semibold text-slate-500">
-                +
-              </div>
-              <input
-                name="countryCode"
-                value={formData.countryCode}
-                onChange={onChange}
-                inputMode="numeric"
-                aria-label="Country code"
-                placeholder="91"
-                className="h-full w-full bg-transparent px-2 text-center text-sm font-medium text-slate-700 outline-none placeholder:text-slate-300"
-              />
-            </div>
-            <input
-              type="tel"
-              name="phone"
-              value={formData.phone}
-              onChange={onChange}
-              placeholder="Enter your phone number"
-              inputMode="numeric"
-              pattern="^$|[0-9]{7,15}$"
-              title="Enter a valid phone number (7-15 digits)."
-              className="h-12 flex-1 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:bg-white"
-            />
-          </div>
         </div>
 
         <div>

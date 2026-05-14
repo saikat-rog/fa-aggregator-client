@@ -14,6 +14,10 @@ import {
   FaXTwitter,
 } from "react-icons/fa6";
 import type { AdvisorApiItem } from "../../pages/HomePage";
+import {
+  ADVISOR_CLICK_TYPES,
+  trackAdvisorClick,
+} from "../../services/advisor.service";
 import { AuthPromptDialog } from "../ui/AuthPromptDialog";
 
 export interface AdvisorCardData {
@@ -84,6 +88,13 @@ export function AdvisorCard({ advisor }: AdvisorCardProps) {
 
   const openAction = (type: "website" | "email" | "social", url: string) => {
     if (userCanOpenLinks) {
+      const clickType =
+        type === "social"
+          ? ADVISOR_CLICK_TYPES.SOCIAL
+          : type === "email"
+            ? ADVISOR_CLICK_TYPES.EMAIL
+            : ADVISOR_CLICK_TYPES.WEBSITE;
+      void trackAdvisorClick(advisor.id, clickType);
       if (type === "email") {
         window.location.href = url;
         return;
@@ -107,6 +118,11 @@ export function AdvisorCard({ advisor }: AdvisorCardProps) {
     localStorage.removeItem("role");
     closeAuthDialog();
     navigate("/auth");
+  };
+
+  const openProfile = () => {
+    void trackAdvisorClick(advisor.id, ADVISOR_CLICK_TYPES.PROFILE);
+    navigate(`/${advisor.username}`);
   };
 
   return (
@@ -142,7 +158,7 @@ export function AdvisorCard({ advisor }: AdvisorCardProps) {
                   <div className="min-w-0">
                     <button
                       type="button"
-                      onClick={() => navigate(`/${advisor.username}`)}
+                      onClick={openProfile}
                       className="truncate text-xl font-semibold tracking-tight text-white hover:cursor-pointer text-left w-full"
                     >
                       {advisor.name}
@@ -154,7 +170,7 @@ export function AdvisorCard({ advisor }: AdvisorCardProps) {
                       </p>
                       <button
                         type="button"
-                        onClick={() => navigate(`/${advisor.username}`)}
+                        onClick={openProfile}
                         className="inline-flex items-center rounded-full border border-white/20 bg-black px-2.5 py-1 text-xs font-semibold tracking-wide text-white hover:bg-white/20 transition"
                       >
                         @{advisor.username}
@@ -344,6 +360,10 @@ export function AdvisorCard({ advisor }: AdvisorCardProps) {
         role={role}
         actionType={pendingActionType}
         onClose={closeAuthDialog}
+        onLoginAsUser={() => {
+          closeAuthDialog();
+          navigate("/auth");
+        }}
         onLogoutAndLoginAsUser={logoutAndLoginAsUser}
       />
     </>

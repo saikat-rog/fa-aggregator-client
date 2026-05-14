@@ -1,8 +1,13 @@
 import {
+  FaArrowUpRightFromSquare,
+  FaEnvelope,
+  FaEyeSlash,
   FaFacebook,
+  FaGlobe,
   FaInstagram,
   FaLinkedin,
   FaLocationDot,
+  FaShareNodes,
   FaTiktok,
   FaXTwitter,
   FaYoutube,
@@ -30,13 +35,19 @@ type ProfileHeroCardProps = {
   country: string;
   industry?: string;
   profilePictureUrl?: string;
+  personalWebsite?: string;
+  emailForContact?: string;
+  userCanOpenLinks: boolean;
   socialLinks: SocialLinks;
+  onWebsiteOpen: (url: string) => void;
+  onEmailOpen: (mailto: string) => void;
+  onShareProfile: () => void;
   onSocialOpen: (url: string) => void;
   getProxiedImageUrl: (url: string) => string;
 };
 
 const socialButtonBaseClassName =
-  "inline-flex min-w-[150px] items-center justify-center gap-1.5 rounded-full border p-2 text-xs font-semibold transition";
+  "inline-flex min-w-[150px] cursor-pointer items-center justify-center gap-1.5 rounded-full border p-2 text-xs font-semibold transition";
 const instagramButtonClassName =
   `${socialButtonBaseClassName} border-pink-200 bg-pink-50 text-pink-700 hover:bg-pink-100`;
 const linkedinButtonClassName =
@@ -69,7 +80,13 @@ export function ProfileHeroCard({
   country,
   industry,
   profilePictureUrl,
+  personalWebsite,
+  emailForContact,
+  userCanOpenLinks,
   socialLinks,
+  onWebsiteOpen,
+  onEmailOpen,
+  onShareProfile,
   onSocialOpen,
   getProxiedImageUrl,
 }: ProfileHeroCardProps) {
@@ -90,7 +107,15 @@ export function ProfileHeroCard({
     socialLinks.tiktok;
 
   return (
-    <div className="flex flex-col gap-5 rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-[0_12px_30px_rgba(15,23,42,0.04)] sm:flex-row sm:items-start">
+    <div className="relative flex flex-col gap-5 rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-[0_12px_30px_rgba(15,23,42,0.04)] sm:flex-row sm:items-start">
+      <button
+        type="button"
+        onClick={onShareProfile}
+        className="absolute right-4 top-4 inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
+      >
+        <FaShareNodes />
+        Share
+      </button>
       <div className="shrink-0">
         {profilePictureUrl ? (
           <img
@@ -130,6 +155,74 @@ export function ProfileHeroCard({
           <FaLocationDot className="text-blue-600" />
           {state}, {country}
         </div>
+        {(personalWebsite || emailForContact) ? (
+          <div className="mt-4 grid gap-2 sm:grid-cols-2">
+            {personalWebsite ? (
+              <button
+                type="button"
+                onClick={() => onWebsiteOpen(personalWebsite)}
+                className="group cursor-pointer rounded-xl border border-slate-200 bg-slate-50 p-2 text-left transition hover:border-blue-300 hover:bg-blue-50/60"
+              >
+                <p className="inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-blue-700">
+                  <FaGlobe />
+                  Website
+                </p>
+                <div className="mt-1 flex items-center justify-between gap-2">
+                  <p
+                    className={`truncate text-xs ${
+                      userCanOpenLinks
+                        ? "text-slate-700"
+                        : "select-none text-slate-700 blur-sm"
+                    }`}
+                  >
+                    {personalWebsite}
+                  </p>
+                  {userCanOpenLinks ? (
+                    <span className="shrink-0 text-slate-500 transition group-hover:text-blue-700">
+                      <FaArrowUpRightFromSquare />
+                    </span>
+                  ) : (
+                    <span className="shrink-0 text-slate-500">
+                      <FaEyeSlash />
+                    </span>
+                  )}
+                </div>
+              </button>
+            ) : null}
+            {emailForContact ? (
+              <button
+                type="button"
+                onClick={() => onEmailOpen(`mailto:${emailForContact}`)}
+                className="group cursor-pointer rounded-xl border border-slate-200 bg-slate-50 p-2 text-left transition hover:border-blue-300 hover:bg-blue-50/60"
+              >
+                <p className="inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-blue-700">
+                  <FaEnvelope />
+                  Email
+                </p>
+                <div className="mt-1 flex items-center justify-between gap-2">
+                  <p
+                    className={`truncate text-xs ${
+                      userCanOpenLinks
+                        ? "text-slate-700"
+                        : "select-none text-slate-700 blur-sm"
+                    }`}
+                  >
+                    {emailForContact}
+                  </p>
+                  {userCanOpenLinks ? (
+                    <span className="shrink-0 text-slate-500 transition group-hover:text-blue-700">
+                      <FaArrowUpRightFromSquare />
+                    </span>
+                  ) : (
+                    <span className="shrink-0 text-slate-500">
+                      <FaEyeSlash />
+                    </span>
+                  )}
+                </div>
+              </button>
+            ) : null}
+          </div>
+        ) : null}
 
         <div className="mt-5">
           {hasSocial ? (
