@@ -274,7 +274,7 @@ export function AdvisorProfilePage() {
   const advisorData = advisor as Required<typeof advisor>;
 
   return (
-    <div className="min-h-screen py-8 text-slate-900">
+    <div className="min-h-screen pb-8 text-slate-900">
       <div className="mx-auto max-w-6xl space-y-6">
         <section className="overflow-hidden">
           <EducationalDisclaimer />
@@ -287,7 +287,7 @@ export function AdvisorProfilePage() {
                 state={advisorData.state}
                 country={advisorData.country}
                 industry={advisorData.industries?.join(", ")}
-                profilePictureUrl={advisorData.profilePictureUrl}
+                profilePictureUrl={advisorData.profilePictureUrl || undefined}
                 socialLinks={socialLinks}
                 onSocialOpen={(url) => openAction("social", url)}
                 getProxiedImageUrl={getProxiedImageUrl}

@@ -26,6 +26,38 @@ export interface AdvisorApplicationPayload {
   };
 }
 
+export interface AdvisorListQueryParams {
+  page?: number;
+  limit?: number;
+  country?: string;
+  state?: string;
+  industries?: string[];
+  instagramFollowersGt?: number;
+  instagramFollowersGte?: number;
+  instagramFollowersLt?: number;
+  instagramFollowersLte?: number;
+  youtubeSubscribersGt?: number;
+  youtubeSubscribersGte?: number;
+  youtubeSubscribersLt?: number;
+  youtubeSubscribersLte?: number;
+  tiktokFollowersGt?: number;
+  tiktokFollowersGte?: number;
+  tiktokFollowersLt?: number;
+  tiktokFollowersLte?: number;
+  linkedinFollowersGt?: number;
+  linkedinFollowersGte?: number;
+  linkedinFollowersLt?: number;
+  linkedinFollowersLte?: number;
+  facebookFollowersGt?: number;
+  facebookFollowersGte?: number;
+  facebookFollowersLt?: number;
+  facebookFollowersLte?: number;
+  twitterFollowersGt?: number;
+  twitterFollowersGte?: number;
+  twitterFollowersLt?: number;
+  twitterFollowersLte?: number;
+}
+
 export interface AdvisorFormOptionsResponseData {
   countries: string[];
   locations: Record<string, { states: string[] }>;
@@ -52,8 +84,8 @@ export const advisorProfileAnalyticsApi = async () => {
   return response.data;
 };
 
-export const getAllAdvisorsApi = async () => {
-  const response = await api.get('/advisor');
+export const getAllAdvisorsApi = async (params?: AdvisorListQueryParams) => {
+  const response = await api.get('/advisor', { params });
   return response.data;
 };
 

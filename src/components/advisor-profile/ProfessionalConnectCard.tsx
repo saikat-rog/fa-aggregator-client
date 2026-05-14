@@ -21,7 +21,7 @@ export function ProfessionalConnectCard({
 }: ProfessionalConnectCardProps) {
   return (
     <section className="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-[0_12px_30px_rgba(15,23,42,0.04)]">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-slate-500">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
         Connect Professionally
       </p>
 

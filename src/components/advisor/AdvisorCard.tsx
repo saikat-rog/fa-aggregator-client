@@ -20,6 +20,7 @@ export interface AdvisorCardData {
   id: string;
   name: string;
   username: string;
+  industries?: string[];
   country: string;
   state: string;
   marketFocus: string[];
@@ -154,10 +155,15 @@ export function AdvisorCard({ advisor }: AdvisorCardProps) {
                       <button
                         type="button"
                         onClick={() => navigate(`/${advisor.username}`)}
-                        className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-[11px] font-semibold tracking-wide text-white/90 hover:bg-white/20 transition"
+                        className="inline-flex items-center rounded-full border border-white/20 bg-black px-2.5 py-1 text-xs font-semibold tracking-wide text-white hover:bg-white/20 transition"
                       >
                         @{advisor.username}
                       </button>
+                      {advisor.industries?.length ? (
+                        <p className="inline-flex items-center rounded-full uppercase border border-white/20 bg-white px-2.5 py-1 text-[11px] font-semibold tracking-wide text-blue-700">
+                          {advisor.industries.join(", ")}
+                        </p>
+                      ) : null}
                     </div>
                   </div>
                 </div>
