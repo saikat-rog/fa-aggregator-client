@@ -33,8 +33,8 @@ export function AuthPromptDialog({
         aria-labelledby="advisor-auth-dialog-title"
       >
         <div className="space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-blue-600">
-            {role === "advisor" ? "Advisor session detected" : "Sign in required"}
+          <p className="text-xs font-bold uppercase tracking-[0.22em] text-blue-600">
+            {role === "advisor" ? "Advisor action not allowed" : "Sign in required"}
           </p>
           <h3 id="advisor-auth-dialog-title" className="text-2xl font-semibold tracking-tight text-slate-900">
             {role === "advisor"

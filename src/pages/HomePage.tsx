@@ -19,18 +19,22 @@ export interface AdvisorApiItem {
     twitter?: string;
     facebook?: string;
     youtube?: string;
-    instagramFollowers?: number;
-    linkedinFollowers?: number;
-    twitterFollowers?: number;
-    facebookFollowers?: number;
-    youtubeSubscribers?: number;
+    tiktok?: string;
   };
+  instagramFollowers?: number;
+  linkedinFollowers?: number;
+  twitterFollowers?: number;
+  facebookFollowers?: number;
+  youtubeSubscribers?: number;
+  tiktokFollowers?: number;
   about?: string;
   marketFocus?: string[];
   expertiseIndeces?: string[];
   emailForContact?: string;
   personalWebsite?: string;
   username?: string;
+  industry?: string;
+  industries?: string[];
 }
 
 export function HomePage() {

@@ -16,11 +16,13 @@ export interface AdvisorApplicationPayload {
     twitter?: string;
     facebook?: string;
     youtube?: string;
+    tiktok?: string;
     instagramFollowers?: number;
     linkedinFollowers?: number;
     twitterFollowers?: number;
     facebookFollowers?: number;
     youtubeSubscribers?: number;
+    tiktokFollowers?: number;
   };
 }
 
@@ -66,16 +68,15 @@ export const getAdvisorByUsernameApi = async (username: string) => {
 };
 
 export interface AdvisorQueryPayload {
-  advisorUsername: string;
-  name: string;
-  email: string;
+  advisorId: string;
   subject: string;
+  phone: string;
   message: string;
   category?: string;
 }
 
 export const submitAdvisorQueryApi = async (payload: AdvisorQueryPayload) => {
-  const response = await api.post('/advisor/query', payload);
+  const response = await api.post(`/user/submit-enquiry/advisor/${payload.advisorId}`, payload);
   return response.data;
 };
 

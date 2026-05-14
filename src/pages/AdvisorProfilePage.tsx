@@ -48,10 +48,10 @@ export function AdvisorProfilePage() {
   });
 
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
     subject: "",
     message: "",
+    countryCode: "91",
+    phone: "",
     category: "general",
   });
   const [formSubmitting, setFormSubmitting] = useState(false);
@@ -108,21 +108,23 @@ export function AdvisorProfilePage() {
   const userCanOpenLinks = isAuthenticated && role === "user";
 
   const socialLinks = useMemo(() => {
-    if (!advisor?.socialLinks) return {};
-    const links = advisor.socialLinks;
+    if (!advisor) return {};
+    const links = advisor.socialLinks ?? {};
     return {
       instagram: links.instagram,
       linkedin: links.linkedin,
       twitter: links.twitter,
       facebook: links.facebook,
       youtube: links.youtube,
-      instagramFollowers: links.instagramFollowers,
-      linkedinFollowers: links.linkedinFollowers,
-      twitterFollowers: links.twitterFollowers,
-      facebookFollowers: links.facebookFollowers,
-      youtubeSubscribers: links.youtubeSubscribers,
+      tiktok: links.tiktok,
+      instagramFollowers: advisor.instagramFollowers,
+      linkedinFollowers: advisor.linkedinFollowers,
+      twitterFollowers: advisor.twitterFollowers,
+      facebookFollowers: advisor.facebookFollowers,
+      youtubeSubscribers: advisor.youtubeSubscribers,
+      tiktokFollowers: advisor.tiktokFollowers,
     };
-  }, [advisor?.socialLinks]);
+  }, [advisor]);
 
   const closeAuthDialog = () => {
     setAuthDialogOpen(false);
@@ -170,6 +172,14 @@ export function AdvisorProfilePage() {
     >,
   ) => {
     const { name, value } = e.target;
+    if (name === "phone" || name === "countryCode") {
+      const numericValue = value.replace(/\D/g, "");
+      setFormData((prev) => ({
+        ...prev,
+        [name]: numericValue,
+      }));
+      return;
+    }
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -179,30 +189,55 @@ export function AdvisorProfilePage() {
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!advisor) return;
+    if (!userCanOpenLinks) {
+      setPendingActionType("email");
+      setAuthDialogOpen(true);
+      return;
+    }
+
+    const countryCodeRegex = /^[0-9]{1,4}$/;
+    const phoneRegex = /^[0-9]{7,15}$/;
+    const hasPhone = formData.phone.trim().length > 0;
+    if (hasPhone && !countryCodeRegex.test(formData.countryCode.trim())) {
+      setFormMessage({
+        type: "error",
+        text: "Please enter a valid country code.",
+      });
+      return;
+    }
+    if (hasPhone && !phoneRegex.test(formData.phone.trim())) {
+      setFormMessage({
+        type: "error",
+        text: "Please enter a valid phone number (7-15 digits).",
+      });
+      return;
+    }
 
     setFormSubmitting(true);
     setFormMessage(null);
 
     try {
+      const fullPhone = hasPhone
+        ? `+${formData.countryCode}${formData.phone}`
+        : "";
       const response = await submitAdvisorQueryApi({
-        advisorUsername: advisor.username as string,
-        name: formData.name,
-        email: formData.email,
+        advisorId: advisorData.id,
         subject: formData.subject,
         message: formData.message,
+        phone: fullPhone,
         category: formData.category,
       });
 
       if (response.success) {
         setFormMessage({
           type: "success",
-          text: "Query submitted successfully! The advisor will get back to you soon.",
+          text: `Submitted! ${advisorData.name} will connect you soon.`,
         });
         setFormData({
-          name: "",
-          email: "",
           subject: "",
           message: "",
+          countryCode: "91",
+          phone: "",
           category: "general",
         });
       } else {
@@ -251,6 +286,7 @@ export function AdvisorProfilePage() {
                 username={advisorData.username}
                 state={advisorData.state}
                 country={advisorData.country}
+                industry={advisorData.industries?.join(", ")}
                 profilePictureUrl={advisorData.profilePictureUrl}
                 socialLinks={socialLinks}
                 onSocialOpen={(url) => openAction("social", url)}
@@ -281,8 +317,13 @@ export function AdvisorProfilePage() {
                 advisorName={advisorData.name}
                 formData={formData}
                 formSubmitting={formSubmitting}
+                canSubmitEnquiry={userCanOpenLinks}
                 formMessage={formMessage}
                 onChange={handleFormChange}
+                onLockedSubmit={() => {
+                  setPendingActionType("email");
+                  setAuthDialogOpen(true);
+                }}
                 onSubmit={handleFormSubmit}
               />
             </aside>

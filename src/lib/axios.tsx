@@ -26,6 +26,11 @@ const isConnectionRefused = (error: unknown) => {
   );
 };
 
+const isAuthEndpoint = (url?: string) => {
+  if (!url) return false;
+  return url.includes("/auth/login") || url.includes("/auth/register") || url.includes("/auth/verify-otp") || url.includes("/auth/resend-otp") || url.includes("/auth/refresh");
+};
+
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) {
@@ -46,7 +51,12 @@ api.interceptors.response.use(
 
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
+    if (
+      error.response?.status === 401 &&
+      originalRequest &&
+      !originalRequest._retry &&
+      !isAuthEndpoint(originalRequest.url)
+    ) {
       originalRequest._retry = true;
 
       try {

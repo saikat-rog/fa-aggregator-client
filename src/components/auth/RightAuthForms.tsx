@@ -33,6 +33,8 @@ const RightAuthForms = () => {
   const [resendCooldown, setResendCooldown] = useState(0);
   const [resendMessage, setResendMessage] = useState("");
   const [countryCode, setCountryCode] = useState("91");
+  const [advisorDeclarationChecked, setAdvisorDeclarationChecked] =
+    useState(false);
   const navigate = useNavigate();
   const pendingSignupEmail = pendingSignup?.email || "your email";
   const [otpDigits, setOtpDigits] = useState<string[]>(Array(6).fill(""));
@@ -51,6 +53,7 @@ const RightAuthForms = () => {
     setResendMessage("");
     setResendAttempts(0);
     setCountryCode("91");
+    setAdvisorDeclarationChecked(false);
     setOtpCooldownStarted(false);
   };
 
@@ -83,6 +86,12 @@ const RightAuthForms = () => {
       let authResponse: { accessToken?: string } | null = null;
       if (mode === "signup") {
         if (signupStep === "details") {
+          if (formRole === "advisor" && !advisorDeclarationChecked) {
+            setErrorMessage(
+              "Please confirm you are an influencer and not claiming anything fake.",
+            );
+            return;
+          }
           await registerApi(email, password, name, fullPhone, formRole);
           setPendingSignup({ email, password, role: formRole });
           setSignupStep("otp");
@@ -327,7 +336,16 @@ const RightAuthForms = () => {
                     type="tel"
                     placeholder="Phone number"
                     autoComplete="tel"
-                      className="h-12 flex-1 rounded-lg border border-blue-100 px-3 py-3 text-base outline-none focus:border-blue-400"
+                    inputMode="numeric"
+                    pattern="^$|[0-9]{7,15}"
+                    title="Enter a valid phone number (7-15 digits)."
+                    onChange={(event) => {
+                      event.currentTarget.value = event.currentTarget.value.replace(
+                        /\D/g,
+                        "",
+                      );
+                    }}
+                    className="h-12 flex-1 rounded-lg border border-blue-100 px-3 py-3 text-base outline-none focus:border-blue-400"
                   />
                 </div>
               </div>
@@ -458,6 +476,25 @@ const RightAuthForms = () => {
               />
             </>
           )}
+
+          {mode === "signup" &&
+          signupStep === "details" &&
+          formRole === "advisor" ? (
+            <label className="mt-1 inline-flex items-start gap-2 rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-sm text-slate-700">
+              <input
+                type="checkbox"
+                checked={advisorDeclarationChecked}
+                onChange={(event) =>
+                  setAdvisorDeclarationChecked(event.target.checked)
+                }
+                className="mt-0.5 h-4 w-4 accent-blue-600"
+              />
+              <span>
+                Please confirm you are an influencer already and not claiming
+                anything fake.
+              </span>
+            </label>
+          ) : null}
 
           <button
             disabled={isSubmitting}
