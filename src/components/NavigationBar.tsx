@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
+import { FiLogOut } from "react-icons/fi";
 import { logoutApi } from '../services/auth.service'
 import { MobileNav, MobileNavHeader, MobileNavMenu, MobileNavToggle, NavBody, Navbar } from './ui/resizable-navbar'
 
@@ -39,6 +40,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         ? [{ to: '/a/dashboard', label: 'Dashboard' }]
         : role === 'user'
           ? [{ to: '/u/dashboard', label: 'Dashboard' }]
+          : role === 'admin'
+            ? [{ to: '/admin', label: 'Admin' }]
           : []
       : []),
       { to: '/blogs', label: 'Blogs' },
@@ -87,8 +90,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             {isAuthenticated ? (
               <button
                 onClick={handleLogout}
-                className="rounded-full bg-red-700 px-8 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
+                className="inline-flex items-center gap-1.5 rounded-full bg-red-700 px-8 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
               >
+                <FiLogOut className="h-4 w-4" />
                 Logout
               </button>
             ) : (
@@ -131,8 +135,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               {isAuthenticated ? (
                 <button
                   onClick={handleLogout}
-                  className="w-full rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800"
+                  className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800"
                 >
+                  <FiLogOut className="h-4 w-4" />
                   Logout
                 </button>
               ) : (

@@ -16,7 +16,7 @@ export function ProtectedRoute({ children, allowedRoles }: { children: React.Rea
     }
 
     if (role === 'admin') {
-      return <Navigate to="/lol" replace />
+      return <Navigate to="/admin" replace />
     }
 
     return <Navigate to="/u/dashboard" replace />

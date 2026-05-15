@@ -73,3 +73,45 @@ export default defineConfig([
   },
 ])
 ```
+
+## Admin API Integration
+
+- Admin route: `/admin` (legacy `/lol` now redirects to `/admin`)
+- Auth flow: `/admin/login` is called from the admin login card and saves `accessToken` + `role` in `localStorage`.
+- Bearer token: all admin requests use `Authorization: Bearer <token>` via `src/lib/adminApi.ts` (consumed by `src/services/admin/admin.service.ts`).
+- Dev logging: request/response/error logs are enabled only in `import.meta.env.DEV`.
+
+### Screen Filters and URL Params
+
+- Users (`GET /admin/users`): `usersPage`, `usersLimit`, `usersCountry`, `usersState`, `usersApproxLocation`
+- Advisors (`GET /admin/advisors`): `advisorsPage`, `advisorsLimit`, `advisorsUsername`, `advisorsEmail`, `advisorsCountry`, `advisorsState`, `advisorsVerificationStatus`, `advisorsIndustries`
+- Advisor details (`GET /admin/advisors/:userId`): fetched on click only, not preloaded from list.
+- Applications (`GET /admin/advisor-applications`): `applicationsPage`, `applicationsLimit`, `applicationsStatus`
+- Enquiries (`GET /admin/advisors/:advisorId/enquiries`): `enquiryAdvisorId`, `enquiryPage`, `enquiryLimit`
+
+### Notes
+
+- Pagination is normalized to backend `pagination` and rendered via reusable `PaginationControls`.
+- Text filters are debounced by ~300ms (`useDebouncedValue`).
+- Stale requests are canceled with `AbortController` on filter/page changes.
+- Reject application validates non-empty rejection reason before submit.
+
+## Admin Advisor Application Review Flow
+
+- List + filter + pagination:
+  - `GET /admin/advisor-applications`
+  - URL params: `applicationsPage`, `applicationsLimit`, `applicationsStatus`
+  - Row action uses `applicationId` URL param to open review panel
+- Edit pending application:
+  - `PATCH /admin/advisor-applications/:id`
+  - Editable fields: username, industries, country/state, socialLinks, about, marketFocus, expertiseIndeces, emailForContact, personalWebsite, follower/subscriber metrics
+- Approve after review:
+  - `PATCH /admin/advisor-applications/:id/approve`
+- Reject with reason:
+  - `PATCH /admin/advisor-applications/:id/reject`
+  - Rejection reason required in UI
+- Behavior:
+  - Non-pending applications are read-only in review panel
+  - Save blocked when no fields changed
+  - Numeric metrics validated as non-negative
+  - List refreshes after save/approve/reject and keeps current page/filter

@@ -109,7 +109,7 @@ export function MyEnquiriesSection({
                           <div className="mt-1.5 grid gap-1 text-xs text-slate-700">
                             <p><span className="font-semibold">Category:</span> {item.category}</p>
                             <p><span className="font-semibold">Status:</span> {item.status}</p>
-                            <p><span className="font-semibold">Created:</span> {formatDate(item.createdAt)}</p>
+                            <p><span className="font-semibold">Date</span> {formatDate(item.createdAt)}</p>
                             {item.respondedAt ? (
                               <p className="text-emerald-700">
                                 <span className="font-semibold">Responded:</span> {formatDate(item.respondedAt)}

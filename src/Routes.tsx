@@ -49,7 +49,11 @@ function App() {
               <Route index element={<Navigate to="/" replace />} />
               <Route path="dashboard" element={<AdvisorDashboardPage />} />
           </Route>
-          <Route path="/lol" element={<AdminPage />} />
+          <Route
+            path="/admin"
+            element={<AdminPage />}
+          />
+          <Route path="/lol" element={<Navigate to="/admin" replace />} />
           <Route path="/:username" element={<AdvisorProfilePage />} />
           </Routes>
         </AppShell>
