@@ -4,6 +4,7 @@ import { UsersPanel } from "./panels/UsersPanel";
 import { AdvisorsPanel } from "./panels/AdvisorsPanel";
 import { ApplicationsPanel } from "./panels/ApplicationsPanel";
 import { IndustriesPanel } from "./panels/IndustriesPanel";
+import { BlogsPanel } from "./panels/BlogsPanel";
 
 export function AdminPageContent() {
   const [params, setParams] = useSearchParams();
@@ -46,6 +47,7 @@ export function AdminPageContent() {
       {view === "advisors" ? <AdvisorsPanel params={params} setParam={setParam} /> : null}
       {view === "applications" ? <ApplicationsPanel params={params} setParam={setParam} /> : null}
       {view === "industries" ? <IndustriesPanel /> : null}
+      {view === "blogs" ? <BlogsPanel params={params} setParam={setParam} setManyParams={setManyParams} /> : null}
     </div>
   );
 }

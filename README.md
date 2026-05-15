@@ -114,4 +114,21 @@ export default defineConfig([
   - Non-pending applications are read-only in review panel
   - Save blocked when no fields changed
   - Numeric metrics validated as non-negative
-  - List refreshes after save/approve/reject and keeps current page/filter
+- List refreshes after save/approve/reject and keeps current page/filter
+
+## Blog Routes
+
+- Public list: `/blog`
+  - Query params: `page`, `limit`, `search`, `tag`
+- Public details: `/blog/:slug`
+- Admin list: `/admin/blogs`
+  - Query params: `page`, `limit`, `status`, `search`
+- Admin create: `/admin/blogs/new`
+- Admin edit: `/admin/blogs/:id/edit`
+
+## Blog Admin Workflow
+
+- Create blog in draft or published state
+- Edit fields + SEO metadata
+- Publish / unpublish from list or edit screen
+- Delete with confirmation

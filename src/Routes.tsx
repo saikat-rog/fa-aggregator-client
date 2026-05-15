@@ -11,6 +11,9 @@ import AdvisorLayout from "./layouts/AdvisorLayout";
 import UserLayout from "./layouts/UserLayout";
 import UserDashboard from "./components/user/UserDashboard";
 import AdvisorDashboardPage from "./pages/AdvisorDashboardPage";
+import { BlogListPage } from "./pages/BlogListPage";
+import { BlogDetailPage } from "./pages/BlogDetailPage";
+import { NotFoundState } from "./components/ui/NotFoundState";
 
 function App() {
   return (
@@ -55,6 +58,13 @@ function App() {
           />
           <Route path="/lol" element={<Navigate to="/admin" replace />} />
           <Route path="/:username" element={<AdvisorProfilePage />} />
+          <Route path="/blog" element={<BlogListPage />} />
+          <Route path="/blogs" element={<Navigate to="/blog" replace />} />
+          <Route path="/blog/:slug" element={<BlogDetailPage />} />
+          <Route
+            path="*"
+            element={<NotFoundState onButtonClick={() => window.location.assign("/")} />}
+          />
           </Routes>
         </AppShell>
       </SavedAdvisorsProvider>
