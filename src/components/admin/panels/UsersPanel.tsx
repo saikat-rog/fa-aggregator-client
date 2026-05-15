@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { FiAtSign, FiMapPin, FiPhone, FiUser } from "react-icons/fi";
 import type { AdminUser } from "../../../services/admin/admin.service";
 import { getAdminUsers } from "../../../services/admin/admin.service";
 import { advisorFormOptionsApi, type AdvisorFormOptionsResponseData } from "../../../services/advisor.service";
@@ -64,15 +65,24 @@ export function UsersPanel({ params, setParam, setManyParams }: Props) {
       </div>
 
       <div className="mt-4 grid gap-2 sm:grid-cols-3">
-        <select className={inputClassName} value={country} onChange={(e) => setManyParams({ usersCountry: e.target.value || undefined, usersState: undefined })}>
-          <option value="">All countries</option>
-          {availableCountries.map((item) => <option key={item} value={item}>{item}</option>)}
-        </select>
-        <select className={`${inputClassName} disabled:cursor-not-allowed disabled:opacity-60`} value={state} onChange={(e) => setParam("usersState", e.target.value)} disabled={!country}>
-          <option value="">All states</option>
-          {availableStates.map((item) => <option key={item} value={item}>{item}</option>)}
-        </select>
-        <input className={inputClassName} placeholder="Approx location (search)" value={approxLocation} onChange={(e) => setParam("usersApproxLocation", e.target.value)} />
+        <label className="relative">
+          <FiMapPin className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-blue-700" />
+          <select className={`${inputClassName} w-full pl-9`} value={country} onChange={(e) => setManyParams({ usersCountry: e.target.value || undefined, usersState: undefined })}>
+            <option value="">All countries</option>
+            {availableCountries.map((item) => <option key={item} value={item}>{item}</option>)}
+          </select>
+        </label>
+        <label className="relative">
+          <FiMapPin className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-blue-700" />
+          <select className={`${inputClassName} w-full pl-9 disabled:cursor-not-allowed disabled:opacity-60`} value={state} onChange={(e) => setParam("usersState", e.target.value)} disabled={!country}>
+            <option value="">All states</option>
+            {availableStates.map((item) => <option key={item} value={item}>{item}</option>)}
+          </select>
+        </label>
+        <label className="relative">
+          <FiMapPin className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-blue-700" />
+          <input className={`${inputClassName} w-full pl-9`} placeholder="Approx location (search)" value={approxLocation} onChange={(e) => setParam("usersApproxLocation", e.target.value)} />
+        </label>
       </div>
 
       {loading ? <p className={statusInfoClassName}>Loading users...</p> : null}
@@ -84,7 +94,10 @@ export function UsersPanel({ params, setParam, setManyParams }: Props) {
           <table className="min-w-full text-left text-sm">
             <thead className="bg-slate-50">
               <tr className="border-b border-slate-200 text-xs uppercase tracking-wide text-blue-700">
-                <th className="px-4 py-3">Name</th><th className="px-4 py-3">Email</th><th className="px-4 py-3">Location</th>
+                <th className="px-4 py-3"><span className="inline-flex items-center gap-1"><FiUser /> Name</span></th>
+                <th className="px-4 py-3"><span className="inline-flex items-center gap-1"><FiAtSign /> Email</span></th>
+                <th className="px-4 py-3"><span className="inline-flex items-center gap-1"><FiPhone /> Phone Number</span></th>
+                <th className="px-4 py-3"><span className="inline-flex items-center gap-1"><FiMapPin /> Location</span></th>
               </tr>
             </thead>
             <tbody>
@@ -92,6 +105,7 @@ export function UsersPanel({ params, setParam, setManyParams }: Props) {
                 <tr key={user._id || user.id || user.email} className="border-b border-slate-100 transition hover:bg-slate-50/80">
                   <td className="px-4 py-3 font-medium text-slate-800">{user.name || "-"}</td>
                   <td className="px-4 py-3 text-slate-600">{user.email || "-"}</td>
+                  <td className="px-4 py-3 text-slate-600">{user.phone || "-"}</td>
                   <td className="px-4 py-3 text-slate-600">{[user.country, user.state].filter(Boolean).join(", ") || "-"}</td>
                 </tr>
               ))}
