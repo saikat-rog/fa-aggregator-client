@@ -58,8 +58,7 @@ function App() {
           />
           <Route path="/lol" element={<Navigate to="/admin" replace />} />
           <Route path="/:username" element={<AdvisorProfilePage />} />
-          <Route path="/blog" element={<BlogListPage />} />
-          <Route path="/blogs" element={<Navigate to="/blog" replace />} />
+          <Route path="/blogs" element={<BlogListPage />} />
           <Route path="/blog/:slug" element={<BlogDetailPage />} />
           <Route
             path="*"
