@@ -20,7 +20,7 @@ import {
   ADVISOR_CLICK_TYPES,
   trackAdvisorClick,
 } from "../../services/advisor.service";
-import { AuthPromptDialog } from "../ui/AuthPromptDialog";
+import { AuthPromptDialog } from "../dialog/AuthPromptDialog";
 
 export interface AdvisorCardData {
   id: string;

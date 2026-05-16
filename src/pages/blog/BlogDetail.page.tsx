@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { FiCalendar, FiClock, FiTag } from "react-icons/fi";
+import { Helmet } from "react-helmet-async";
+import { BlogNotFound } from "../../components/pageNotFound/BlogPageNotFound";
 import { publicGetBlogBySlug, type Blog } from "../../services/blog.service";
 
 const formatDate = (value?: string | null) =>
@@ -15,71 +17,59 @@ const formatDate = (value?: string | null) =>
         .toLowerCase()
     : "-";
 
-function setOrCreateMeta(name: string, content: string) {
-  let node = document.querySelector(`meta[name=\"${name}\"]`) as HTMLMetaElement | null;
-  if (!node) {
-    node = document.createElement("meta");
-    node.setAttribute("name", name);
-    document.head.appendChild(node);
-  }
-  node.setAttribute("content", content);
-}
-
-function setOrCreateProperty(property: string, content: string) {
-  let node = document.querySelector(`meta[property=\"${property}\"]`) as HTMLMetaElement | null;
-  if (!node) {
-    node = document.createElement("meta");
-    node.setAttribute("property", property);
-    document.head.appendChild(node);
-  }
-  node.setAttribute("content", content);
-}
-
 export function BlogDetailPage() {
   const { slug } = useParams();
   const [blog, setBlog] = useState<Blog | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isNotFound, setIsNotFound] = useState(false);
 
   useEffect(() => {
     if (!slug) return;
     setLoading(true);
     setError(null);
+    setIsNotFound(false);
     publicGetBlogBySlug(slug)
-      .then((res) => setBlog(res))
-      .catch((err: any) => setError(err?.response?.data?.msg || "Failed to load blog"))
+      .then((res) => {
+        setBlog(res);
+      })
+      .catch((err: any) => {
+        const status = err?.response?.status;
+        const message = err?.response?.data?.msg || "Failed to load blog";
+        const notFoundFromMessage =
+          typeof message === "string" && message.toLowerCase().includes("not found");
+        if (status === 404 || notFoundFromMessage) {
+          setIsNotFound(true);
+          setBlog(null);
+          setError(null);
+          return;
+        }
+        setError(message);
+      })
       .finally(() => setLoading(false));
   }, [slug]);
 
-  useEffect(() => {
-    if (!blog) return;
-    const title = blog.seo?.metaTitle || blog.title;
-    const description = blog.seo?.metaDescription || blog.excerpt || "";
-    document.title = title;
-    setOrCreateMeta("description", description);
-    setOrCreateProperty("og:title", title);
-    setOrCreateProperty("og:description", description);
-    setOrCreateProperty("og:image", blog.seo?.ogImageUrl || blog.coverImageUrl);
-    setOrCreateProperty("og:type", "article");
-    if (blog.seo?.noIndex) setOrCreateMeta("robots", "noindex,nofollow");
-    else setOrCreateMeta("robots", "index,follow");
-
-    if (blog.seo?.canonicalUrl) {
-      let link = document.querySelector("link[rel='canonical']") as HTMLLinkElement | null;
-      if (!link) {
-        link = document.createElement("link");
-        link.rel = "canonical";
-        document.head.appendChild(link);
-      }
-      link.href = blog.seo.canonicalUrl;
-    }
-  }, [blog]);
+  const title = blog?.seo?.metaTitle || blog?.title || "Blog | Invest24";
+  const description = blog?.seo?.metaDescription || blog?.excerpt || "";
+  const ogImage = blog?.seo?.ogImageUrl || blog?.coverImageUrl || "";
+  const robots = blog?.seo?.noIndex ? "noindex,nofollow" : "index,follow";
 
   return (
     <div className="space-y-4">
+      <Helmet>
+        <title>{title}</title>
+        <meta name="description" content={description} />
+        <meta name="robots" content={robots} />
+        <meta property="og:title" content={title} />
+        <meta property="og:description" content={description} />
+        <meta property="og:type" content="article" />
+        {ogImage ? <meta property="og:image" content={ogImage} /> : null}
+        {blog?.seo?.canonicalUrl ? <link rel="canonical" href={blog.seo.canonicalUrl} /> : null}
+      </Helmet>
       {loading ? <p className="rounded border border-blue-100 bg-blue-50 p-2 text-sm text-blue-700">Loading blog...</p> : null}
+      {!loading && isNotFound ? <BlogNotFound /> : null}
       {error ? <p className="rounded border border-red-100 bg-red-50 p-2 text-sm text-red-700">{error}</p> : null}
-      {blog ? (
+      {blog && !isNotFound ? (
         <article className="space-y-4 rounded-3xl ">
           <h1 className="text-3xl font-semibold text-slate-900">{blog.title}</h1>
           <p className="flex flex-wrap items-center gap-3 text-sm text-slate-500">

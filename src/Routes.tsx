@@ -13,7 +13,7 @@ import UserDashboard from "./components/user/UserDashboard";
 import AdvisorDashboardPage from "./pages/advisor/AdvisorDashboard.page";
 import { BlogListPage } from "./pages/blog/BlogList.page";
 import { BlogDetailPage } from "./pages/blog/BlogDetail.page";
-import { NotFoundState } from "./components/ui/NotFoundState";
+import { NotFoundState } from "./components/pageNotFound/PageNotFound";
 import { SeoLandingPage } from "./pages/home/SeoLanding.page";
 import { seoLandings } from "./config/seoLandings";
 

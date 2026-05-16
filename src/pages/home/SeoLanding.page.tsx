@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { NotFoundState } from "../../components/ui/NotFoundState";
+import { NotFoundState } from "../../components/pageNotFound/PageNotFound";
 import { seoLandings } from "../../config/seoLandings";
 import { HomePage } from "./Home.page";
 

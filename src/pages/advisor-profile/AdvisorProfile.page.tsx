@@ -3,8 +3,8 @@ import { ContactFormCard } from "../../components/advisor/profile/ContactFormCar
 import { EducationalDisclaimer } from "../../components/advisor/profile/EducationalDisclaimer";
 import { ExpertiseCard } from "../../components/advisor/profile/ExpertiseCard";
 import { ProfileHeroCard } from "../../components/advisor/profile/ProfileHeroCard";
-import { AuthPromptDialog } from "../../components/ui/AuthPromptDialog";
-import { NotFoundState } from "../../components/ui/NotFoundState";
+import { AuthPromptDialog } from "../../components/dialog/AuthPromptDialog";
+import { NotFoundState } from "../../components/pageNotFound/PageNotFound";
 import { AdvisorProfileSeo } from "./AdvisorProfile.seo";
 import { useAdvisorProfileController } from "./AdvisorProfile.controller";
 
