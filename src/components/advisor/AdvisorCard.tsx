@@ -14,7 +14,7 @@ import {
   FaYoutube,
   FaXTwitter,
 } from "react-icons/fa6";
-import type { AdvisorApiItem } from "../../pages/HomePage";
+import type { AdvisorApiItem } from "../../pages/home/Home.page";
 import { useSavedAdvisors } from "../../context/SavedAdvisorsContext";
 import {
   ADVISOR_CLICK_TYPES,

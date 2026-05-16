@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { FiCalendar, FiSearch, FiTag } from "react-icons/fi";
-import { useDebouncedValue } from "../hooks/useDebouncedValue";
-import { publicListBlogs, type Blog } from "../services/blog.service";
+import { useDebouncedValue } from "../../hooks/useDebouncedValue";
+import { publicListBlogs, type Blog } from "../../services/blog.service";
 
 const getNum = (v: string | null, fallback: number) => {
   const n = Number(v);

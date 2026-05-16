@@ -1,14 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { FaCircleCheck } from "react-icons/fa6";
 import { useSearchParams } from "react-router-dom";
-import ApplicationForm from "../components/advisor/ApplicationForm";
+import ApplicationForm from "../../components/advisor/ApplicationForm";
 import {
   advisorProfileAnalyticsApi,
   getMyEnquiries,
   markEnquiryResponded,
   type Enquiry,
   type EnquiryPagination,
-} from "../services/advisor.service";
+} from "../../services/advisor.service";
 
 const platformWarnings = [
   {

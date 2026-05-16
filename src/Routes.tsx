@@ -3,17 +3,18 @@ import { AppShell } from "./components/NavigationBar";
 import { SavedAdvisorsProvider } from "./context/SavedAdvisorsContext";
 import { ProtectedRoute } from "./components/RoutePrivacy/ProtectedRoute";
 import { PublicOnlyRoute } from "./components/RoutePrivacy/PublicOnlyRoute";
-import { AdminPage } from "./pages/AdminPage";
-import { AuthPage } from "./pages/AuthPage";
-import { HomePage } from "./pages/HomePage";
-import { AdvisorProfilePage } from "./pages/AdvisorProfilePage";
+import { AdminPage } from "./pages/admin/Admin.page";
+import { AuthPage } from "./pages/auth/Auth.page";
+import { HomePage } from "./pages/home/Home.page";
+import { AdvisorProfilePage } from "./pages/advisor-profile/AdvisorProfile.page";
 import AdvisorLayout from "./layouts/AdvisorLayout";
 import UserLayout from "./layouts/UserLayout";
 import UserDashboard from "./components/user/UserDashboard";
-import AdvisorDashboardPage from "./pages/AdvisorDashboardPage";
-import { BlogListPage } from "./pages/BlogListPage";
-import { BlogDetailPage } from "./pages/BlogDetailPage";
+import AdvisorDashboardPage from "./pages/advisor/AdvisorDashboard.page";
+import { BlogListPage } from "./pages/blog/BlogList.page";
+import { BlogDetailPage } from "./pages/blog/BlogDetail.page";
 import { NotFoundState } from "./components/ui/NotFoundState";
+import { SeoLandingPage } from "./pages/home/SeoLanding.page";
 
 function App() {
   return (
@@ -60,6 +61,7 @@ function App() {
           <Route path="/:username" element={<AdvisorProfilePage />} />
           <Route path="/blogs" element={<BlogListPage />} />
           <Route path="/blog/:slug" element={<BlogDetailPage />} />
+          <Route path="/find/:landingSlug" element={<SeoLandingPage />} />
           <Route
             path="*"
             element={<NotFoundState onButtonClick={() => window.location.assign("/")} />}

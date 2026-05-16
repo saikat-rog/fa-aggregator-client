@@ -1,5 +1,5 @@
-import LeftInfo from '../components/auth/LeftInfo'
-import RightAuthForms from '../components/auth/RightAuthForms'
+import LeftInfo from '../../components/auth/LeftInfo'
+import RightAuthForms from '../../components/auth/RightAuthForms'
 
 export function AuthPage() {
 

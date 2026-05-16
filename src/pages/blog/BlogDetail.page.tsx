@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { FiCalendar, FiClock, FiTag } from "react-icons/fi";
-import { publicGetBlogBySlug, type Blog } from "../services/blog.service";
+import { publicGetBlogBySlug, type Blog } from "../../services/blog.service";
 
 const formatDate = (value?: string | null) =>
   value

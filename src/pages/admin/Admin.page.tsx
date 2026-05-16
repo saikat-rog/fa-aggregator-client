@@ -1,6 +1,6 @@
 import { useMemo } from "react";
-import { AdminLoginCard } from "../components/admin/AdminLoginCard";
-import { AdminPageContent } from "../components/admin/AdminPageContent";
+import { AdminLoginCard } from "../../components/admin/AdminLoginCard";
+import { AdminPageContent } from "../../components/admin/AdminPageContent";
 
 export function AdminPage() {
   const isAdmin = useMemo(

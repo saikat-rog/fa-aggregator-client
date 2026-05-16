@@ -12,14 +12,15 @@ import {
   FaXTwitter,
   FaYoutube,
 } from "react-icons/fa6";
-import { AdvisorCard } from "../components/advisor/AdvisorCard";
-import type { AdvisorCardData } from "../components/advisor/AdvisorCard";
+import { AdvisorCard } from "../../components/advisor/AdvisorCard";
+import type { AdvisorCardData } from "../../components/advisor/AdvisorCard";
 import {
   advisorFormOptionsApi,
   getAllAdvisorsApi,
   type AdvisorFormOptionsResponseData,
   type AdvisorListQueryParams,
-} from "../services/advisor.service";
+} from "../../services/advisor.service";
+import { HomeSeo } from "./Home.seo";
 
 export interface AdvisorApiItem {
   id: string;
@@ -75,6 +76,11 @@ type AdvisorFilters = {
   facebookFollowersGte: string;
   twitterFollowersGt: string;
   twitterFollowersGte: string;
+};
+
+type HomePageProps = {
+  initialFiltersOverride?: Partial<AdvisorFilters>;
+  disableUrlSync?: boolean;
 };
 
 const followerFields = [
@@ -252,10 +258,18 @@ function queryParamsFromFilters(filters: AdvisorFilters): AdvisorListQueryParams
   return params;
 }
 
-export function HomePage() {
+export function HomePage({
+  initialFiltersOverride,
+  disableUrlSync = false,
+}: HomePageProps = {}) {
   const [searchParams, setSearchParams] = useSearchParams();
   const [filters, setFilters] = useState<AdvisorFilters>(() =>
-    filtersFromSearchParams(searchParams),
+    ({
+      ...filtersFromSearchParams(searchParams),
+      ...(initialFiltersOverride ?? {}),
+      page: initialFiltersOverride?.page ?? filtersFromSearchParams(searchParams).page,
+      limit: initialFiltersOverride?.limit ?? filtersFromSearchParams(searchParams).limit,
+    }),
   );
   const [advisors, setAdvisors] = useState<AdvisorCardData[]>([]);
   const [formOptions, setFormOptions] =
@@ -305,15 +319,17 @@ export function HomePage() {
     : followerFields.slice(0, 3);
 
   useEffect(() => {
+    if (disableUrlSync) return;
     const current = filtersFromSearchParams(searchParams);
     const currentSerialized = buildAdvisorQuery(current);
     const localSerialized = buildAdvisorQuery(filters);
     if (currentSerialized !== localSerialized) {
       setFilters(current);
     }
-  }, [searchParams]);
+  }, [searchParams, disableUrlSync, filters]);
 
   useEffect(() => {
+    if (disableUrlSync) return;
     const timeoutId = window.setTimeout(() => {
       const next = buildAdvisorQuery(filters);
       if (next !== searchParams.toString()) {
@@ -322,7 +338,7 @@ export function HomePage() {
     }, 300);
 
     return () => window.clearTimeout(timeoutId);
-  }, [filters, searchParams, setSearchParams]);
+  }, [filters, searchParams, setSearchParams, disableUrlSync]);
 
   useEffect(() => {
     const loadOptions = async () => {
@@ -343,7 +359,9 @@ export function HomePage() {
         setIsLoading(true);
         setError("");
 
-        const activeFilters = filtersFromSearchParams(searchParams);
+        const activeFilters = disableUrlSync
+          ? filters
+          : filtersFromSearchParams(searchParams);
         const params = queryParamsFromFilters(activeFilters);
         const payload = await getAllAdvisorsApi(params);
 
@@ -401,7 +419,7 @@ export function HomePage() {
     };
 
     loadAdvisors();
-  }, [searchParams, filters.limit]);
+  }, [searchParams, filters, filters.limit, disableUrlSync]);
 
   const setFilterValue = (key: keyof AdvisorFilters, value: string | number) => {
     setFilters((prev) => ({
@@ -413,6 +431,7 @@ export function HomePage() {
 
   return (
     <div className="space-y-8">
+      <HomeSeo />
       <section className="overflow-hidden rounded-3xl border border-blue-100 bg-linear-to-r from-blue-700 to-blue-500 p-8 text-white shadow-lg shadow-blue-100">
         <h1 className="text-3xl font-bold">Find Trusted Financial Advisors Near You</h1>
         <p className="mt-2 max-w-2xl text-blue-100">
@@ -459,7 +478,9 @@ export function HomePage() {
               type="button"
               onClick={() => {
                 setFilters(initialFilters);
-                setSearchParams(buildAdvisorQuery(initialFilters));
+                if (!disableUrlSync) {
+                  setSearchParams(buildAdvisorQuery(initialFilters));
+                }
               }}
               aria-label="Reset filters"
               title="Reset filters"
@@ -509,7 +530,9 @@ export function HomePage() {
           type="button"
           onClick={() => {
             setFilters(initialFilters);
-            setSearchParams(buildAdvisorQuery(initialFilters));
+            if (!disableUrlSync) {
+              setSearchParams(buildAdvisorQuery(initialFilters));
+            }
           }}
           className="my-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-blue-200 bg-white px-4 py-2.5 text-sm font-semibold text-blue-700 transition hover:bg-blue-50 sm:hidden"
         >
