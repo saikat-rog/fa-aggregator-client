@@ -205,7 +205,7 @@ ${merged
     { loc: `${siteOrigin}/`, changefreq: "daily", priority: "1.0" },
     { loc: `${siteOrigin}/blogs`, changefreq: "daily", priority: "0.8" },
     ...merged.map((item) => ({
-      loc: `${siteOrigin}/find/${item.slug}`,
+      loc: `${siteOrigin}/${item.slug}`,
       changefreq: "weekly",
       priority: "0.9",
     })),

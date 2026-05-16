@@ -4,8 +4,9 @@ import { seoLandings } from "../../config/seoLandings";
 import { HomePage } from "./Home.page";
 
 export function SeoLandingPage() {
-  const { landingSlug } = useParams();
-  const landing = landingSlug ? seoLandings[landingSlug] : undefined;
+  const { landingSlug, slug } = useParams();
+  const activeSlug = landingSlug ?? slug;
+  const landing = activeSlug ? seoLandings[activeSlug] : undefined;
 
   if (!landing) {
     return <NotFoundState onButtonClick={() => window.location.assign("/")} />;

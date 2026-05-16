@@ -209,7 +209,13 @@ export const advisorProfileAnalyticsApi = async () => {
 };
 
 export const getAllAdvisorsApi = async (params?: AdvisorListQueryParams) => {
-  const response = await api.get('/advisor', { params });
+  const response = await api.get('/advisor', {
+    params,
+    paramsSerializer: {
+      // Backend expects repeated keys: industries=a&industries=b (no [] suffix).
+      indexes: null,
+    },
+  });
   return response.data;
 };
 

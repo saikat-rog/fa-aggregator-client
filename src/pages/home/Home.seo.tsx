@@ -3,8 +3,9 @@ import { useParams } from "react-router-dom";
 import { seoLandings } from "../../config/seoLandings";
 
 export function HomeSeo() {
-  const { landingSlug } = useParams();
-  const landing = landingSlug ? seoLandings[landingSlug] : undefined;
+  const { landingSlug, slug } = useParams();
+  const activeSlug = landingSlug ?? slug;
+  const landing = activeSlug ? seoLandings[activeSlug] : undefined;
   const title = landing?.title || "Find Trusted Financial Advisors | Invest24";
   const description =
     landing?.description ||

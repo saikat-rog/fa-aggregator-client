@@ -20,7 +20,8 @@ const getAuthState = () => {
 };
 
 export function useAdvisorProfileController() {
-  const { username } = useParams<{ username: string }>();
+  const { username, slug } = useParams<{ username?: string; slug?: string }>();
+  const activeUsername = username ?? slug;
   const navigate = useNavigate();
 
   const [advisor, setAdvisor] = useState<AdvisorApiItem | null>(null);
@@ -70,7 +71,7 @@ export function useAdvisorProfileController() {
 
   useEffect(() => {
     const fetchAdvisor = async () => {
-      if (!username) {
+      if (!activeUsername) {
         setError("Username not found");
         setLoading(false);
         return;
@@ -78,7 +79,7 @@ export function useAdvisorProfileController() {
       try {
         setLoading(true);
         setError(null);
-        const response = await getAdvisorByUsernameApi(username);
+        const response = await getAdvisorByUsernameApi(activeUsername);
         if (response.success && response.data?.advisor) {
           setAdvisor(response.data.advisor);
         } else {
@@ -91,7 +92,7 @@ export function useAdvisorProfileController() {
       }
     };
     void fetchAdvisor();
-  }, [username]);
+  }, [activeUsername]);
 
   useEffect(() => {
     if (!advisor?.id) return;

@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes, useParams } from "react-router-dom";
 import { AppShell } from "./components/NavigationBar";
 import { SavedAdvisorsProvider } from "./context/SavedAdvisorsContext";
 import { ProtectedRoute } from "./components/RoutePrivacy/ProtectedRoute";
@@ -15,6 +15,15 @@ import { BlogListPage } from "./pages/blog/BlogList.page";
 import { BlogDetailPage } from "./pages/blog/BlogDetail.page";
 import { NotFoundState } from "./components/ui/NotFoundState";
 import { SeoLandingPage } from "./pages/home/SeoLanding.page";
+import { seoLandings } from "./config/seoLandings";
+
+function SlugRouteResolver() {
+  const { slug } = useParams<{ slug: string }>();
+  if (slug && seoLandings[slug]) {
+    return <SeoLandingPage />;
+  }
+  return <AdvisorProfilePage />;
+}
 
 function App() {
   return (
@@ -58,10 +67,9 @@ function App() {
             element={<AdminPage />}
           />
           <Route path="/lol" element={<Navigate to="/admin" replace />} />
-          <Route path="/:username" element={<AdvisorProfilePage />} />
+          <Route path="/:slug" element={<SlugRouteResolver />} />
           <Route path="/blogs" element={<BlogListPage />} />
           <Route path="/blog/:slug" element={<BlogDetailPage />} />
-          <Route path="/find/:landingSlug" element={<SeoLandingPage />} />
           <Route
             path="*"
             element={<NotFoundState onButtonClick={() => window.location.assign("/")} />}
