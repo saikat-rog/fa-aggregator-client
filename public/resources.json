@@ -1,0 +1,59 @@
+{
+  "title": "Important Links",
+  "subtitle": "Curated resources to support your financial awareness journey.",
+  "categories": [
+    {
+      "id": "market-education",
+      "title": "Market Educational Hubs",
+      "items": [
+        {
+          "title": "NSE Knowledge Hub",
+          "description": "Official learning portal for the National Stock Exchange.",
+          "url": "https://www.nseindia.com/learn"
+        },
+        {
+          "title": "BSE Training Institute",
+          "description": "Comprehensive courses on capital markets.",
+          "url": "https://www.bsebti.com/"
+        },
+        {
+          "title": "Investopedia Basics",
+          "description": "The world's largest financial education website.",
+          "url": "https://www.investopedia.com/"
+        }
+      ]
+    },
+    {
+      "id": "regulatory-resources",
+      "title": "Regulatory Resources",
+      "items": [
+        {
+          "title": "SEBI Investor Portal",
+          "description": "Investor protection and regulatory updates.",
+          "url": "https://investor.sebi.gov.in/"
+        },
+        {
+          "title": "RBI Awareness",
+          "description": "Financial literacy initiatives by the Central Bank.",
+          "url": "https://www.rbi.org.in/financialeducation/"
+        }
+      ]
+    },
+    {
+      "id": "global-tracking",
+      "title": "Global Financial Tracking",
+      "items": [
+        {
+          "title": "TradingView",
+          "description": "Real-time charts and global market analysis.",
+          "url": "https://www.tradingview.com/"
+        },
+        {
+          "title": "Bloomberg Markets",
+          "description": "Global financial news and data.",
+          "url": "https://www.bloomberg.com/markets"
+        }
+      ]
+    }
+  ]
+}
