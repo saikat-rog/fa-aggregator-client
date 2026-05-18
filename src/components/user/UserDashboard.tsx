@@ -11,6 +11,7 @@ import { DailyGrowthSection } from "./dashboard/DailyGrowthSection";
 import { MyEnquiriesSection } from "./dashboard/MyEnquiriesSection";
 import { SavedAdvisorsSection } from "./dashboard/SavedAdvisorsSection";
 import { UserStatsCards } from "./dashboard/UserStatsCards";
+import { FiCompass, FiSearch } from "react-icons/fi";
 
 const UserDashboard = () => {
   const navigate = useNavigate();
@@ -125,6 +126,13 @@ const UserDashboard = () => {
       return next;
     });
   };
+  const showFirstStepPanel =
+    !isSavedListLoading &&
+    !enquiriesLoading &&
+    !savedListError &&
+    !enquiriesError &&
+    savedAdvisors.length === 0 &&
+    enquiries.length === 0;
 
   return (
     <div className="space-y-6">
@@ -134,6 +142,27 @@ const UserDashboard = () => {
         savedLoading={isSavedListLoading}
         totalSavedAdvisors={savedAdvisors.length}
       />
+
+      {showFirstStepPanel ? (
+        <section className="rounded-3xl border border-blue-200 bg-linear-to-r from-blue-600 to-indigo-600 p-6 text-white shadow-md">
+          <p className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-wide">
+            <FiCompass className="h-3.5 w-3.5" />
+            Start Here
+          </p>
+          <h2 className="mt-3 text-2xl font-bold">Let’s build your advisor shortlist</h2>
+          <p className="mt-1 text-sm text-blue-100">
+            Explore verified advisors, save your favorites, and send your first enquiry to get matched faster.
+          </p>
+          <button
+            type="button"
+            onClick={() => navigate("/")}
+            className="mt-4 inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-blue-700 transition hover:bg-blue-50"
+          >
+            <FiSearch className="h-4 w-4" />
+            Discover Advisors
+          </button>
+        </section>
+      ) : null}
 
       <SavedAdvisorsSection
         isLoading={isSavedListLoading}

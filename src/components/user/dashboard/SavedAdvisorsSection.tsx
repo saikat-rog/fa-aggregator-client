@@ -44,8 +44,22 @@ export function SavedAdvisorsSection({
           {error}
         </p>
       ) : savedAdvisors.length === 0 ? (
-        <div className="mt-6 rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-8 text-center">
-          <p className="text-base font-semibold text-slate-700">No saved advisors yet</p>
+        <div className="mt-6 rounded-2xl border border-dashed border-blue-200 bg-linear-to-br from-blue-50 to-cyan-50 p-8 text-center">
+          <div className="mx-auto mb-3 inline-flex h-12 w-12 items-center justify-center rounded-full bg-white text-blue-700 shadow-sm">
+            <FaBookmark className="h-5 w-5" />
+          </div>
+          <p className="text-base font-semibold text-slate-800">No saved advisors yet</p>
+          <p className="mt-1 text-sm text-slate-600">
+            Save advisors while browsing to shortlist and compare later.
+          </p>
+          <button
+            type="button"
+            onClick={onRefresh}
+            className="mt-4 inline-flex items-center gap-2 rounded-lg border border-blue-200 bg-white px-3 py-2 text-sm font-semibold text-blue-700 transition hover:bg-blue-50"
+          >
+            <FaRotateRight className="h-3.5 w-3.5" />
+            Refresh list
+          </button>
         </div>
       ) : (
         <div className="mt-4 grid gap-4 md:grid-cols-2">

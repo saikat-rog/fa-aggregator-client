@@ -1,4 +1,5 @@
 import { FaChevronRight } from "react-icons/fa6";
+import { FiMessageCircle } from "react-icons/fi";
 import type { EnquiryPagination, UserEnquiry } from "../../../services/advisor.service";
 
 type MyEnquiriesSectionProps = {
@@ -47,8 +48,14 @@ export function MyEnquiriesSection({
           {enquiriesError}
         </p>
       ) : enquiries.length === 0 ? (
-        <div className="mt-6 rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-8 text-center">
-          <p className="text-base font-semibold text-slate-700">No enquiries yet</p>
+        <div className="mt-6 rounded-2xl border border-dashed border-indigo-200 bg-linear-to-br from-indigo-50 to-blue-50 p-8 text-center">
+          <div className="mx-auto mb-3 inline-flex h-12 w-12 items-center justify-center rounded-full bg-white text-indigo-700 shadow-sm">
+            <FiMessageCircle className="h-5 w-5" />
+          </div>
+          <p className="text-base font-semibold text-slate-800">No enquiries yet</p>
+          <p className="mt-1 text-sm text-slate-600">
+            Once you contact an advisor, your conversation history will show up here.
+          </p>
         </div>
       ) : (
         <>
