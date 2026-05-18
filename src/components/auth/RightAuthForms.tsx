@@ -1,33 +1,109 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
+  forgotPasswordApi,
+  googleAuthApi,
   loginApi,
   registerApi,
-  verifyEmailApi,
   reVerifyEmailApi,
+  resetPasswordApi,
+  verifyEmailApi,
+  type AuthRole,
+  type AuthSuccessPayload,
 } from "../../services/auth.service";
 
 type AuthMode = "login" | "signup";
-type FormRole = "user" | "advisor";
 type SignupStep = "details" | "otp";
+type ForgotStep = "request" | "reset";
 
 type PendingSignup = {
   email: string;
   password: string;
-  role: FormRole;
+  role: AuthRole;
+};
+
+type GoogleCompletionState = {
+  open: boolean;
+  idToken: string;
+  role: AuthRole;
+};
+
+type GoogleCompletionFieldKey = "name" | "phone";
+type GoogleCompletionField = {
+  key: GoogleCompletionFieldKey;
+  label: string;
+  required: boolean;
+  placeholder: string;
+  type?: "text" | "tel";
+};
+
+declare global {
+  interface Window {
+    google?: {
+      accounts?: {
+        id?: {
+          initialize: (params: {
+            client_id: string;
+            callback: (response: { credential?: string }) => void;
+          }) => void;
+          prompt: () => void;
+        };
+      };
+    };
+  }
+}
+
+const GOOGLE_ONLY_HELP_TEXT =
+  "After login, create password in Settings";
+const GOOGLE_ONLY_FALLBACK_MESSAGE =
+  "Google authentication is enabled for this account. Please login with Google first, then set a password.";
+const NO_PASSWORD_FOR_ROLE_MESSAGE =
+  "This role has no password yet. Login with Google and create a password first.";
+const ADVISOR_DECLARATION_MESSAGE =
+  "Please confirm you are an influencer and not claiming anything fake.";
+
+const persistAuthSession = (authResponse: AuthSuccessPayload) => {
+  localStorage.setItem("token", authResponse.accessToken);
+  localStorage.setItem("role", authResponse.role);
+  localStorage.setItem(
+    "roles",
+    JSON.stringify(Array.isArray(authResponse.roles) ? authResponse.roles : [authResponse.role]),
+  );
+};
+
+const navigateByRole = (navigate: ReturnType<typeof useNavigate>, role: AuthRole) => {
+  if (role === "advisor") {
+    navigate("/a/dashboard");
+    return;
+  }
+  navigate("/u/dashboard");
+};
+
+const extractApiMessage = (error: unknown) => {
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "response" in error &&
+    typeof (error as { response?: { data?: { msg?: string } } }).response?.data
+      ?.msg === "string"
+  ) {
+    return (error as { response?: { data?: { msg?: string } } }).response?.data
+      ?.msg as string;
+  }
+  return "";
 };
 
 const RightAuthForms = () => {
-  const [formRole, setFormRole] = useState<FormRole>("user");
+  const [formRole, setFormRole] = useState<AuthRole>("user");
   const [mode, setMode] = useState<AuthMode>("login");
   const [signupStep, setSignupStep] = useState<SignupStep>("details");
+  const [forgotStep, setForgotStep] = useState<ForgotStep>("request");
 
-  const [pendingSignup, setPendingSignup] = useState<PendingSignup | null>(
-    null,
-  );
+  const [pendingSignup, setPendingSignup] = useState<PendingSignup | null>(null);
   const [forgotOpen, setForgotOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [resendCooldown, setResendCooldown] = useState(0);
@@ -35,12 +111,52 @@ const RightAuthForms = () => {
   const [countryCode, setCountryCode] = useState("91");
   const [advisorDeclarationChecked, setAdvisorDeclarationChecked] =
     useState(false);
-  const navigate = useNavigate();
-  const pendingSignupEmail = pendingSignup?.email || "your email";
   const [otpDigits, setOtpDigits] = useState<string[]>(Array(6).fill(""));
-  const digitRefs = useRef<HTMLInputElement[]>([]);
   const [resendAttempts, setResendAttempts] = useState(0);
   const [otpCooldownStarted, setOtpCooldownStarted] = useState(false);
+  const [googleClientReady, setGoogleClientReady] = useState(false);
+  const [showGoogleOnlyGuidance, setShowGoogleOnlyGuidance] = useState(false);
+  const [forgotPayload, setForgotPayload] = useState({
+    email: "",
+    role: "user" as AuthRole,
+    otp: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+  const [googleCompletion, setGoogleCompletion] = useState<GoogleCompletionState>({
+    open: false,
+    idToken: "",
+    role: "user",
+  });
+  const [googleCompletionForm, setGoogleCompletionForm] = useState({
+    name: "",
+    phone: "",
+    countryCode: "91",
+  });
+  const googleCompletionFields: GoogleCompletionField[] = [
+    {
+      key: "name",
+      label: "Full name",
+      required: true,
+      placeholder: "Full name",
+      type: "text",
+    },
+    {
+      key: "phone",
+      label: "Phone (optional)",
+      required: false,
+      placeholder: "Phone (optional)",
+      type: "tel",
+    },
+  ];
+
+  const navigate = useNavigate();
+  const pendingSignupEmail = pendingSignup?.email || "your email";
+  const digitRefs = useRef<HTMLInputElement[]>([]);
+  const googleIdTokenRef = useRef<string>("");
+  const formRoleRef = useRef<AuthRole>("user");
+  const modeRef = useRef<AuthMode>("login");
+  const googleFlowModeRef = useRef<AuthMode>("login");
   const MAX_RESEND_ATTEMPTS = 5;
 
   const resetSignupFlow = () => {
@@ -55,41 +171,163 @@ const RightAuthForms = () => {
     setCountryCode("91");
     setAdvisorDeclarationChecked(false);
     setOtpCooldownStarted(false);
+    setShowGoogleOnlyGuidance(false);
   };
 
   const switchMode = (nextMode: AuthMode) => {
     setMode(nextMode);
+    setErrorMessage("");
+    setSuccessMessage("");
+    setShowGoogleOnlyGuidance(false);
+    setForgotOpen(false);
+    setForgotStep("request");
     if (nextMode === "login") {
       resetSignupFlow();
     }
   };
 
-  const switchRole = (nextRole: FormRole) => {
+  const switchRole = (nextRole: AuthRole) => {
     setFormRole(nextRole);
+    setForgotOpen(false);
+    setForgotStep("request");
     resetSignupFlow();
+  };
+
+  useEffect(() => {
+    formRoleRef.current = formRole;
+  }, [formRole]);
+
+  useEffect(() => {
+    modeRef.current = mode;
+  }, [mode]);
+
+  const applyAuthSuccess = (authResponse: AuthSuccessPayload, viaGoogle: boolean) => {
+    persistAuthSession(authResponse);
+    if (viaGoogle) {
+      localStorage.setItem("googleLinked", "true");
+    }
+    navigateByRole(navigate, authResponse.role);
+  };
+
+  const tryGoogleAuth = async (params: {
+    idToken: string;
+    role: AuthRole;
+    name?: string;
+    phone?: string;
+  }) => {
+    const response = await googleAuthApi(params);
+    applyAuthSuccess(response, true);
+  };
+
+  const onGoogleCredential = async (credential?: string) => {
+    if (!credential) {
+      setErrorMessage("Google sign-in failed. Please try again.");
+      return;
+    }
+
+    googleIdTokenRef.current = credential;
+    setIsGoogleSubmitting(true);
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    try {
+      if (googleFlowModeRef.current === "signup") {
+        setGoogleCompletion({
+          open: true,
+          idToken: credential,
+          role: formRoleRef.current,
+        });
+        return;
+      }
+
+      await tryGoogleAuth({ idToken: credential, role: formRoleRef.current });
+    } catch (error: unknown) {
+      const message = extractApiMessage(error);
+      const status =
+        typeof error === "object" && error !== null && "response" in error
+          ? (error as { response?: { status?: number } }).response?.status
+          : undefined;
+      const lowerMessage = message.toLowerCase();
+      const nameRequired =
+        status === 422 &&
+        (lowerMessage.includes("name") || lowerMessage.includes("required"));
+      const incompleteSignup = status === 422;
+
+      if (nameRequired || incompleteSignup) {
+        setGoogleCompletion({
+          open: true,
+          idToken: credential,
+          role: formRoleRef.current,
+        });
+        return;
+      }
+
+      setErrorMessage(message || "Google authentication failed.");
+    } finally {
+      setIsGoogleSubmitting(false);
+    }
+  };
+
+  const initGoogleClient = () => {
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
+    if (!clientId) {
+      setErrorMessage("Google login is not configured.");
+      return;
+    }
+
+    if (!window.google?.accounts?.id) {
+      setErrorMessage("Google SDK failed to load.");
+      return;
+    }
+
+    window.google.accounts.id.initialize({
+      client_id: clientId,
+      callback: (response) => {
+        void onGoogleCredential(response.credential);
+      },
+    });
+
+    setGoogleClientReady(true);
+  };
+
+  const handleGoogleSignIn = (sourceMode: AuthMode) => {
+    googleFlowModeRef.current = sourceMode;
+    setErrorMessage("");
+    setSuccessMessage("");
+    setShowGoogleOnlyGuidance(false);
+
+    if (!googleClientReady) {
+      initGoogleClient();
+    }
+
+    if (!window.google?.accounts?.id) {
+      setErrorMessage("Google login is not configured.");
+      return;
+    }
+
+    window.google.accounts.id.prompt();
   };
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    const email = String(formData.get("email") || "");
-    const name = String(formData.get("name") || email.split("@")[0]);
+    const email = String(formData.get("email") || "").trim();
+    const name = String(formData.get("name") || "").trim();
     const password = String(formData.get("password") || "");
-    const phone = String(formData.get("phone") || "");
-    const fullPhone = phone ? `+${countryCode}${phone}` : "";
+    const phone = String(formData.get("phone") || "").trim();
+    const fullPhone = phone ? `+${countryCode}${phone}` : undefined;
 
     try {
       setIsSubmitting(true);
       setErrorMessage("");
       setSuccessMessage("");
+      setShowGoogleOnlyGuidance(false);
 
-      let authResponse: { accessToken?: string } | null = null;
+      let authResponse: AuthSuccessPayload | null = null;
       if (mode === "signup") {
         if (signupStep === "details") {
           if (formRole === "advisor" && !advisorDeclarationChecked) {
-            setErrorMessage(
-              "Please confirm you are an influencer and not claiming anything fake.",
-            );
+            setErrorMessage(ADVISOR_DECLARATION_MESSAGE);
             return;
           }
           await registerApi(email, password, name, fullPhone, formRole);
@@ -103,9 +341,7 @@ const RightAuthForms = () => {
 
         if (!pendingSignup) {
           setSignupStep("details");
-          setErrorMessage(
-            "Your signup session expired. Please register again.",
-          );
+          setErrorMessage("Your signup session expired. Please register again.");
           return;
         }
 
@@ -127,28 +363,21 @@ const RightAuthForms = () => {
       }
 
       if (authResponse?.accessToken) {
-        localStorage.setItem("token", authResponse.accessToken);
-        localStorage.setItem("role", formRole);
+        applyAuthSuccess(authResponse, false);
       }
-
-      formRole === "advisor"
-        ? navigate("/a/dashboard")
-        : navigate("/u/dashboard");
     } catch (error: unknown) {
       const fallbackMessage =
         mode === "signup"
           ? "Signup failed. Please try again."
           : "Login failed. Please check your credentials.";
-      const apiError =
-        typeof error === "object" &&
-        error !== null &&
-        "response" in error &&
-        typeof (error as { response?: { data?: { msg?: string } } }).response
-          ?.data?.msg === "string"
-          ? (error as { response?: { data?: { msg?: string } } }).response?.data
-              ?.msg
-          : "";
+      const apiError = extractApiMessage(error);
+      const normalized = (apiError || "").toLowerCase();
+      const shouldShowGoogleHelp =
+        normalized.includes("google authentication is enabled") ||
+        apiError === GOOGLE_ONLY_FALLBACK_MESSAGE;
+
       setErrorMessage(apiError || fallbackMessage);
+      setShowGoogleOnlyGuidance(shouldShowGoogleHelp);
       if (mode === "signup" && signupStep === "otp") {
         setSuccessMessage(
           "We could not verify your email. Check the code and try again.",
@@ -176,32 +405,133 @@ const RightAuthForms = () => {
       setIsSubmitting(true);
       setErrorMessage("");
       setResendMessage("");
-      await reVerifyEmailApi(pendingSignup.email);
+      await reVerifyEmailApi(pendingSignup.email, pendingSignup.role);
       setResendMessage("OTP resent to your email again.");
       setResendCooldown(16);
       setResendAttempts((s) => s + 1);
     } catch (error: unknown) {
-      const status = (error as any)?.response?.status;
-      if (status === 429)
+      const status =
+        typeof error === "object" && error !== null && "response" in error
+          ? (error as { response?: { status?: number } }).response?.status
+          : undefined;
+      if (status === 429) {
         setErrorMessage("Too many requests. Try again later.");
-      else {
-        const apiErr =
-          typeof error === "object" &&
-          error !== null &&
-          "response" in error &&
-          typeof (error as { response?: { data?: { msg?: string } } }).response
-            ?.data?.msg === "string"
-            ? (error as { response?: { data?: { msg?: string } } }).response
-                ?.data?.msg
-            : "";
-        setErrorMessage(apiErr || "Could not resend OTP. Try again later.");
+      } else {
+        setErrorMessage(extractApiMessage(error) || "Could not resend OTP. Try again later.");
       }
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // keep a joined OTP string if needed elsewhere by reading otpDigits.join('')
+  const onForgotRequest = async () => {
+    try {
+      setIsSubmitting(true);
+      setErrorMessage("");
+      setSuccessMessage("");
+      await forgotPasswordApi(forgotPayload.email, forgotPayload.role);
+      setForgotStep("reset");
+      setSuccessMessage("OTP sent. Enter code and set your new password.");
+    } catch (error: unknown) {
+      setErrorMessage(extractApiMessage(error) || "Could not send reset OTP.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const onForgotReset = async () => {
+    if (forgotPayload.newPassword.length < 8) {
+      setErrorMessage("Password must be at least 8 characters.");
+      return;
+    }
+    if (forgotPayload.newPassword !== forgotPayload.confirmPassword) {
+      setErrorMessage("Passwords do not match.");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      setErrorMessage("");
+      setSuccessMessage("");
+      await resetPasswordApi({
+        email: forgotPayload.email,
+        role: forgotPayload.role,
+        otp: forgotPayload.otp,
+        newPassword: forgotPayload.newPassword,
+      });
+      setSuccessMessage("Password reset successful. You can sign in now.");
+      setForgotOpen(false);
+      setForgotStep("request");
+      setForgotPayload({
+        email: "",
+        role: formRole,
+        otp: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+    } catch (error: unknown) {
+      const msg = extractApiMessage(error);
+      const normalized = msg.toLowerCase();
+      const noPasswordForRole =
+        normalized.includes("no password") && normalized.includes("role");
+      setErrorMessage(
+        noPasswordForRole ? NO_PASSWORD_FOR_ROLE_MESSAGE : msg || "Could not reset password.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const onGoogleCompletionSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const name = googleCompletionForm.name.trim();
+    if (!name) {
+      setErrorMessage("Name is required to complete Google signup.");
+      return;
+    }
+
+    const phone = googleCompletionForm.phone.trim();
+    const fullPhone = phone
+      ? `+${googleCompletionForm.countryCode}${phone}`
+      : undefined;
+
+    try {
+      setIsGoogleSubmitting(true);
+      setErrorMessage("");
+      await tryGoogleAuth({
+        idToken: googleCompletion.idToken,
+        role: googleCompletion.role,
+        name,
+        phone: fullPhone,
+      });
+    } catch (error: unknown) {
+      setErrorMessage(extractApiMessage(error) || "Could not complete Google signup.");
+    } finally {
+      setIsGoogleSubmitting(false);
+    }
+  };
+
+  useEffect(() => {
+    const existingScript = document.querySelector(
+      'script[src="https://accounts.google.com/gsi/client"]',
+    ) as HTMLScriptElement | null;
+
+    if (existingScript) {
+      if (window.google?.accounts?.id) {
+        initGoogleClient();
+      } else {
+        existingScript.addEventListener("load", initGoogleClient, { once: true });
+      }
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = "https://accounts.google.com/gsi/client";
+    script.async = true;
+    script.defer = true;
+    script.onload = initGoogleClient;
+    document.head.appendChild(script);
+  }, []);
 
   useEffect(() => {
     if (signupStep === "otp" && !otpCooldownStarted) {
@@ -224,6 +554,24 @@ const RightAuthForms = () => {
     );
     return () => clearInterval(id);
   }, [resendCooldown]);
+
+  useEffect(() => {
+    if (!forgotOpen) return;
+    setForgotPayload((prev) => ({ ...prev, role: formRole }));
+  }, [forgotOpen, formRole]);
+
+  const canSubmitForgotRequest = useMemo(
+    () => forgotPayload.email.trim().length > 0,
+    [forgotPayload.email],
+  );
+  const disablePrimarySubmit =
+    isSubmitting ||
+    isGoogleSubmitting ||
+    (mode === "signup" &&
+      signupStep === "details" &&
+      formRole === "advisor" &&
+      !advisorDeclarationChecked &&
+      !forgotOpen);
 
   return (
     <section className="rounded-3xl border border-blue-100 bg-white p-6 shadow-lg">
@@ -263,25 +611,21 @@ const RightAuthForms = () => {
         </div>
       </div>
 
-      <div className="mb-5 flex rounded-full bg-slate-100 p-1 border border-blue-500">
+      <div className="mb-5 flex rounded-full border border-blue-500 bg-slate-100 p-1">
         <button
           onClick={() => switchMode("login")}
           type="button"
           className={`flex-1 rounded-full px-3 py-2 text-sm font-medium transition ${
-            mode === "login"
-              ? "bg-blue-700 text-white shadow"
-              : "text-slate-600"
+            mode === "login" ? "bg-blue-700 text-white shadow" : "text-slate-600"
           }`}
         >
           Login
         </button>
         <button
-          onClick={() => setMode("signup")}
+          onClick={() => switchMode("signup")}
           type="button"
           className={`flex-1 rounded-full px-3 py-2 text-sm font-medium transition ${
-            mode === "signup"
-              ? "bg-blue-700 text-white shadow"
-              : "text-slate-600"
+            mode === "signup" ? "bg-blue-700 text-white shadow" : "text-slate-600"
           }`}
         >
           Signup
@@ -290,29 +634,29 @@ const RightAuthForms = () => {
 
       <AnimatePresence mode="wait">
         <motion.form
-          key={`${formRole}-${mode}`}
+          key={`${formRole}-${mode}-${signupStep}`}
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -20 }}
           transition={{ duration: 0.22 }}
           onSubmit={onSubmit}
-          className={`relative space-y-3 rounded-2xl p-4 transition `}
+          className="relative space-y-3 rounded-2xl p-4 transition"
         >
-          {formRole === "advisor" && mode === "signup" ? (
-            <div className="rounded-xl border font-semibold border-blue-400 bg-white/70 px-2 py-2 text-xs font-large text-blue-800">
+          {!forgotOpen && formRole === "advisor" && mode === "signup" ? (
+            <div className="rounded-xl border border-blue-400 bg-white/70 px-2 py-2 text-xs font-semibold text-blue-800">
               NOTE: Advisor onboarding mode: these details are used for advisor
               profile review.
             </div>
           ) : null}
 
-          {mode === "signup" && signupStep === "details" ? (
+          {!forgotOpen && mode === "signup" && signupStep === "details" ? (
             <>
               <input
                 name="name"
                 required
                 placeholder="Full name"
                 autoComplete="name"
-                className="w-full rounded-xl px-4 py-3 outline-none border border-blue-100 focus:border-blue-400"
+                className="w-full rounded-xl border border-blue-100 px-4 py-3 outline-none focus:border-blue-400"
               />
               <div className="rounded-xl bg-white p-2">
                 <div className="flex items-stretch gap-2">
@@ -328,13 +672,13 @@ const RightAuthForms = () => {
                       inputMode="numeric"
                       aria-label="Country code"
                       placeholder="91"
-                        className="h-full w-full bg-transparent px-2 text-center text-base font-medium text-slate-700 outline-none placeholder:text-slate-300"
+                      className="h-full w-full bg-transparent px-2 text-center text-base font-medium text-slate-700 outline-none placeholder:text-slate-300"
                     />
                   </div>
                   <input
                     name="phone"
                     type="tel"
-                    placeholder="Phone number"
+                    placeholder="Phone number (optional)"
                     autoComplete="tel"
                     inputMode="numeric"
                     pattern="^$|[0-9]{7,15}"
@@ -352,7 +696,7 @@ const RightAuthForms = () => {
             </>
           ) : null}
 
-          {mode === "signup" && signupStep === "otp" ? (
+          {!forgotOpen && mode === "signup" && signupStep === "otp" ? (
             <div className="space-y-3 rounded-2xl border border-dashed border-blue-200 bg-white/80 p-4">
               <div>
                 <p className="text-sm font-semibold text-slate-900">
@@ -427,26 +771,28 @@ const RightAuthForms = () => {
                 </div>
               ) : null}
               <div className="mt-2 flex items-center justify-center gap-3">
-                {resendCooldown == 0 ? <button
-                  type="button"
-                  onClick={handleResend}
-                  disabled={
-                    resendCooldown > 0 ||
-                    isSubmitting ||
-                    resendAttempts >= MAX_RESEND_ATTEMPTS
-                  }
-                  className={`rounded-lg px-3 py-2 text-sm font-semibold transition disabled:opacity-60 ${
-                    resendCooldown > 0
-                      ? "border border-slate-200 bg-white text-slate-600"
-                      : "border border-blue-100 bg-blue-50 text-blue-700"
-                  }`}
-                >
-                  {resendCooldown > 0
-                    ? `Resend in ${resendCooldown}s`
-                    : resendAttempts >= MAX_RESEND_ATTEMPTS
-                      ? "Limit reached"
-                      : "Resend code"}
-                </button> : null}
+                {resendCooldown === 0 ? (
+                  <button
+                    type="button"
+                    onClick={handleResend}
+                    disabled={
+                      resendCooldown > 0 ||
+                      isSubmitting ||
+                      resendAttempts >= MAX_RESEND_ATTEMPTS
+                    }
+                    className={`rounded-lg px-3 py-2 text-sm font-semibold transition disabled:opacity-60 ${
+                      resendCooldown > 0
+                        ? "border border-slate-200 bg-white text-slate-600"
+                        : "border border-blue-100 bg-blue-50 text-blue-700"
+                    }`}
+                  >
+                    {resendCooldown > 0
+                      ? `Resend in ${resendCooldown}s`
+                      : resendAttempts >= MAX_RESEND_ATTEMPTS
+                        ? "Limit reached"
+                        : "Resend code"}
+                  </button>
+                ) : null}
                 {resendMessage ? (
                   <p className="text-sm text-emerald-700">{resendMessage}</p>
                 ) : null}
@@ -454,7 +800,7 @@ const RightAuthForms = () => {
             </div>
           ) : null}
 
-          {mode === "signup" && signupStep === "otp" ? null : (
+          {!forgotOpen && (mode === "signup" && signupStep === "otp" ? null : (
             <>
               <input
                 name="email"
@@ -469,17 +815,14 @@ const RightAuthForms = () => {
                 type="password"
                 required
                 placeholder="Password"
-                autoComplete={
-                  mode === "login" ? "current-password" : "new-password"
-                }
+                minLength={8}
+                autoComplete={mode === "login" ? "current-password" : "new-password"}
                 className="w-full rounded-xl border border-blue-100 px-4 py-3 outline-none focus:border-blue-400"
               />
             </>
-          )}
+          ))}
 
-          {mode === "signup" &&
-          signupStep === "details" &&
-          formRole === "advisor" ? (
+          {!forgotOpen && mode === "signup" && signupStep === "details" && formRole === "advisor" ? (
             <label className="mt-1 inline-flex items-start gap-2 rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-sm text-slate-700">
               <input
                 type="checkbox"
@@ -496,52 +839,193 @@ const RightAuthForms = () => {
             </label>
           ) : null}
 
+          {!forgotOpen ? (
           <button
-            disabled={isSubmitting}
+            disabled={disablePrimarySubmit}
             className="mt-2 w-full rounded-xl bg-blue-600 px-4 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-70"
           >
-            {isSubmitting
-              ? "Please wait..."
-              : mode === "login"
-                ? "Login"
-                : signupStep === "details"
-                  ? "Create account"
-                  : "Verify & Sign in"}
-          </button>
-          {errorMessage ? (
+              {isSubmitting
+                ? "Please wait..."
+                : mode === "login"
+                  ? "Sign in"
+                  : signupStep === "details"
+                    ? "Create account"
+                    : "Verify & Sign in"}
+            </button>
+          ) : null}
+
+          {!forgotOpen && (mode === "login" || (mode === "signup" && signupStep === "details")) ? (
+            <>
+              <div className="my-2 flex items-center gap-2 text-xs text-slate-500">
+                <span className="h-px flex-1 bg-slate-200" />
+                <span>or</span>
+                <span className="h-px flex-1 bg-slate-200" />
+              </div>
+              <button
+                type="button"
+                onClick={() => handleGoogleSignIn(modeRef.current)}
+                disabled={isGoogleSubmitting}
+                className="inline-flex w-full items-center justify-center gap-3 rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-medium text-slate-700 shadow-xs transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 48 48"
+                  className="h-5 w-5 shrink-0"
+                  aria-hidden="true"
+                >
+                  <path
+                    fill="#FFC107"
+                    d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12S17.4 12 24 12c3 0 5.7 1.1 7.8 3l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"
+                  />
+                  <path
+                    fill="#FF3D00"
+                    d="M6.3 14.7l6.6 4.8C14.7 15 19 12 24 12c3 0 5.7 1.1 7.8 3l5.7-5.7C34 6.1 29.3 4 24 4c-7.7 0-14.3 4.3-17.7 10.7z"
+                  />
+                  <path
+                    fill="#4CAF50"
+                    d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2c-2 1.5-4.5 2.4-7.2 2.4-5.3 0-9.7-3.3-11.3-8l-6.6 5.1C9.5 39.6 16.2 44 24 44z"
+                  />
+                  <path
+                    fill="#1976D2"
+                    d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.1 5.8 0 0 0 0 0 0l6.2 5.2C37 38.6 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"
+                  />
+                </svg>
+                {isGoogleSubmitting
+                  ? "Please wait..."
+                  : mode === "login"
+                    ? "Continue with Google"
+                    : "Sign up with Google"}
+              </button>
+            </>
+          ) : null}
+
+          {errorMessage && errorMessage !== ADVISOR_DECLARATION_MESSAGE ? (
             <p className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
               {errorMessage}
             </p>
           ) : null}
 
-          <button
-            type="button"
-            onClick={() => setForgotOpen((value) => !value)}
-            className="w-full text-sm text-blue-700"
-          >
-            Forgot password?
-          </button>
+          {showGoogleOnlyGuidance ? (
+            <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+              <p className="font-semibold">Google login required for this role.</p>
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleGoogleSignIn("login")}
+                  className="rounded-lg bg-amber-600 px-3 py-2 text-xs font-semibold text-white hover:bg-amber-700"
+                >
+                  Continue with Google
+                </button>
+                <span>{GOOGLE_ONLY_HELP_TEXT}</span>
+              </div>
+            </div>
+          ) : null}
 
-          <AnimatePresence>
-            {forgotOpen ? (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                className="overflow-hidden rounded-xl border border-blue-100 bg-blue-50 p-3 text-sm text-blue-800"
+          {!forgotOpen && mode === "login" ? (
+            <button
+              type="button"
+              onClick={() => {
+                setForgotOpen(true);
+                setForgotStep("request");
+                setErrorMessage("");
+                setSuccessMessage("");
+              }}
+              className="w-full text-sm text-blue-700"
+            >
+              Forgot password?
+            </button>
+          ) : null}
+
+          {forgotOpen && mode === "login" ? (
+            <div className="space-y-3">
+              <p className="text-sm font-semibold text-slate-800">
+                Forgot password for <span className="capitalize">{formRole}</span> role
+              </p>
+              {forgotStep === "request" ? (
+                <div className="space-y-2">
+                  <input
+                    value={forgotPayload.email}
+                    onChange={(e) =>
+                      setForgotPayload((prev) => ({ ...prev, email: e.target.value }))
+                    }
+                    placeholder="Email"
+                    type="email"
+                    className="w-full rounded-xl border border-blue-100 px-4 py-3 outline-none focus:border-blue-400"
+                  />
+                  <button
+                    type="button"
+                    disabled={!canSubmitForgotRequest || isSubmitting}
+                    onClick={onForgotRequest}
+                    className="w-full rounded-xl bg-blue-600 px-4 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    Send OTP
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <input
+                    value={forgotPayload.otp}
+                    onChange={(e) =>
+                      setForgotPayload((prev) => ({ ...prev, otp: e.target.value.replace(/\D/g, "") }))
+                    }
+                    placeholder="OTP"
+                    inputMode="numeric"
+                    className="w-full rounded-xl border border-blue-100 px-4 py-3 outline-none focus:border-blue-400"
+                  />
+                  <input
+                    value={forgotPayload.newPassword}
+                    onChange={(e) =>
+                      setForgotPayload((prev) => ({ ...prev, newPassword: e.target.value }))
+                    }
+                    placeholder="New password (min 8)"
+                    type="password"
+                    className="w-full rounded-xl border border-blue-100 px-4 py-3 outline-none focus:border-blue-400"
+                  />
+                  <input
+                    value={forgotPayload.confirmPassword}
+                    onChange={(e) =>
+                      setForgotPayload((prev) => ({ ...prev, confirmPassword: e.target.value }))
+                    }
+                    placeholder="Confirm new password"
+                    type="password"
+                    className="w-full rounded-xl border border-blue-100 px-4 py-3 outline-none focus:border-blue-400"
+                  />
+                  <button
+                    type="button"
+                    disabled={isSubmitting}
+                    onClick={onForgotReset}
+                    className="w-full rounded-xl bg-blue-600 px-4 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    Reset password
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setForgotStep("request")}
+                    className="text-xs font-semibold text-blue-700 underline"
+                  >
+                    Start over
+                  </button>
+                </div>
+              )}
+              <button
+                type="button"
+                onClick={() => {
+                  setForgotOpen(false);
+                  setForgotStep("request");
+                  setErrorMessage("");
+                  setSuccessMessage("");
+                }}
+                className="w-full text-sm font-semibold text-blue-700 underline"
               >
-                Reset link would be sent to your email in real backend
-                integration.
-              </motion.div>
-            ) : null}
-          </AnimatePresence>
-          {isSubmitting ? (
+                Back to sign in
+              </button>
+            </div>
+          ) : null}
+
+          {isSubmitting || isGoogleSubmitting ? (
             <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/60">
               <div className="flex items-center gap-3 rounded-full bg-white/80 px-4 py-2 shadow">
-                <svg
-                  className="h-5 w-5 animate-spin text-blue-600"
-                  viewBox="0 0 24 24"
-                >
+                <svg className="h-5 w-5 animate-spin text-blue-600" viewBox="0 0 24 24">
                   <circle
                     cx="12"
                     cy="12"
@@ -553,15 +1037,122 @@ const RightAuthForms = () => {
                     fill="none"
                   />
                 </svg>
-                <span className="text-sm font-medium text-slate-700">
-                  Processing...
-                </span>
+                <span className="text-sm font-medium text-slate-700">Processing...</span>
               </div>
             </div>
           ) : null}
         </motion.form>
       </AnimatePresence>
+
+      <AnimatePresence>
+        {googleCompletion.open ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4"
+          >
+            <motion.form
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onSubmit={onGoogleCompletionSubmit}
+              className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-xl"
+            >
+              <h3 className="text-lg font-semibold text-slate-900">Complete your profile to finish signup</h3>
+              <p className="mt-1 text-sm text-slate-600">
+                Name is required to complete Google signup. Phone is optional.
+              </p>
+
+              <div className="mt-4 space-y-3">
+                {googleCompletionFields.map((field) =>
+                  field.key === "phone" ? (
+                    <div key={field.key} className="space-y-1">
+                      <label className="text-sm font-medium text-slate-700">
+                        {field.label}
+                      </label>
+                      <div className="flex items-stretch gap-2">
+                        <div className="flex h-11 w-20 overflow-hidden rounded-lg border border-slate-300 bg-white">
+                          <div className="flex h-full items-center border-r border-slate-200 bg-slate-50 px-2 text-sm font-semibold text-slate-500">
+                            +
+                          </div>
+                          <input
+                            value={googleCompletionForm.countryCode}
+                            onChange={(event) =>
+                              setGoogleCompletionForm((prev) => ({
+                                ...prev,
+                                countryCode: event.target.value.replace(/\D/g, ""),
+                              }))
+                            }
+                            inputMode="numeric"
+                            aria-label="Country code"
+                            placeholder="91"
+                            className="h-full w-full bg-transparent px-2 text-center text-sm font-medium text-slate-700 outline-none"
+                          />
+                        </div>
+                        <input
+                          value={googleCompletionForm.phone}
+                          onChange={(event) =>
+                            setGoogleCompletionForm((prev) => ({
+                              ...prev,
+                              phone: event.target.value.replace(/\D/g, ""),
+                            }))
+                          }
+                          placeholder={field.placeholder}
+                          inputMode="numeric"
+                          className="h-11 flex-1 rounded-lg border border-slate-300 px-3 py-2"
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <label key={field.key} className="block space-y-1">
+                      <span className="text-sm font-medium text-slate-700">
+                        {field.label}
+                        {field.required ? " *" : ""}
+                      </span>
+                      <input
+                        value={googleCompletionForm.name}
+                        onChange={(e) =>
+                          setGoogleCompletionForm((prev) => ({ ...prev, name: e.target.value }))
+                        }
+                        placeholder={field.placeholder}
+                        required={field.required}
+                        type={field.type ?? "text"}
+                        className="w-full rounded-lg border border-slate-300 px-3 py-2"
+                      />
+                    </label>
+                  ),
+                )}
+              </div>
+
+              <div className="mt-4 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setGoogleCompletion({
+                      open: false,
+                      idToken: "",
+                      role: formRole,
+                    })
+                  }
+                  className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isGoogleSubmitting}
+                  className="rounded-lg bg-blue-600 px-3 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isGoogleSubmitting ? "Saving..." : "Continue"}
+                </button>
+              </div>
+            </motion.form>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </section>
   );
 };
+
 export default RightAuthForms;

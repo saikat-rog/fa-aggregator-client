@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSavedAdvisors } from "../../context/SavedAdvisorsContext";
+// import { LoginMethodsCard } from "../auth/LoginMethodsCard";
 import {
   getUserMyEnquiries,
   type EnquiryPagination,
@@ -160,6 +161,8 @@ const UserDashboard = () => {
       />
 
       <DailyGrowthSection onReadNow={() => navigate("/blog")} />
+
+      {/* <LoginMethodsCard /> */}
     </div>
   );
 };

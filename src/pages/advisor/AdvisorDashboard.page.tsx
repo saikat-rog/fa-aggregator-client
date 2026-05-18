@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { FaCircleCheck } from "react-icons/fa6";
 import { useSearchParams } from "react-router-dom";
 import ApplicationForm from "../../components/advisor/ApplicationForm";
+// import { LoginMethodsCard } from "../../components/auth/LoginMethodsCard";
 import {
   advisorProfileAnalyticsApi,
   getMyEnquiries,
@@ -411,6 +412,7 @@ const AdvisorDashboardPage = () => {
         </article>
       </section>
 
+      {applicationStatus === 1 ? (
       <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
@@ -566,6 +568,9 @@ const AdvisorDashboardPage = () => {
           </div>
         )}
       </section>
+      ) : null}
+
+      {/* <LoginMethodsCard /> */}
 
       {rowActionError ? (
         <div className="fixed bottom-4 right-4 z-50 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700 shadow-lg">
