@@ -47,12 +47,28 @@ declare global {
             client_id: string;
             callback: (response: { credential?: string }) => void;
           }) => void;
-          prompt: () => void;
+          prompt: (listener?: (notification: PromptMomentNotification) => void) => void;
+          renderButton: (
+            parent: HTMLElement,
+            options: {
+              type?: "standard" | "icon";
+              theme?: "outline" | "filled_blue" | "filled_black";
+              size?: "large" | "medium" | "small";
+              text?: "signin_with" | "signup_with" | "continue_with" | "signin";
+              shape?: "rectangular" | "pill" | "circle" | "square";
+              width?: number;
+            },
+          ) => void;
         };
       };
     };
   }
 }
+
+type PromptMomentNotification = {
+  isNotDisplayed: () => boolean;
+  isSkippedMoment: () => boolean;
+};
 
 const GOOGLE_ONLY_HELP_TEXT =
   "After login, create password in Settings";
@@ -157,6 +173,8 @@ const RightAuthForms = () => {
   const formRoleRef = useRef<AuthRole>("user");
   const modeRef = useRef<AuthMode>("login");
   const googleFlowModeRef = useRef<AuthMode>("login");
+  const hiddenGoogleButtonContainerRef = useRef<HTMLDivElement | null>(null);
+  const hasRenderedHiddenGoogleButtonRef = useRef(false);
   const MAX_RESEND_ATTEMPTS = 5;
 
   const resetSignupFlow = () => {
@@ -305,7 +323,19 @@ const RightAuthForms = () => {
       return;
     }
 
-    window.google.accounts.id.prompt();
+    window.google.accounts.id.prompt((notification) => {
+      if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+        const hiddenGoogleButton =
+          hiddenGoogleButtonContainerRef.current?.querySelector(
+            "div[role='button']",
+          ) as HTMLElement | null;
+        if (hiddenGoogleButton) {
+          hiddenGoogleButton.click();
+          return;
+        }
+        setErrorMessage("Google prompt is blocked on this browser. Please enable popups/cookies and try again.");
+      }
+    });
   };
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -560,6 +590,22 @@ const RightAuthForms = () => {
     setForgotPayload((prev) => ({ ...prev, role: formRole }));
   }, [forgotOpen, formRole]);
 
+  useEffect(() => {
+    if (!googleClientReady) return;
+    if (!hiddenGoogleButtonContainerRef.current) return;
+    if (!window.google?.accounts?.id) return;
+    if (hasRenderedHiddenGoogleButtonRef.current) return;
+
+    window.google.accounts.id.renderButton(hiddenGoogleButtonContainerRef.current, {
+      type: "standard",
+      theme: "outline",
+      size: "large",
+      text: "continue_with",
+      width: 280,
+    });
+    hasRenderedHiddenGoogleButtonRef.current = true;
+  }, [googleClientReady]);
+
   const canSubmitForgotRequest = useMemo(
     () => forgotPayload.email.trim().length > 0,
     [forgotPayload.email],
@@ -574,7 +620,12 @@ const RightAuthForms = () => {
       !forgotOpen);
 
   return (
-    <section className="rounded-3xl border border-blue-100 bg-white p-6 shadow-lg">
+    <section className="rounded-3xl border border-blue-100 bg-white py-4 px-3 md:p-5 shadow-lg">
+      <div
+        ref={hiddenGoogleButtonContainerRef}
+        className="pointer-events-none absolute -left-[9999px] top-0 opacity-0"
+        aria-hidden="true"
+      />
       {successMessage ? (
         <div className="mb-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
           {successMessage}
