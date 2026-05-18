@@ -17,6 +17,7 @@ import { NotFoundState } from "./components/pageNotFound/PageNotFound";
 import { SeoLandingPage } from "./pages/home/SeoLanding.page";
 import { seoLandings } from "./config/seoLandings";
 import { ResourcesPage } from "./pages/resources/Resources.page";
+import { ContactPage } from "./pages/contact/Contact.page";
 
 function SlugRouteResolver() {
   const { slug } = useParams<{ slug: string }>();
@@ -69,6 +70,7 @@ function App() {
           />
           <Route path="/lol" element={<Navigate to="/admin" replace />} />
           <Route path="/resources" element={<ResourcesPage />} />
+          <Route path="/contact" element={<ContactPage />} />
           <Route path="/:slug" element={<SlugRouteResolver />} />
           <Route path="/blogs" element={<BlogListPage />} />
           <Route path="/blog/:slug" element={<BlogDetailPage />} />

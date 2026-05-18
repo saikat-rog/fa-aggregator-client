@@ -1,6 +1,6 @@
-import { FiBookOpen, FiGrid, FiList, FiUser, FiUsers } from "react-icons/fi";
+import { FiBookOpen, FiBriefcase, FiGrid, FiList, FiUser, FiUsers } from "react-icons/fi";
 
-export const views = ["users", "advisors", "applications", "industries", "blogs"] as const;
+export const views = ["users", "advisors", "applications", "industries", "blogs", "requirements"] as const;
 export type AdminView = (typeof views)[number];
 
 export const viewIcons: Record<AdminView, React.ComponentType<{ className?: string }>> = {
@@ -9,6 +9,7 @@ export const viewIcons: Record<AdminView, React.ComponentType<{ className?: stri
   applications: FiList,
   industries: FiGrid,
   blogs: FiBookOpen,
+  requirements: FiBriefcase,
 };
 
 export const getNum = (value: string | null, fallback: number) => {
