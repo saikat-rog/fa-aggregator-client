@@ -13,6 +13,7 @@ import {
   FaXTwitter,
   FaYoutube,
 } from "react-icons/fa6";
+import { getDisplayCategory, getDisplayPpp } from "../advisorDisplay.utils";
 
 type SocialLinks = {
   instagram?: string;
@@ -35,6 +36,8 @@ type ProfileHeroCardProps = {
   state: string;
   country: string;
   industry?: string;
+  ppp?: number | null;
+  category?: string | null;
   profilePictureUrl?: string;
   personalWebsite?: string;
   emailForContact?: string;
@@ -83,6 +86,8 @@ export function ProfileHeroCard({
   state,
   country,
   industry,
+  ppp,
+  category,
   profilePictureUrl,
   personalWebsite,
   emailForContact,
@@ -172,6 +177,12 @@ export function ProfileHeroCard({
               Industry: {industry}
             </p>
           ) : null}
+          <p className="inline-flex items-center rounded-full bg-slate-700 px-3 py-1 text-xs font-semibold tracking-wide text-white">
+            PPP: {getDisplayPpp(ppp)}
+          </p>
+          <p className="inline-flex items-center rounded-full bg-cyan-700 px-3 py-1 text-xs font-semibold tracking-wide text-white">
+            Category: {getDisplayCategory(category)}
+          </p>
         </div>
         <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-slate-50 px-3 py-1 text-xs text-slate-600">
           <FaLocationDot className="text-blue-600" />

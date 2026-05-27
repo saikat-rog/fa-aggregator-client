@@ -7,6 +7,11 @@ import {
   type AdvisorApplicationPayload,
   type AdvisorFormOptionsResponseData,
 } from "../../services/advisor.service";
+import {
+  getAdvisorApplicationFieldErrors,
+  normalizeCategory,
+  parsePpp,
+} from "./applicationForm.utils";
 
 type ApplicationFormProps = {
   onSubmitted?: () => void;
@@ -43,6 +48,10 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
   const [isUsernameAvailable, setIsUsernameAvailable] = useState<boolean | null>(
     null,
   );
+  const [pppValue, setPppValue] = useState("");
+  const [categoryValue, setCategoryValue] = useState("");
+  const [pppError, setPppError] = useState("");
+  const [categoryError, setCategoryError] = useState("");
 
   useEffect(() => {
     const loadOptions = async () => {
@@ -102,19 +111,8 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
       facebook: handleOrUndefined(formData.get("facebook")),
       youtube: handleOrUndefined(formData.get("youtube")),
     };
-
-    const payload: AdvisorApplicationPayload = {
-      username: cleanedUsername,
-      industry: selectedIndustry,
-      country: String(formData.get("country") || "").trim(),
-      state: String(formData.get("state") || "").trim(),
-      about: String(formData.get("about") || "").trim(),
-      marketFocus: selectedMarkets,
-      emailForContact: String(formData.get("emailForContact") || "").trim(),
-      personalWebsite: String(formData.get("personalWebsite") || "").trim() || undefined,
-      expertiseIndeces: selectedIndices,
-      socialLinks,
-    };
+    const parsedPpp = parsePpp(pppValue);
+    const trimmedCategory = normalizeCategory(categoryValue);
 
     const socialHandles = [
       socialLinks.instagram,
@@ -123,12 +121,42 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
       socialLinks.facebook,
       socialLinks.youtube,
     ].filter(Boolean) as string[];
+    const selectedCountryValue = String(formData.get("country") || "").trim();
 
-    if (!payload.country) {
+    if (!selectedCountryValue) {
       setUsernameError("");
       setErrorMessage("Please select a country.");
       return;
     }
+    const fieldErrors = getAdvisorApplicationFieldErrors({
+      pppValue,
+      categoryValue,
+    });
+    if (fieldErrors.pppError || fieldErrors.categoryError) {
+      setPppError(fieldErrors.pppError);
+      setCategoryError(fieldErrors.categoryError);
+      setErrorMessage("");
+      return;
+    }
+    if (parsedPpp === null) {
+      return;
+    }
+
+    const payload: AdvisorApplicationPayload = {
+      username: cleanedUsername,
+      industry: selectedIndustry,
+      ppp: parsedPpp,
+      category: trimmedCategory,
+      country: selectedCountryValue,
+      state: String(formData.get("state") || "").trim(),
+      about: String(formData.get("about") || "").trim(),
+      marketFocus: selectedMarkets,
+      emailForContact: String(formData.get("emailForContact") || "").trim(),
+      personalWebsite:
+        String(formData.get("personalWebsite") || "").trim() || undefined,
+      expertiseIndeces: selectedIndices,
+      socialLinks,
+    };
 
     if (!payload.industry) {
       setUsernameError("");
@@ -182,6 +210,8 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
       setErrorMessage("");
       setApplicationNote("");
       setUsernameError("");
+      setPppError("");
+      setCategoryError("");
       setIsCheckingUsername(true);
 
       const availabilityResponse = await duplicateUsernameCheckApi(cleanedUsername);
@@ -213,6 +243,8 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
       setSelectedIndustry("");
       setSelectedMarkets([]);
       setSelectedIndices([]);
+      setPppValue("");
+      setCategoryValue("");
       setIsUsernameAvailable(null);
     } catch (error: unknown) {
       const apiError =
@@ -414,6 +446,45 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
             </option>
           ))}
         </select>
+
+        <div className="grid gap-3 md:grid-cols-2">
+          <div>
+            <input
+              required
+              name="ppp"
+              type="number"
+              min={0}
+              step="any"
+              value={pppValue}
+              onChange={(event) => {
+                setPppValue(event.target.value);
+                setPppError("");
+              }}
+              placeholder="PPP (non-negative number)"
+              className="w-full rounded-xl border border-blue-100 px-4 py-3 outline-none focus:border-blue-400"
+            />
+            {pppError ? (
+              <p className="mt-1 text-xs text-rose-600">{pppError}</p>
+            ) : null}
+          </div>
+          <div>
+            <input
+              required
+              name="category"
+              type="text"
+              value={categoryValue}
+              onChange={(event) => {
+                setCategoryValue(event.target.value);
+                setCategoryError("");
+              }}
+              placeholder="Category"
+              className="w-full rounded-xl border border-blue-100 px-4 py-3 outline-none focus:border-blue-400"
+            />
+            {categoryError ? (
+              <p className="mt-1 text-xs text-rose-600">{categoryError}</p>
+            ) : null}
+          </div>
+        </div>
 
         <input
           required

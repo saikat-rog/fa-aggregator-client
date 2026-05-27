@@ -46,6 +46,8 @@ export function AdvisorProfilePage() {
                 state={advisorData.state || "-"}
                 country={advisorData.country || "-"}
                 industry={advisorData.industries?.join(", ")}
+                ppp={advisorData.ppp}
+                category={advisorData.category}
                 profilePictureUrl={advisorData.profilePictureUrl || undefined}
                 personalWebsite={advisorData.personalWebsite}
                 emailForContact={advisorData.emailForContact}

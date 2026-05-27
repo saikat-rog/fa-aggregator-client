@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { FiCalendar, FiSearch, FiTag } from "react-icons/fi";
+import { FiBookOpen, FiCalendar, FiSearch, FiTag } from "react-icons/fi";
 import { useDebouncedValue } from "../../hooks/useDebouncedValue";
 import { publicListBlogs, type Blog } from "../../services/blog.service";
 
@@ -64,29 +64,40 @@ export function BlogListPage() {
       </div>
       {loading ? <p className="rounded border border-blue-100 bg-blue-50 p-2 text-sm text-blue-700">Loading blogs...</p> : null}
       {error ? <p className="rounded border border-red-100 bg-red-50 p-2 text-sm text-red-700">{error}</p> : null}
-      {!loading && !error && (data?.blogs?.length ?? 0) === 0 ? <p className="rounded border border-slate-200 bg-slate-50 p-2 text-sm text-slate-600">No blogs found.</p> : null}
-      <div className="grid gap-4 md:grid-cols-2">
-        {data?.blogs?.map((b) => (
-          <Link key={b._id} to={`/blog/${b.slug}`} className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_10px_30px_rgba(15,23,42,0.05)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(15,23,42,0.1)]">
-            <div className="aspect-video w-full overflow-hidden bg-slate-100">
-              <img src={b.coverImageUrl} alt={b.title} className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]" />
-            </div>
-            <div className="p-4">
-              <p className="inline-flex items-center gap-1.5 text-xs text-slate-500"><FiCalendar className="text-blue-700" /> {b.publishedAt ? new Date(b.publishedAt).toLocaleDateString("en-GB") : "-"}</p>
-              <h2 className="mt-1 text-lg font-semibold text-slate-900">{b.title}</h2>
-              <p className="mt-1 line-clamp-3 text-sm text-slate-600">{b.excerpt || ""}</p>
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                {(b.tags || []).map((t) => (
-                  <span key={t} className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700">
-                    <FiTag className="h-3 w-3" />
-                    {t}
-                  </span>
-                ))}
+      {!loading && !error && (data?.blogs?.length ?? 0) === 0 ? (
+        <section className="flex min-h-[65vh] flex-col items-center justify-center rounded-3xl border border-slate-200 bg-slate-50/80 px-6 text-center">
+          <span className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 text-blue-700">
+            <FiBookOpen className="h-7 w-7" />
+          </span>
+          <h2 className="mt-4 text-xl font-semibold text-slate-800">No blogs found</h2>
+          <p className="mt-1 max-w-md text-sm text-slate-600">
+            Try changing your search or tag filter to discover more blog posts.
+          </p>
+        </section>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2">
+          {data?.blogs?.map((b) => (
+            <Link key={b._id} to={`/blog/${b.slug}`} className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_10px_30px_rgba(15,23,42,0.05)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(15,23,42,0.1)]">
+              <div className="aspect-video w-full overflow-hidden bg-slate-100">
+                <img src={b.coverImageUrl} alt={b.title} className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]" />
               </div>
-            </div>
-          </Link>
-        ))}
-      </div>
+              <div className="p-4">
+                <p className="inline-flex items-center gap-1.5 text-xs text-slate-500"><FiCalendar className="text-blue-700" /> {b.publishedAt ? new Date(b.publishedAt).toLocaleDateString("en-GB") : "-"}</p>
+                <h2 className="mt-1 text-lg font-semibold text-slate-900">{b.title}</h2>
+                <p className="mt-1 line-clamp-3 text-sm text-slate-600">{b.excerpt || ""}</p>
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  {(b.tags || []).map((t) => (
+                    <span key={t} className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700">
+                      <FiTag className="h-3 w-3" />
+                      {t}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
       {data?.pagination ? (
         <div className="flex items-center justify-between text-sm">
           <p>Page {data.pagination.page} of {Math.max(1, data.pagination.totalPages)}</p>

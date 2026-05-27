@@ -5,6 +5,8 @@ export interface AdminAdvisorCard {
   name?: string;
   username?: string;
   profilePictureUrl?: string;
+  ppp?: number | null;
+  category?: string | null;
 }
 
 export interface AdvisorsQuery {

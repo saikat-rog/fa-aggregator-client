@@ -2,6 +2,10 @@ import type { AdvisorCardData } from "../../../components/advisor/AdvisorCard";
 import type { AdvisorApiItem } from "../Home.types";
 
 export function mapAdvisorApiItem(item: AdvisorApiItem): AdvisorCardData {
+  const normalizedCategory = item.category?.trim() ?? "";
+  const normalizedPpp =
+    typeof item.ppp === "number" && Number.isFinite(item.ppp) ? item.ppp : null;
+
   return {
     id: item.id,
     name: item.name?.trim() || "Verified Advisor",
@@ -20,5 +24,7 @@ export function mapAdvisorApiItem(item: AdvisorApiItem): AdvisorCardData {
     personalWebsite: item.personalWebsite,
     emailForContact: item.emailForContact,
     socialLinks: item.socialLinks,
+    ppp: normalizedPpp,
+    category: normalizedCategory || null,
   };
 }

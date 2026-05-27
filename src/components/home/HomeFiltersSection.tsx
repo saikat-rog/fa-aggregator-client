@@ -39,10 +39,10 @@ export function HomeFiltersSection({
     <section className="overflow-hidden rounded-3xl border border-blue-100 bg-linear-to-r from-blue-700 to-blue-500 p-8 text-white shadow-lg shadow-blue-100">
       <h1 className="text-3xl font-bold">Find Trusted Financial Advisors Near You</h1>
       <p className="mt-2 max-w-2xl text-blue-100">
-        Filter advisors by location and follower thresholds.
+        Filter advisors by location, category, and follower thresholds.
       </p>
 
-      <div className="mt-6 grid gap-2 lg:grid-cols-[1fr_1fr_auto]">
+      <div className="mt-6 grid gap-2 lg:grid-cols-[1fr_1fr_1fr_auto]">
         <select
           value={filters.country}
           onChange={(event) => {
@@ -76,6 +76,12 @@ export function HomeFiltersSection({
             </option>
           ))}
         </select>
+        <input
+          value={filters.category}
+          onChange={(event) => onSetFilterValue("category", event.target.value)}
+          placeholder="Category (type to search)"
+          className="w-full rounded-xl border border-blue-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none focus:border-blue-400"
+        />
 
         <div className="flex items-center justify-end gap-2">
           <button

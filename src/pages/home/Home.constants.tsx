@@ -81,6 +81,7 @@ export const initialFilters: AdvisorFilters = {
   limit: 20,
   country: "",
   state: "",
+  category: "",
   industries: [],
   instagramFollowersGt: "",
   instagramFollowersGte: "",

@@ -47,6 +47,7 @@ import {
   statusErrorClassName,
   statusInfoClassName,
 } from "../adminPage.shared";
+import { getDisplayCategory, getDisplayPpp } from "../../advisor/advisorDisplay.utils";
 
 interface Props {
   params: URLSearchParams;
@@ -166,6 +167,22 @@ export function AdvisorsPanel({ params, setParam }: Props) {
       value: Array.isArray(profile.expertiseIndeces)
         ? profile.expertiseIndeces.join(", ") || "-"
         : "-",
+    },
+    {
+      label: "PPP",
+      value: getDisplayPpp(
+        typeof profile.ppp === "number"
+          ? profile.ppp
+          : (detailsUser as Record<string, unknown> | null)?.ppp as number | null | undefined,
+      ),
+    },
+    {
+      label: "Category",
+      value: getDisplayCategory(
+        typeof profile.category === "string"
+          ? profile.category
+          : (detailsUser as Record<string, unknown> | null)?.category as string | null | undefined,
+      ),
     },
   ];
 
@@ -503,6 +520,9 @@ export function AdvisorsPanel({ params, setParam }: Props) {
                   </p>
                   <p className="truncate text-xs text-blue-700">
                     @{advisor.username || "no-username"}
+                  </p>
+                  <p className="truncate text-xs text-slate-500">
+                    PPP: {getDisplayPpp(advisor.ppp)} | Category: {getDisplayCategory(advisor.category)}
                   </p>
                   <p className="truncate text-xs text-slate-400">
                     {advisor.id}

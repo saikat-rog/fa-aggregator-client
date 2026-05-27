@@ -44,6 +44,8 @@ const markPersistedTrackedClick = (key: string) => {
 export interface AdvisorApplicationPayload {
   username: string;
   industry: string;
+  ppp: number;
+  category: string;
   country: string;
   state: string;
   about: string;
@@ -72,6 +74,7 @@ export interface AdvisorListQueryParams {
   limit?: number;
   country?: string;
   state?: string;
+  category?: string;
   industries?: string[];
   instagramFollowersGt?: number;
   instagramFollowersGte?: number;
@@ -135,6 +138,8 @@ export type SavedAdvisor = {
   linkedinFollowers?: number;
   facebookFollowers?: number;
   twitterFollowers?: number;
+  ppp?: number | null;
+  category?: string | null;
 };
 
 export type EnquiryStatus = "pending" | "responded";
@@ -169,6 +174,8 @@ export interface UserEnquiryAdvisorProfile {
   username?: string;
   emailForContact?: string;
   personalWebsite?: string;
+  ppp?: number | null;
+  category?: string | null;
 }
 
 export interface UserEnquiryAdvisor {

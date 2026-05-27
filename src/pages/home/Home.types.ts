@@ -28,6 +28,8 @@ export interface AdvisorApiItem {
   personalWebsite?: string;
   username?: string;
   industries?: string[];
+  ppp?: number | null;
+  category?: string | null;
 }
 
 export type AdvisorPagination = {
@@ -42,6 +44,7 @@ export type AdvisorFilters = {
   limit: number;
   country: string;
   state: string;
+  category: string;
   industries: string[];
   instagramFollowersGt: string;
   instagramFollowersGte: string;

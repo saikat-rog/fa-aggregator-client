@@ -59,6 +59,8 @@ export interface AdminAdvisorCard {
   name?: string;
   username?: string;
   profilePictureUrl?: string;
+  ppp?: number | null;
+  category?: string | null;
 }
 
 export interface AdvisorsQuery {
@@ -165,6 +167,8 @@ export interface AdvisorApplication {
   linkedinFollowers?: number;
   facebookFollowers?: number;
   twitterFollowers?: number;
+  ppp?: number | null;
+  category?: string | null;
   user?: {
     _id?: string;
     name?: string;
@@ -217,6 +221,8 @@ export interface UpdateAdvisorApplicationPayload {
   linkedinFollowers?: number;
   facebookFollowers?: number;
   twitterFollowers?: number;
+  ppp?: number;
+  category?: string;
 }
 
 export async function updateAdvisorApplication(id: string, payload: UpdateAdvisorApplicationPayload) {

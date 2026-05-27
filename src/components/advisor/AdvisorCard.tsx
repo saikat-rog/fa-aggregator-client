@@ -21,6 +21,7 @@ import {
   trackAdvisorClick,
 } from "../../services/advisor.service";
 import { AuthPromptDialog } from "../dialog/AuthPromptDialog";
+import { getDisplayCategory, getDisplayPpp } from "./advisorDisplay.utils";
 
 export interface AdvisorCardData {
   id: string;
@@ -36,6 +37,8 @@ export interface AdvisorCardData {
   personalWebsite?: string;
   emailForContact?: string;
   socialLinks?: AdvisorApiItem["socialLinks"];
+  ppp?: number | null;
+  category?: string | null;
 }
 
 export interface AdvisorCardProps {
@@ -242,6 +245,14 @@ export function AdvisorCard({ advisor }: AdvisorCardProps) {
               </div>
 
               <div className="rounded-2xl text-white">
+                <div className="mb-2 flex flex-wrap gap-2">
+                  <span className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-[11px] font-semibold">
+                    PPP: {getDisplayPpp(advisor.ppp)}
+                  </span>
+                  <span className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-[11px] font-semibold">
+                    Category: {getDisplayCategory(advisor.category)}
+                  </span>
+                </div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.24em]">
                   About
                 </p>

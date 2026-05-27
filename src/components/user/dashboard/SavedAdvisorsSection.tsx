@@ -82,6 +82,8 @@ export function SavedAdvisorsSection({
               personalWebsite: advisor.personalWebsite,
               emailForContact: advisor.emailForContact,
               socialLinks: advisor.socialLinks,
+              ppp: advisor.ppp,
+              category: advisor.category,
             };
 
             return <AdvisorCard key={advisor.id} advisor={cardData} />;

@@ -9,6 +9,7 @@ export function buildAdvisorQuery(filters: AdvisorFilters) {
   if (filters.limit && filters.limit !== 20) params.set("limit", String(filters.limit));
   if (filters.country) params.set("country", filters.country);
   if (filters.state) params.set("state", filters.state);
+  if (filters.category.trim()) params.set("category", filters.category.trim());
   if (filters.industries.length > 0) {
     filters.industries.forEach((industry) => params.append("industries", industry));
   }
@@ -38,6 +39,7 @@ export function filtersFromSearchParams(searchParams: URLSearchParams): AdvisorF
     limit: 20,
     country: searchParams.get("country") || "",
     state: searchParams.get("state") || "",
+    category: searchParams.get("category") || "",
     industries: [],
   };
 
@@ -76,6 +78,7 @@ export function queryParamsFromFilters(filters: AdvisorFilters): AdvisorListQuer
     limit: filters.limit,
     country: filters.country || undefined,
     state: filters.state || undefined,
+    category: filters.category.trim() || undefined,
     industries: filters.industries.length ? filters.industries : undefined,
   };
 
