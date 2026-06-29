@@ -51,7 +51,8 @@ export function BlogDetailPage() {
 
   const title = blog?.seo?.metaTitle || blog?.title || "Blog | Invest24";
   const description = blog?.seo?.metaDescription || blog?.excerpt || "";
-  const ogImage = blog?.seo?.ogImageUrl || blog?.coverImageUrl || "";
+  const coverImageUrl = blog?.coverImageUrl?.trim() || "";
+  const ogImage = blog?.seo?.ogImageUrl || coverImageUrl || "";
   const robots = blog?.seo?.noIndex ? "noindex,nofollow" : "index,follow";
 
   return (
@@ -76,9 +77,11 @@ export function BlogDetailPage() {
             <span className="inline-flex items-center gap-1.5"><FiCalendar className="text-blue-700" /> {formatDate(blog.publishedAt)}</span>
             <span className="inline-flex items-center gap-1.5"><FiClock className="text-blue-700" /> {blog.readingTimeMinutes || "-"} min read</span>
           </p>
-          <div className="aspect-video w-full overflow-hidden rounded-2xl bg-slate-100">
-            <img src={blog.coverImageUrl} alt={blog.title} className="h-full w-full object-cover" />
-          </div>
+          {coverImageUrl ? (
+            <div className="aspect-video w-full overflow-hidden rounded-2xl bg-slate-100">
+              <img src={coverImageUrl} alt={blog.title} className="h-full w-full object-cover" />
+            </div>
+          ) : null}
           <div className="flex flex-wrap gap-1.5">
             {(blog.tags || []).map((t) => (
               <span key={t} className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700">

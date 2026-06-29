@@ -15,6 +15,7 @@ export interface AdvisorApiItem {
     youtube?: string;
     tiktok?: string;
   };
+  instagramEngagementRateScore?: number;
   instagramFollowers?: number;
   linkedinFollowers?: number;
   twitterFollowers?: number;

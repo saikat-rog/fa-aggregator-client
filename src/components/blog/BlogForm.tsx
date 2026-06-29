@@ -74,8 +74,7 @@ export function BlogForm({ initialValues, loading, onSubmit, submitLabel }: Prop
     if (!values.title.trim()) return setError("Title is required.");
     if (values.title.trim().length > 150) return setError("Title max length is 150.");
     if (!values.content.trim()) return setError("Content is required.");
-    if (!values.coverImageUrl.trim()) return setError("Cover image URL is required.");
-    if (!isValidHttpUrl(values.coverImageUrl.trim())) return setError("Cover image URL must be valid http/https URL.");
+    if (values.coverImageUrl.trim() && !isValidHttpUrl(values.coverImageUrl.trim())) return setError("Cover image URL must be valid http/https URL.");
     if (values.seo.metaTitle && values.seo.metaTitle.length > 60) return setError("SEO meta title max length is 60.");
     if (values.seo.metaDescription && values.seo.metaDescription.length > 160) return setError("SEO meta description max length is 160.");
     if (values.seo.canonicalUrl && !isValidHttpUrl(values.seo.canonicalUrl)) return setError("Canonical URL must be valid.");
@@ -86,7 +85,7 @@ export function BlogForm({ initialValues, loading, onSubmit, submitLabel }: Prop
       slug: values.slug.trim() || undefined,
       excerpt: values.excerpt.trim() || undefined,
       content: values.content,
-      coverImageUrl: values.coverImageUrl.trim(),
+      coverImageUrl: values.coverImageUrl.trim() || undefined,
       tags: tagsPreview,
       status: values.status,
       seo: {
@@ -126,7 +125,7 @@ export function BlogForm({ initialValues, loading, onSubmit, submitLabel }: Prop
         <div className="space-y-2">
           <div className="relative">
             <FiLink className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-700" />
-            <input className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 pl-9 text-sm" placeholder="Cover Image URL" value={values.coverImageUrl} onChange={(e) => update("coverImageUrl", e.target.value)} />
+            <input className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 pl-9 text-sm" placeholder="Cover Image URL (optional)" value={values.coverImageUrl} onChange={(e) => update("coverImageUrl", e.target.value)} />
           </div>
           <div className="relative">
             <FiTag className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-700" />

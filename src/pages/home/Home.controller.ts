@@ -5,7 +5,7 @@ import {
   getAllAdvisorsApi,
   type AdvisorFormOptionsResponseData,
 } from "../../services/advisor.service";
-import { followerFields, initialFilters } from "./Home.constants";
+import { initialFilters } from "./Home.constants";
 import type {
   AdvisorApiItem,
   AdvisorCardData,
@@ -45,7 +45,6 @@ export function useHomeController({
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
-  const [showAllFollowerFilters, setShowAllFollowerFilters] = useState(false);
   const latestRequestIdRef = useRef(0);
 
   const countries = useMemo(() => {
@@ -74,10 +73,6 @@ export function useHomeController({
       (formOptions?.industries ?? []).slice().sort((a, b) => a.localeCompare(b)),
     [formOptions],
   );
-
-  const visibleFollowerFields = showAllFollowerFilters
-    ? followerFields
-    : followerFields.slice(0, 3);
 
   useEffect(() => {
     if (disableUrlSync) return;
@@ -206,15 +201,12 @@ export function useHomeController({
     countries,
     states,
     industryOptions,
-    visibleFollowerFields,
-    showAllFollowerFilters,
     isLoading,
     error,
     advisors,
     pagination,
     disableUrlSync,
     setFilters,
-    setShowAllFollowerFilters,
     setFilterValue,
     resetFilters,
     setSearchParams,

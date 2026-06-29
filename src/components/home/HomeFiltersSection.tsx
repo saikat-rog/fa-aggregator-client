@@ -1,7 +1,10 @@
+import { useEffect, useState } from "react";
 import { FaFilter, FaRotateRight, FaTags } from "react-icons/fa6";
 import {
-  followerFieldLabels,
+  followerCountOptions,
+  followerFieldPlatformLabels,
   followerFieldUi,
+  followerFields,
   type FollowerField,
 } from "../../pages/home/Home.constants";
 import type { AdvisorFilters } from "../../pages/home/Home.types";
@@ -11,9 +14,6 @@ type HomeFiltersSectionProps = {
   countries: string[];
   states: string[];
   industryOptions: string[];
-  visibleFollowerFields: readonly FollowerField[];
-  showAllFollowerFilters: boolean;
-  setShowAllFollowerFilters: (value: boolean | ((prev: boolean) => boolean)) => void;
   disableUrlSync: boolean;
   onSetFilters: (updater: (prev: AdvisorFilters) => AdvisorFilters) => void;
   onSetSearchParams: (query: string) => void;
@@ -26,15 +26,54 @@ export function HomeFiltersSection({
   countries,
   states,
   industryOptions,
-  visibleFollowerFields,
-  showAllFollowerFilters,
-  setShowAllFollowerFilters,
   disableUrlSync,
   onSetFilters,
   onSetSearchParams,
   onSetFilterValue,
   onResetFilters,
 }: HomeFiltersSectionProps) {
+  const appliedFollowerField =
+    followerFields.find((field) => filters[`${field}Gte` as keyof AdvisorFilters]) ??
+    "";
+  const [selectedFollowerField, setSelectedFollowerField] = useState<
+    FollowerField | ""
+  >(appliedFollowerField);
+  const selectedFollowerCount = selectedFollowerField
+    ? String(filters[`${selectedFollowerField}Gte` as keyof AdvisorFilters])
+    : "";
+  const selectedFollowerUi = selectedFollowerField
+    ? followerFieldUi[selectedFollowerField]
+    : null;
+
+  useEffect(() => {
+    if (appliedFollowerField) {
+      setSelectedFollowerField(appliedFollowerField);
+    }
+  }, [appliedFollowerField]);
+
+  const resetFollowerFilters = (filtersToUpdate: AdvisorFilters) => {
+    const nextFilters = { ...filtersToUpdate };
+    const nextFollowerFilters = nextFilters as Record<string, string | number | string[]>;
+    for (const field of followerFields) {
+      nextFollowerFilters[`${field}Gt`] = "";
+      nextFollowerFilters[`${field}Gte`] = "";
+    }
+    return nextFilters;
+  };
+
+  const setFollowerFilter = (
+    field: FollowerField | "",
+    count: string,
+    previousFilters: AdvisorFilters,
+  ) => {
+    const nextFilters = resetFollowerFilters(previousFilters);
+    if (field && count) {
+      (nextFilters as Record<string, string | number | string[]>)[`${field}Gte`] =
+        count;
+    }
+    return { ...nextFilters, page: 1 };
+  };
+
   return (
     <section className="overflow-hidden rounded-3xl border border-blue-100 bg-linear-to-r from-blue-700 to-blue-500 p-8 text-white shadow-lg shadow-blue-100">
       <h1 className="text-3xl font-bold">Find Trusted Financial Advisors Near You</h1>
@@ -87,6 +126,7 @@ export function HomeFiltersSection({
           <button
             type="button"
             onClick={() => {
+              setSelectedFollowerField("");
               onResetFilters();
               if (!disableUrlSync) {
                 onSetSearchParams("");
@@ -138,6 +178,7 @@ export function HomeFiltersSection({
       <button
         type="button"
         onClick={() => {
+          setSelectedFollowerField("");
           onResetFilters();
           if (!disableUrlSync) {
             onSetSearchParams("");
@@ -150,61 +191,85 @@ export function HomeFiltersSection({
       </button>
 
       <div className="mt-1">
-        <div className="mb-2 flex items-center gap-2">
-          <p className="mr-2 text-md text-white">Search by followers and subscribers count</p>
-          <button
-            type="button"
-            onClick={() => setShowAllFollowerFilters((prev) => !prev)}
-            aria-label={showAllFollowerFilters ? "Hide filters" : "Show filters"}
-            title={showAllFollowerFilters ? "Hide filters" : "Show filters"}
-            className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg border border-white/70 bg-white px-2.5 py-1.5 text-xs font-semibold text-blue-700 shadow-sm transition hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/90"
-          >
-            <FaFilter />
-            <span>{showAllFollowerFilters ? "Hide Filters" : "Show Filters"}</span>
-          </button>
-        </div>
-
+        <p className="mb-2 inline-flex items-center gap-1.5 text-md text-white">
+          <FaFilter />
+          Search by followers and subscribers count
+        </p>
         <div
-          className={`overflow-hidden transition-all duration-300 ease-out ${
-            showAllFollowerFilters ? "max-h-225 opacity-100" : "max-h-0 opacity-0"
-          }`}
+          className={`rounded-2xl border border-white/40 bg-white/90 p-3 text-slate-700 shadow-[0_10px_20px_rgba(15,23,42,0.08)] ring-1 ${
+            selectedFollowerUi?.ringClass ?? "ring-blue-200"
+          } backdrop-blur`}
         >
-          <div
-            className={`transition-transform duration-300 ease-out ${
-              showAllFollowerFilters ? "translate-y-0" : "-translate-y-2"
-            }`}
-          >
-            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-              {visibleFollowerFields.map((field) => {
-                const gteKey = `${field}Gte` as keyof AdvisorFilters;
-                const ui = followerFieldUi[field];
-                return (
-                  <div
-                    key={field}
-                    className={`rounded-2xl border border-white/40 bg-white/90 p-2.5 text-slate-700 shadow-[0_10px_20px_rgba(15,23,42,0.08)] ring-1 ${ui.ringClass} backdrop-blur`}
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="text-xs font-semibold text-slate-600">
-                        {followerFieldLabels[field]}
-                      </p>
-                      <span className={`inline-flex items-center ${ui.badgeClass}`}>
-                        {ui.icon}
-                      </span>
-                    </div>
-                    <div className="mt-2">
-                      <input
-                        type="number"
-                        min={0}
-                        value={String(filters[gteKey])}
-                        onChange={(event) => onSetFilterValue(gteKey, event.target.value)}
-                        placeholder="Minimum"
-                        className={`h-8 w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 outline-none transition placeholder:text-slate-400 ${ui.inputFocusClass}`}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+          <div className="grid gap-3 md:grid-cols-[1fr_1fr_auto]">
+            <label className="block">
+              <span className="mb-1 block text-xs font-semibold text-slate-600">
+                Platform
+              </span>
+              <select
+                value={selectedFollowerField}
+                onChange={(event) => {
+                  const nextField = event.target.value as FollowerField | "";
+                  setSelectedFollowerField(nextField);
+                  onSetFilters((prev) =>
+                    setFollowerFilter(
+                      nextField,
+                      selectedFollowerCount,
+                      prev,
+                    ),
+                  );
+                }}
+                className={`h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 outline-none transition ${
+                  selectedFollowerUi?.inputFocusClass ?? "focus:border-blue-400"
+                }`}
+              >
+                <option value="">Select platform</option>
+                {followerFields.map((field) => (
+                  <option key={field} value={field}>
+                    {followerFieldPlatformLabels[field]}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="block">
+              <span className="mb-1 block text-xs font-semibold text-slate-600">
+                Followers / Subscribers
+              </span>
+              <select
+                value={selectedFollowerCount}
+                disabled={!selectedFollowerField}
+                onChange={(event) =>
+                  onSetFilters((prev) =>
+                    setFollowerFilter(
+                      selectedFollowerField as FollowerField,
+                      event.target.value,
+                      prev,
+                    ),
+                  )
+                }
+                className={`h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 outline-none transition disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 ${
+                  selectedFollowerUi?.inputFocusClass ?? "focus:border-blue-400"
+                }`}
+              >
+                <option value="">Select count</option>
+                {followerCountOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            {selectedFollowerUi ? (
+              <div className="flex items-end">
+                <span
+                  className={`inline-flex h-10 items-center gap-2 rounded-lg border px-3 text-sm font-semibold ${selectedFollowerUi.badgeClass}`}
+                >
+                  {selectedFollowerUi.icon}
+                  {followerFieldPlatformLabels[selectedFollowerField as FollowerField]}
+                </span>
+              </div>
+            ) : null}
           </div>
         </div>
       </div>

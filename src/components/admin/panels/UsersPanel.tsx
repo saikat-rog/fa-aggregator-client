@@ -59,7 +59,7 @@ export function UsersPanel({ params, setParam, setManyParams }: Props) {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h3 className="inline-flex items-center gap-2 text-lg font-semibold text-slate-900"><FiUsers className="text-blue-700" /> Users</h3>
-          <p className="text-sm text-blue-700">Directory from <code>/admin/users</code></p>
+          {/* <p className="text-sm text-blue-700">Directory from <code>/admin/users</code></p> */}
         </div>
         <div className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">{data?.pagination?.total ?? 0} total</div>
       </div>

@@ -38,6 +38,7 @@ type ProfileHeroCardProps = {
   industry?: string;
   ppp?: number | null;
   category?: string | null;
+  instagramEngagementRateScore?: number | null;
   profilePictureUrl?: string;
   personalWebsite?: string;
   emailForContact?: string;
@@ -88,6 +89,7 @@ export function ProfileHeroCard({
   industry,
   ppp,
   category,
+  instagramEngagementRateScore,
   profilePictureUrl,
   personalWebsite,
   emailForContact,
@@ -108,6 +110,13 @@ export function ProfileHeroCard({
           notation: "compact",
           maximumFractionDigits: 1,
         }).format(value)
+      : null;
+  const formattedInstagramEngagementRateScore =
+    typeof instagramEngagementRateScore === "number" &&
+    Number.isFinite(instagramEngagementRateScore)
+      ? new Intl.NumberFormat("en", {
+          maximumFractionDigits: 2,
+        }).format(instagramEngagementRateScore)
       : null;
 
   const hasSocial =
@@ -164,7 +173,7 @@ export function ProfileHeroCard({
         )}
       </div>
 
-      <div className="min-w-0 flex-1 space-x-2">
+      <div className="min-w-0 flex-1 space-x-2 pt-5">
         <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
           {name}
         </h1>
@@ -183,6 +192,11 @@ export function ProfileHeroCard({
           <p className="inline-flex items-center rounded-full bg-cyan-700 px-3 py-1 text-xs font-semibold tracking-wide text-white">
             Category: {getDisplayCategory(category)}
           </p>
+          {formattedInstagramEngagementRateScore ? (
+            <p className="uppercase inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold tracking-wide text-black underline decoration-dotted underline-offset-4">
+              Engagement Rate: {formattedInstagramEngagementRateScore}
+            </p>
+          ) : null}
         </div>
         <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-slate-50 px-3 py-1 text-xs text-slate-600">
           <FaLocationDot className="text-blue-600" />

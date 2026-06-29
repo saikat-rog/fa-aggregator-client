@@ -41,7 +41,7 @@ export function HomeResultsSection({
 
       {!isLoading && !error ? (
         <>
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid auto-rows-fr gap-4 md:grid-cols-2">
             {advisors.map((advisor) => (
               <AdvisorCard key={advisor.id} advisor={advisor} />
             ))}

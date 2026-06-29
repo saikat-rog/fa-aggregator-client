@@ -513,10 +513,9 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
         </div>
 
         <textarea
-          required
           name="about"
           rows={4}
-          placeholder="Short description for your public profile"
+          placeholder="Short description for your public profile (optional)"
           className="w-full rounded-xl border border-blue-100 px-4 py-3 outline-none focus:border-blue-400"
         />
 
@@ -580,6 +579,7 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
           </button>
           
         </div>
+          <p><strong>NOTE: </strong>Once submitted, please DM us in our official instagram page "invest24" from your given Instagram profile.</p>
       </form>
 
       {applicationNote ? (

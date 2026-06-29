@@ -76,26 +76,32 @@ export function BlogListPage() {
         </section>
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
-          {data?.blogs?.map((b) => (
-            <Link key={b._id} to={`/blog/${b.slug}`} className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_10px_30px_rgba(15,23,42,0.05)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(15,23,42,0.1)]">
-              <div className="aspect-video w-full overflow-hidden bg-slate-100">
-                <img src={b.coverImageUrl} alt={b.title} className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]" />
-              </div>
-              <div className="p-4">
-                <p className="inline-flex items-center gap-1.5 text-xs text-slate-500"><FiCalendar className="text-blue-700" /> {b.publishedAt ? new Date(b.publishedAt).toLocaleDateString("en-GB") : "-"}</p>
-                <h2 className="mt-1 text-lg font-semibold text-slate-900">{b.title}</h2>
-                <p className="mt-1 line-clamp-3 text-sm text-slate-600">{b.excerpt || ""}</p>
-                <div className="mt-3 flex flex-wrap gap-1.5">
-                  {(b.tags || []).map((t) => (
-                    <span key={t} className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700">
-                      <FiTag className="h-3 w-3" />
-                      {t}
-                    </span>
-                  ))}
+          {data?.blogs?.map((b) => {
+            const coverImageUrl = b.coverImageUrl?.trim() || "";
+
+            return (
+              <Link key={b._id} to={`/blog/${b.slug}`} className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_10px_30px_rgba(15,23,42,0.05)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(15,23,42,0.1)]">
+                {coverImageUrl ? (
+                  <div className="aspect-video w-full overflow-hidden bg-slate-100">
+                    <img src={coverImageUrl} alt={b.title} className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]" />
+                  </div>
+                ) : null}
+                <div className="p-4">
+                  <p className="inline-flex items-center gap-1.5 text-xs text-slate-500"><FiCalendar className="text-blue-700" /> {b.publishedAt ? new Date(b.publishedAt).toLocaleDateString("en-GB") : "-"}</p>
+                  <h2 className="mt-1 text-lg font-semibold text-slate-900">{b.title}</h2>
+                  <p className="mt-1 line-clamp-3 text-sm text-slate-600">{b.excerpt || ""}</p>
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {(b.tags || []).map((t) => (
+                      <span key={t} className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700">
+                        <FiTag className="h-3 w-3" />
+                        {t}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       )}
       {data?.pagination ? (

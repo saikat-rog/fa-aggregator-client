@@ -62,7 +62,7 @@ export function SavedAdvisorsSection({
           </button>
         </div>
       ) : (
-        <div className="mt-4 grid gap-4 md:grid-cols-2">
+        <div className="mt-4 grid auto-rows-fr gap-4 md:grid-cols-2">
           {savedAdvisors.map((advisor) => {
             const cardData: AdvisorCardData = {
               id: advisor.id,

@@ -171,7 +171,7 @@ export function AdvisorCard({ advisor }: AdvisorCardProps) {
 
   return (
     <>
-      <article className="group relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-[0_18px_60px_rgba(15,23,42,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_80px_rgba(15,23,42,0.14)]">
+      <article className="group relative h-full overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-[0_18px_60px_rgba(15,23,42,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_80px_rgba(15,23,42,0.14)]">
         <div className="absolute right-3 top-3 z-10">
           <button
             type="button"
@@ -187,7 +187,7 @@ export function AdvisorCard({ advisor }: AdvisorCardProps) {
             {saveLoading ? "..." : isSavedAdvisor ? "Saved" : "Save"}
           </button>
         </div>
-        <div className="grid lg:grid-cols-[280px_1fr]">
+        <div className="grid h-full lg:grid-cols-[280px_1fr]">
           <div className="relative bg-linear-to-br from-blue-700 to-blue-500 p-5 text-white">
             <div className="absolute right-0 top-0 h-24 w-24 rounded-bl-full bg-white/10" />
             <div className="relative flex h-full flex-col justify-between gap-6">
@@ -417,7 +417,7 @@ export function AdvisorCard({ advisor }: AdvisorCardProps) {
             <button
               type="button"
               onClick={() => navigate(`/${advisor.username}`)}
-              className="mt-auto inline-flex items-center justify-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 w-full"
+              className="mt-auto inline-flex w-full items-center justify-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
             >
               View more <FaArrowRight />
             </button>

@@ -11,15 +11,12 @@ export function HomePage(props: HomePageProps = {}) {
     countries,
     states,
     industryOptions,
-    visibleFollowerFields,
-    showAllFollowerFilters,
     isLoading,
     error,
     advisors,
     pagination,
     disableUrlSync,
     setFilters,
-    setShowAllFollowerFilters,
     setFilterValue,
     resetFilters,
     setSearchParams,
@@ -35,9 +32,6 @@ export function HomePage(props: HomePageProps = {}) {
         countries={countries}
         states={states}
         industryOptions={industryOptions}
-        visibleFollowerFields={visibleFollowerFields}
-        showAllFollowerFilters={showAllFollowerFilters}
-        setShowAllFollowerFilters={setShowAllFollowerFilters}
         disableUrlSync={disableUrlSync}
         onSetFilters={setFilters}
         onSetSearchParams={setSearchParams}

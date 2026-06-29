@@ -17,7 +17,7 @@ export interface Blog {
   slug: string;
   excerpt?: string;
   content?: string;
-  coverImageUrl: string;
+  coverImageUrl?: string;
   tags?: string[];
   status: BlogStatus;
   seo?: BlogSeo;
@@ -53,7 +53,7 @@ export interface BlogPayload {
   slug?: string;
   excerpt?: string;
   content: string;
-  coverImageUrl: string;
+  coverImageUrl?: string;
   tags?: string[] | string;
   status?: BlogStatus;
   seo?: BlogSeo;
