@@ -80,6 +80,13 @@ const NO_PASSWORD_FOR_ROLE_MESSAGE =
 const ADVISOR_DECLARATION_MESSAGE =
   "Please confirm you are an influencer and not claiming anything fake.";
 
+const isLikelyMobileDevice = () => {
+  if (typeof window === "undefined") return false;
+
+  const hasCoarsePointer = window.matchMedia?.("(pointer: coarse)").matches;
+  return hasCoarsePointer || window.innerWidth < 768;
+};
+
 const persistAuthSession = (authResponse: AuthSuccessPayload) => {
   localStorage.setItem("token", authResponse.accessToken);
   localStorage.setItem("role", authResponse.role);
@@ -352,12 +359,17 @@ const RightAuthForms = () => {
     setSuccessMessage("");
     setShowGoogleOnlyGuidance(false);
 
+    if (isLikelyMobileDevice()) {
+      redirectToGoogleSignIn(sourceMode);
+      return;
+    }
+
     if (!googleClientReady) {
       initGoogleClient();
     }
 
     if (!window.google?.accounts?.id) {
-      setErrorMessage("Google login is not configured.");
+      redirectToGoogleSignIn(sourceMode);
       return;
     }
 
