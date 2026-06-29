@@ -70,6 +70,7 @@ type PromptMomentNotification = {
   isSkippedMoment: () => boolean;
 };
 
+const GOOGLE_REDIRECT_STATE_KEY = "invest24GoogleRedirectState";
 const GOOGLE_ONLY_HELP_TEXT =
   "After login, create password in Settings";
 const GOOGLE_ONLY_FALLBACK_MESSAGE =
@@ -176,6 +177,43 @@ const RightAuthForms = () => {
   const hiddenGoogleButtonContainerRef = useRef<HTMLDivElement | null>(null);
   const hasRenderedHiddenGoogleButtonRef = useRef(false);
   const MAX_RESEND_ATTEMPTS = 5;
+
+  const getGoogleClientId = () =>
+    import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
+
+  const redirectToGoogleSignIn = (sourceMode: AuthMode) => {
+    const clientId = getGoogleClientId();
+    if (!clientId) {
+      setErrorMessage("Google login is not configured.");
+      return;
+    }
+
+    const nonce =
+      typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    sessionStorage.setItem(
+      GOOGLE_REDIRECT_STATE_KEY,
+      JSON.stringify({
+        mode: sourceMode,
+        role: formRoleRef.current,
+        nonce,
+      }),
+    );
+
+    const params = new URLSearchParams({
+      client_id: clientId,
+      redirect_uri: window.location.origin + window.location.pathname,
+      response_type: "id_token",
+      scope: "openid email profile",
+      nonce,
+      prompt: "select_account",
+    });
+
+    window.location.assign(
+      `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`,
+    );
+  };
 
   const resetSignupFlow = () => {
     setSignupStep("details");
@@ -287,7 +325,7 @@ const RightAuthForms = () => {
   };
 
   const initGoogleClient = () => {
-    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
+    const clientId = getGoogleClientId();
     if (!clientId) {
       setErrorMessage("Google login is not configured.");
       return;
@@ -325,15 +363,7 @@ const RightAuthForms = () => {
 
     window.google.accounts.id.prompt((notification) => {
       if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-        const hiddenGoogleButton =
-          hiddenGoogleButtonContainerRef.current?.querySelector(
-            "div[role='button']",
-          ) as HTMLElement | null;
-        if (hiddenGoogleButton) {
-          hiddenGoogleButton.click();
-          return;
-        }
-        setErrorMessage("Google prompt is blocked on this browser. Please enable popups/cookies and try again.");
+        redirectToGoogleSignIn(sourceMode);
       }
     });
   };
@@ -540,6 +570,41 @@ const RightAuthForms = () => {
       setIsGoogleSubmitting(false);
     }
   };
+
+  useEffect(() => {
+    const hashParams = new URLSearchParams(window.location.hash.slice(1));
+    const idToken = hashParams.get("id_token");
+    if (!idToken) return;
+
+    const storedState = sessionStorage.getItem(GOOGLE_REDIRECT_STATE_KEY);
+    sessionStorage.removeItem(GOOGLE_REDIRECT_STATE_KEY);
+
+    try {
+      const parsedState = storedState
+        ? (JSON.parse(storedState) as {
+            mode?: AuthMode;
+            role?: AuthRole;
+          })
+        : null;
+      if (parsedState?.role) {
+        formRoleRef.current = parsedState.role;
+        setFormRole(parsedState.role);
+      }
+      if (parsedState?.mode) {
+        googleFlowModeRef.current = parsedState.mode;
+        setMode(parsedState.mode);
+      }
+    } catch {
+      // Continue with the current role/mode if stored redirect state is invalid.
+    }
+
+    window.history.replaceState(
+      null,
+      document.title,
+      window.location.pathname + window.location.search,
+    );
+    void onGoogleCredential(idToken);
+  }, []);
 
   useEffect(() => {
     const existingScript = document.querySelector(
