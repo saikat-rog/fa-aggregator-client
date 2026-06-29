@@ -128,6 +128,11 @@ export async function getAdminAdvisorDetails(userId: string, signal?: AbortSigna
   return (payload?.advisor ?? payload) as Record<string, unknown>;
 }
 
+export async function removeAdminAdvisorProfile(userId: string) {
+  const response = await adminApi.delete(`/admin/advisors/${userId}/profile`);
+  return response.data?.data ?? response.data;
+}
+
 export interface AdvisorEnquiriesResponse {
   enquiries: Array<Record<string, unknown>>;
   pagination?: Pagination;

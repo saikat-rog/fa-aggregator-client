@@ -21,6 +21,7 @@ import {
   FiSearch,
   FiShield,
   FiTag,
+  FiTrash2,
   FiUser,
   FiXCircle,
 } from "react-icons/fi";
@@ -29,6 +30,7 @@ import {
   getAdminAdvisorDetails,
   getAdminAdvisorEnquiries,
   getAdminAdvisors,
+  removeAdminAdvisorProfile,
   type AdminAdvisorCard,
 } from "../../../services/admin/admin.service";
 import {
@@ -80,6 +82,13 @@ export function AdvisorsPanel({ params, setParam }: Props) {
   const [enquiries, setEnquiries] = useState<Record<string, unknown>[]>([]);
   const [enquiriesLoading, setEnquiriesLoading] = useState(false);
   const [enquiriesTotal, setEnquiriesTotal] = useState(0);
+  const [actionInfo, setActionInfo] = useState<string | null>(null);
+  const [removeError, setRemoveError] = useState<string | null>(null);
+  const [removeTarget, setRemoveTarget] = useState<{
+    id: string;
+    name?: string;
+  } | null>(null);
+  const [isRemovingProfile, setIsRemovingProfile] = useState(false);
   const [expandedEnquiryIds, setExpandedEnquiryIds] = useState<Set<string>>(
     new Set(),
   );
@@ -93,6 +102,8 @@ export function AdvisorsPanel({ params, setParam }: Props) {
     email?: string;
     country?: string;
     state?: string;
+    role?: string;
+    roles?: string[];
     verificationStatus?: string;
     advisorProfile?: Record<string, unknown>;
     socialLinks?: Record<string, unknown>;
@@ -146,6 +157,10 @@ export function AdvisorsPanel({ params, setParam }: Props) {
   ).toLowerCase();
   const isVerified =
     verificationState === "approved" || verificationState === "verified";
+  const hasAdvisorRole =
+    Array.isArray(detailsUser?.roles)
+      ? detailsUser.roles.includes("advisor")
+      : detailsUser?.role === "advisor" || Object.keys(profile).length > 0;
 
   const advisorItems = [
     { label: "Contact Email", value: String(profile.emailForContact ?? "-") },
@@ -372,6 +387,61 @@ export function AdvisorsPanel({ params, setParam }: Props) {
         })
       : "—";
 
+  const getBackendErrorMessage = (err: unknown): string => {
+    if (
+      typeof err === "object" &&
+      err !== null &&
+      "response" in err &&
+      typeof (err as { response?: { data?: { msg?: string } } }).response?.data
+        ?.msg === "string"
+    ) {
+      return (
+        (err as { response?: { data?: { msg?: string } } }).response?.data
+          ?.msg || "Failed to remove advisor profile."
+      );
+    }
+
+    return "Failed to remove advisor profile.";
+  };
+
+  const confirmRemoveAdvisorProfile = async () => {
+    if (!removeTarget) return;
+    setIsRemovingProfile(true);
+    setRemoveError(null);
+    setActionInfo(null);
+
+    try {
+      const response = await removeAdminAdvisorProfile(removeTarget.id);
+      setData((prev) =>
+        prev
+          ? {
+              ...prev,
+              advisors: prev.advisors.filter(
+                (advisor) => advisor.id !== removeTarget.id,
+              ),
+              pagination: {
+                ...prev.pagination,
+                total: Math.max(0, (prev.pagination?.total ?? 1) - 1),
+              },
+            }
+          : prev,
+      );
+      if (selectedId === removeTarget.id) {
+        setSelectedId("");
+        setDetails(null);
+        setEnquiries([]);
+        setEnquiriesTotal(0);
+        setExpandedEnquiryIds(new Set());
+      }
+      setActionInfo(response?.msg || "Advisor profile removed.");
+      setRemoveTarget(null);
+    } catch (err) {
+      setRemoveError(getBackendErrorMessage(err));
+    } finally {
+      setIsRemovingProfile(false);
+    }
+  };
+
   return (
     <section className={panelClassName}>
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -478,6 +548,7 @@ export function AdvisorsPanel({ params, setParam }: Props) {
       {loading ? (
         <p className={statusInfoClassName}>Loading advisors...</p>
       ) : null}
+      {actionInfo ? <p className={statusInfoClassName}>{actionInfo}</p> : null}
       {error ? <p className={statusErrorClassName}>{error}</p> : null}
       {!loading && !error && (data?.advisors?.length ?? 0) === 0 ? (
         <p className={statusEmptyClassName}>
@@ -535,20 +606,41 @@ export function AdvisorsPanel({ params, setParam }: Props) {
 
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]">
           <div className="mb-3 border-b border-slate-100 pb-3">
-            <h4 className="inline-flex items-center gap-1.5 font-semibold text-slate-900">
-              <FiShield className="text-blue-700" /> Advisor Details
-              <span
-                className={`inline-flex h-5 w-5 items-center justify-center rounded-full ${isVerified ? "bg-green-700 text-white" : "bg-amber-100 text-amber-700"}`}
-                title={isVerified ? "Verified" : "Unverified"}
-              >
-                {isVerified ? (
-                  <FiCheckCircle className="h-3.5 w-3.5" />
-                ) : (
-                  <FiXCircle className="h-3.5 w-3.5" />
-                )}
-              </span>
-            </h4>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h4 className="inline-flex items-center gap-1.5 font-semibold text-slate-900">
+                <FiShield className="text-blue-700" /> Advisor Details
+                <span
+                  className={`inline-flex h-5 w-5 items-center justify-center rounded-full ${isVerified ? "bg-green-700 text-white" : "bg-amber-100 text-amber-700"}`}
+                  title={isVerified ? "Verified" : "Unverified"}
+                >
+                  {isVerified ? (
+                    <FiCheckCircle className="h-3.5 w-3.5" />
+                  ) : (
+                    <FiXCircle className="h-3.5 w-3.5" />
+                  )}
+                </span>
+              </h4>
+              {details && hasAdvisorRole ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setRemoveError(null);
+                    setRemoveTarget({
+                      id: selectedId,
+                      name: detailsUser?.name || String(profile.username ?? ""),
+                    });
+                  }}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 transition hover:bg-red-100"
+                >
+                  <FiTrash2 />
+                  Remove Advisor Profile
+                </button>
+              ) : null}
+            </div>
           </div>
+          {removeError && !removeTarget ? (
+            <p className={statusErrorClassName}>{removeError}</p>
+          ) : null}
           {!selectedId ? (
             <p className="text-sm text-blue-700">
               Select an advisor from the list to view details.
@@ -765,6 +857,61 @@ export function AdvisorsPanel({ params, setParam }: Props) {
           setParam("advisorsPage", "1");
         }}
       />
+
+      {removeTarget ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4">
+          <div className="w-full max-w-md rounded-2xl border border-red-100 bg-white p-5 shadow-2xl">
+            <div className="flex items-start gap-3">
+              <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-700">
+                <FiTrash2 />
+              </span>
+              <div>
+                <h4 className="text-base font-semibold text-slate-900">
+                  Remove Advisor Profile
+                </h4>
+                <p className="mt-1 text-sm text-slate-600">
+                  This will remove the advisor profile and advisor access for
+                  this user. The user account will not be deleted.
+                </p>
+                {removeTarget.name ? (
+                  <p className="mt-2 text-xs font-medium text-slate-500">
+                    User: {removeTarget.name}
+                  </p>
+                ) : null}
+              </div>
+            </div>
+
+            {removeError ? (
+              <p className="mt-4 rounded-xl border border-red-100 bg-red-50 p-3 text-sm text-red-700">
+                {removeError}
+              </p>
+            ) : null}
+
+            <div className="mt-5 flex flex-wrap justify-end gap-2">
+              <button
+                type="button"
+                disabled={isRemovingProfile}
+                onClick={() => {
+                  setRemoveTarget(null);
+                  setRemoveError(null);
+                }}
+                className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-60"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isRemovingProfile}
+                onClick={confirmRemoveAdvisorProfile}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-red-700 bg-red-700 px-3 py-2 text-sm font-semibold text-white transition hover:bg-red-800 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <FiTrash2 />
+                {isRemovingProfile ? "Removing..." : "Remove Advisor Profile"}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }
