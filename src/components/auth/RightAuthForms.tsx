@@ -38,38 +38,6 @@ type GoogleCompletionField = {
   type?: "text" | "tel";
 };
 
-declare global {
-  interface Window {
-    google?: {
-      accounts?: {
-        id?: {
-          initialize: (params: {
-            client_id: string;
-            callback: (response: { credential?: string }) => void;
-          }) => void;
-          prompt: (listener?: (notification: PromptMomentNotification) => void) => void;
-          renderButton: (
-            parent: HTMLElement,
-            options: {
-              type?: "standard" | "icon";
-              theme?: "outline" | "filled_blue" | "filled_black";
-              size?: "large" | "medium" | "small";
-              text?: "signin_with" | "signup_with" | "continue_with" | "signin";
-              shape?: "rectangular" | "pill" | "circle" | "square";
-              width?: number;
-            },
-          ) => void;
-        };
-      };
-    };
-  }
-}
-
-type PromptMomentNotification = {
-  isNotDisplayed: () => boolean;
-  isSkippedMoment: () => boolean;
-};
-
 const GOOGLE_REDIRECT_STATE_KEY = "invest24GoogleRedirectState";
 const GOOGLE_ONLY_HELP_TEXT =
   "After login, create password in Settings";
@@ -79,13 +47,6 @@ const NO_PASSWORD_FOR_ROLE_MESSAGE =
   "This role has no password yet. Login with Google and create a password first.";
 const ADVISOR_DECLARATION_MESSAGE =
   "Please confirm you are an influencer and not claiming anything fake.";
-
-const isLikelyMobileDevice = () => {
-  if (typeof window === "undefined") return false;
-
-  const hasCoarsePointer = window.matchMedia?.("(pointer: coarse)").matches;
-  return hasCoarsePointer || window.innerWidth < 768;
-};
 
 const persistAuthSession = (authResponse: AuthSuccessPayload) => {
   localStorage.setItem("token", authResponse.accessToken);
@@ -138,7 +99,6 @@ const RightAuthForms = () => {
   const [otpDigits, setOtpDigits] = useState<string[]>(Array(6).fill(""));
   const [resendAttempts, setResendAttempts] = useState(0);
   const [otpCooldownStarted, setOtpCooldownStarted] = useState(false);
-  const [googleClientReady, setGoogleClientReady] = useState(false);
   const [showGoogleOnlyGuidance, setShowGoogleOnlyGuidance] = useState(false);
   const [forgotPayload, setForgotPayload] = useState({
     email: "",
@@ -181,8 +141,6 @@ const RightAuthForms = () => {
   const formRoleRef = useRef<AuthRole>("user");
   const modeRef = useRef<AuthMode>("login");
   const googleFlowModeRef = useRef<AuthMode>("login");
-  const hiddenGoogleButtonContainerRef = useRef<HTMLDivElement | null>(null);
-  const hasRenderedHiddenGoogleButtonRef = useRef(false);
   const MAX_RESEND_ATTEMPTS = 5;
 
   const getGoogleClientId = () =>
@@ -331,53 +289,12 @@ const RightAuthForms = () => {
     }
   };
 
-  const initGoogleClient = () => {
-    const clientId = getGoogleClientId();
-    if (!clientId) {
-      setErrorMessage("Google login is not configured.");
-      return;
-    }
-
-    if (!window.google?.accounts?.id) {
-      setErrorMessage("Google SDK failed to load.");
-      return;
-    }
-
-    window.google.accounts.id.initialize({
-      client_id: clientId,
-      callback: (response) => {
-        void onGoogleCredential(response.credential);
-      },
-    });
-
-    setGoogleClientReady(true);
-  };
-
   const handleGoogleSignIn = (sourceMode: AuthMode) => {
     googleFlowModeRef.current = sourceMode;
     setErrorMessage("");
     setSuccessMessage("");
     setShowGoogleOnlyGuidance(false);
-
-    if (isLikelyMobileDevice()) {
-      redirectToGoogleSignIn(sourceMode);
-      return;
-    }
-
-    if (!googleClientReady) {
-      initGoogleClient();
-    }
-
-    if (!window.google?.accounts?.id) {
-      redirectToGoogleSignIn(sourceMode);
-      return;
-    }
-
-    window.google.accounts.id.prompt((notification) => {
-      if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-        redirectToGoogleSignIn(sourceMode);
-      }
-    });
+    redirectToGoogleSignIn(sourceMode);
   };
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -619,28 +536,6 @@ const RightAuthForms = () => {
   }, []);
 
   useEffect(() => {
-    const existingScript = document.querySelector(
-      'script[src="https://accounts.google.com/gsi/client"]',
-    ) as HTMLScriptElement | null;
-
-    if (existingScript) {
-      if (window.google?.accounts?.id) {
-        initGoogleClient();
-      } else {
-        existingScript.addEventListener("load", initGoogleClient, { once: true });
-      }
-      return;
-    }
-
-    const script = document.createElement("script");
-    script.src = "https://accounts.google.com/gsi/client";
-    script.async = true;
-    script.defer = true;
-    script.onload = initGoogleClient;
-    document.head.appendChild(script);
-  }, []);
-
-  useEffect(() => {
     if (signupStep === "otp" && !otpCooldownStarted) {
       setResendCooldown(16);
       setOtpCooldownStarted(true);
@@ -667,22 +562,6 @@ const RightAuthForms = () => {
     setForgotPayload((prev) => ({ ...prev, role: formRole }));
   }, [forgotOpen, formRole]);
 
-  useEffect(() => {
-    if (!googleClientReady) return;
-    if (!hiddenGoogleButtonContainerRef.current) return;
-    if (!window.google?.accounts?.id) return;
-    if (hasRenderedHiddenGoogleButtonRef.current) return;
-
-    window.google.accounts.id.renderButton(hiddenGoogleButtonContainerRef.current, {
-      type: "standard",
-      theme: "outline",
-      size: "large",
-      text: "continue_with",
-      width: 280,
-    });
-    hasRenderedHiddenGoogleButtonRef.current = true;
-  }, [googleClientReady]);
-
   const canSubmitForgotRequest = useMemo(
     () => forgotPayload.email.trim().length > 0,
     [forgotPayload.email],
@@ -698,11 +577,6 @@ const RightAuthForms = () => {
 
   return (
     <section className="rounded-3xl border border-blue-100 bg-white py-4 px-3 md:p-5 shadow-lg">
-      <div
-        ref={hiddenGoogleButtonContainerRef}
-        className="pointer-events-none absolute -left-[9999px] top-0 opacity-0"
-        aria-hidden="true"
-      />
       {successMessage ? (
         <div className="mb-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
           {successMessage}
