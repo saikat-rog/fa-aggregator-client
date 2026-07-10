@@ -30,8 +30,10 @@ export interface AdminUser {
   name?: string;
   email?: string;
   phone?: string;
-  country?: string;
-  state?: string;
+  approxLocation?: {
+    country?: string;
+    state?: string;
+  };
   role?: string;
   createdAt?: string;
 }
