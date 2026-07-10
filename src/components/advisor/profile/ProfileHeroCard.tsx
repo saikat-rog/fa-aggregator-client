@@ -43,6 +43,7 @@ type ProfileHeroCardProps = {
   personalWebsite?: string;
   emailForContact?: string;
   userCanOpenLinks: boolean;
+  emailVisible: boolean;
   socialLinks: SocialLinks;
   onWebsiteOpen: (url: string) => void;
   onEmailOpen: (mailto: string) => void;
@@ -94,6 +95,7 @@ export function ProfileHeroCard({
   personalWebsite,
   emailForContact,
   userCanOpenLinks,
+  emailVisible,
   socialLinks,
   onWebsiteOpen,
   onEmailOpen,
@@ -248,15 +250,11 @@ export function ProfileHeroCard({
                 </p>
                 <div className="mt-1 flex items-center justify-between gap-2">
                   <p
-                    className={`truncate text-xs ${
-                      userCanOpenLinks
-                        ? "text-slate-700"
-                        : "select-none text-slate-700 blur-sm"
-                    }`}
+                    className="truncate text-xs text-slate-700"
                   >
-                    {emailForContact}
+                    {emailVisible ? emailForContact : "View Email"}
                   </p>
-                  {userCanOpenLinks ? (
+                  {emailVisible ? (
                     <span className="shrink-0 text-slate-500 transition group-hover:text-blue-700">
                       <FaArrowUpRightFromSquare />
                     </span>

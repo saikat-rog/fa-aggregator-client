@@ -23,19 +23,10 @@ type PendingSignup = {
   role: AuthRole;
 };
 
-type GoogleCompletionState = {
+type GooglePhoneState = {
   open: boolean;
   idToken: string;
   role: AuthRole;
-};
-
-type GoogleCompletionFieldKey = "name" | "phone";
-type GoogleCompletionField = {
-  key: GoogleCompletionFieldKey;
-  label: string;
-  required: boolean;
-  placeholder: string;
-  type?: "text" | "tel";
 };
 
 const GOOGLE_REDIRECT_STATE_KEY = "invest24GoogleRedirectState";
@@ -107,40 +98,20 @@ const RightAuthForms = () => {
     newPassword: "",
     confirmPassword: "",
   });
-  const [googleCompletion, setGoogleCompletion] = useState<GoogleCompletionState>({
+  const [googlePhone, setGooglePhone] = useState<GooglePhoneState>({
     open: false,
     idToken: "",
     role: "user",
   });
-  const [googleCompletionForm, setGoogleCompletionForm] = useState({
-    name: "",
-    phone: "",
+  const [googlePhoneForm, setGooglePhoneForm] = useState({
     countryCode: "91",
+    phone: "",
   });
-  const googleCompletionFields: GoogleCompletionField[] = [
-    {
-      key: "name",
-      label: "Full name",
-      required: true,
-      placeholder: "Full name",
-      type: "text",
-    },
-    {
-      key: "phone",
-      label: "Phone (optional)",
-      required: false,
-      placeholder: "Phone (optional)",
-      type: "tel",
-    },
-  ];
-
   const navigate = useNavigate();
   const pendingSignupEmail = pendingSignup?.email || "your email";
   const digitRefs = useRef<HTMLInputElement[]>([]);
-  const googleIdTokenRef = useRef<string>("");
   const formRoleRef = useRef<AuthRole>("user");
   const modeRef = useRef<AuthMode>("login");
-  const googleFlowModeRef = useRef<AuthMode>("login");
   const MAX_RESEND_ATTEMPTS = 5;
 
   const getGoogleClientId = () =>
@@ -232,9 +203,8 @@ const RightAuthForms = () => {
 
   const tryGoogleAuth = async (params: {
     idToken: string;
-    role: AuthRole;
-    name?: string;
-    phone?: string;
+    role?: AuthRole;
+    phone: string;
   }) => {
     const response = await googleAuthApi(params);
     applyAuthSuccess(response, true);
@@ -246,51 +216,39 @@ const RightAuthForms = () => {
       return;
     }
 
-    googleIdTokenRef.current = credential;
-    setIsGoogleSubmitting(true);
     setErrorMessage("");
     setSuccessMessage("");
+    setGooglePhone({
+      open: true,
+      idToken: credential,
+      role: formRoleRef.current,
+    });
+  };
+
+  const onGooglePhoneSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const phone = googlePhoneForm.phone.trim();
+    if (!phone) {
+      setErrorMessage("Mobile number is required.");
+      return;
+    }
 
     try {
-      if (googleFlowModeRef.current === "signup") {
-        setGoogleCompletion({
-          open: true,
-          idToken: credential,
-          role: formRoleRef.current,
-        });
-        return;
-      }
-
-      await tryGoogleAuth({ idToken: credential, role: formRoleRef.current });
+      setIsGoogleSubmitting(true);
+      setErrorMessage("");
+      await tryGoogleAuth({
+        idToken: googlePhone.idToken,
+        role: googlePhone.role,
+        phone: `+${googlePhoneForm.countryCode}${phone}`,
+      });
     } catch (error: unknown) {
-      const message = extractApiMessage(error);
-      const status =
-        typeof error === "object" && error !== null && "response" in error
-          ? (error as { response?: { status?: number } }).response?.status
-          : undefined;
-      const lowerMessage = message.toLowerCase();
-      const nameRequired =
-        status === 422 &&
-        (lowerMessage.includes("name") || lowerMessage.includes("required"));
-      const incompleteSignup = status === 422;
-
-      if (nameRequired || incompleteSignup) {
-        setGoogleCompletion({
-          open: true,
-          idToken: credential,
-          role: formRoleRef.current,
-        });
-        return;
-      }
-
-      setErrorMessage(message || "Google authentication failed.");
+      setErrorMessage(extractApiMessage(error) || "Google authentication failed.");
     } finally {
       setIsGoogleSubmitting(false);
     }
   };
 
   const handleGoogleSignIn = (sourceMode: AuthMode) => {
-    googleFlowModeRef.current = sourceMode;
     setErrorMessage("");
     setSuccessMessage("");
     setShowGoogleOnlyGuidance(false);
@@ -471,35 +429,6 @@ const RightAuthForms = () => {
     }
   };
 
-  const onGoogleCompletionSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const name = googleCompletionForm.name.trim();
-    if (!name) {
-      setErrorMessage("Name is required to complete Google signup.");
-      return;
-    }
-
-    const phone = googleCompletionForm.phone.trim();
-    const fullPhone = phone
-      ? `+${googleCompletionForm.countryCode}${phone}`
-      : undefined;
-
-    try {
-      setIsGoogleSubmitting(true);
-      setErrorMessage("");
-      await tryGoogleAuth({
-        idToken: googleCompletion.idToken,
-        role: googleCompletion.role,
-        name,
-        phone: fullPhone,
-      });
-    } catch (error: unknown) {
-      setErrorMessage(extractApiMessage(error) || "Could not complete Google signup.");
-    } finally {
-      setIsGoogleSubmitting(false);
-    }
-  };
-
   useEffect(() => {
     const hashParams = new URLSearchParams(window.location.hash.slice(1));
     const idToken = hashParams.get("id_token");
@@ -520,7 +449,6 @@ const RightAuthForms = () => {
         setFormRole(parsedState.role);
       }
       if (parsedState?.mode) {
-        googleFlowModeRef.current = parsedState.mode;
         setMode(parsedState.mode);
       }
     } catch {
@@ -1047,7 +975,7 @@ const RightAuthForms = () => {
       </AnimatePresence>
 
       <AnimatePresence>
-        {googleCompletion.open ? (
+        {googlePhone.open ? (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -1058,85 +986,46 @@ const RightAuthForms = () => {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              onSubmit={onGoogleCompletionSubmit}
+              onSubmit={onGooglePhoneSubmit}
               className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-xl"
             >
-              <h3 className="text-lg font-semibold text-slate-900">Complete your profile to finish signup</h3>
+              <h3 className="text-lg font-semibold text-slate-900">Enter your mobile number</h3>
               <p className="mt-1 text-sm text-slate-600">
-                Name is required to complete Google signup. Phone is optional.
+                We’ll use your name and email from your Google account.
               </p>
-
-              <div className="mt-4 space-y-3">
-                {googleCompletionFields.map((field) =>
-                  field.key === "phone" ? (
-                    <div key={field.key} className="space-y-1">
-                      <label className="text-sm font-medium text-slate-700">
-                        {field.label}
-                      </label>
-                      <div className="flex items-stretch gap-2">
-                        <div className="flex h-11 w-20 overflow-hidden rounded-lg border border-slate-300 bg-white">
-                          <div className="flex h-full items-center border-r border-slate-200 bg-slate-50 px-2 text-sm font-semibold text-slate-500">
-                            +
-                          </div>
-                          <input
-                            value={googleCompletionForm.countryCode}
-                            onChange={(event) =>
-                              setGoogleCompletionForm((prev) => ({
-                                ...prev,
-                                countryCode: event.target.value.replace(/\D/g, ""),
-                              }))
-                            }
-                            inputMode="numeric"
-                            aria-label="Country code"
-                            placeholder="91"
-                            className="h-full w-full bg-transparent px-2 text-center text-sm font-medium text-slate-700 outline-none"
-                          />
-                        </div>
-                        <input
-                          value={googleCompletionForm.phone}
-                          onChange={(event) =>
-                            setGoogleCompletionForm((prev) => ({
-                              ...prev,
-                              phone: event.target.value.replace(/\D/g, ""),
-                            }))
-                          }
-                          placeholder={field.placeholder}
-                          inputMode="numeric"
-                          className="h-11 flex-1 rounded-lg border border-slate-300 px-3 py-2"
-                        />
-                      </div>
-                    </div>
-                  ) : (
-                    <label key={field.key} className="block space-y-1">
-                      <span className="text-sm font-medium text-slate-700">
-                        {field.label}
-                        {field.required ? " *" : ""}
-                      </span>
-                      <input
-                        value={googleCompletionForm.name}
-                        onChange={(e) =>
-                          setGoogleCompletionForm((prev) => ({ ...prev, name: e.target.value }))
-                        }
-                        placeholder={field.placeholder}
-                        required={field.required}
-                        type={field.type ?? "text"}
-                        className="w-full rounded-lg border border-slate-300 px-3 py-2"
-                      />
-                    </label>
-                  ),
-                )}
+              <div className="mt-4 flex h-11 gap-2">
+                <div className="flex w-24 overflow-hidden rounded-lg border border-slate-300">
+                  <span className="flex items-center bg-slate-50 px-2 text-slate-500">+</span>
+                  <input
+                    value={googlePhoneForm.countryCode}
+                    onChange={(event) => setGooglePhoneForm((prev) => ({
+                      ...prev,
+                      countryCode: event.target.value.replace(/\D/g, ""),
+                    }))}
+                    inputMode="numeric"
+                    aria-label="Country code"
+                    className="w-full px-2 text-center outline-none"
+                    required
+                  />
+                </div>
+                <input
+                  value={googlePhoneForm.phone}
+                  onChange={(event) => setGooglePhoneForm((prev) => ({
+                    ...prev,
+                    phone: event.target.value.replace(/\D/g, ""),
+                  }))}
+                  inputMode="numeric"
+                  aria-label="Mobile number"
+                  placeholder="Mobile number"
+                  className="flex-1 rounded-lg border border-slate-300 px-3 outline-none"
+                  required
+                  autoFocus
+                />
               </div>
-
-              <div className="mt-4 flex items-center justify-end gap-2">
+              <div className="mt-4 flex justify-end gap-2">
                 <button
                   type="button"
-                  onClick={() =>
-                    setGoogleCompletion({
-                      open: false,
-                      idToken: "",
-                      role: formRole,
-                    })
-                  }
+                  onClick={() => setGooglePhone({ open: false, idToken: "", role: formRole })}
                   className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700"
                 >
                   Cancel
@@ -1144,15 +1033,16 @@ const RightAuthForms = () => {
                 <button
                   type="submit"
                   disabled={isGoogleSubmitting}
-                  className="rounded-lg bg-blue-600 px-3 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
+                  className="rounded-lg bg-blue-600 px-3 py-2 text-sm font-semibold text-white disabled:opacity-60"
                 >
-                  {isGoogleSubmitting ? "Saving..." : "Continue"}
+                  {isGoogleSubmitting ? "Continuing..." : "Continue"}
                 </button>
               </div>
             </motion.form>
           </motion.div>
         ) : null}
       </AnimatePresence>
+
     </section>
   );
 };

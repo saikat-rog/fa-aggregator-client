@@ -6,6 +6,7 @@ import {
   getAdvisorByUsernameApi,
   submitAdvisorEnquiry,
   trackAdvisorClick,
+  updateUserPincode,
 } from "../../services/advisor.service";
 import type { AdvisorApiItem } from "../home/Home.page";
 
@@ -30,6 +31,11 @@ export function useAdvisorProfileController() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [role, setRole] = useState<string | null>(null);
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
+  const [pincodeDialogOpen, setPincodeDialogOpen] = useState(false);
+  const [pincode, setPincode] = useState("");
+  const [pincodeSubmitting, setPincodeSubmitting] = useState(false);
+  const [pincodeError, setPincodeError] = useState("");
+  const [emailVisible, setEmailVisible] = useState(false);
   const [pendingActionType, setPendingActionType] = useState<
     "website" | "email" | "social" | null
   >(null);
@@ -160,24 +166,57 @@ export function useAdvisorProfileController() {
 
   const openAction = (type: "website" | "email" | "social", url: string) => {
     if (userCanOpenLinks) {
+      if (type === "email") {
+        if (emailVisible) {
+          window.location.href = url;
+          return;
+        }
+        if (sessionStorage.getItem("pincodeCollected") === "true") {
+          setEmailVisible(true);
+          if (advisor?.id) void trackAdvisorClick(advisor.id, ADVISOR_CLICK_TYPES.EMAIL);
+          return;
+        }
+        setPincodeError("");
+        setPincodeDialogOpen(true);
+        return;
+      }
       const clickType =
         type === "social"
           ? ADVISOR_CLICK_TYPES.SOCIAL
-          : type === "email"
-            ? ADVISOR_CLICK_TYPES.EMAIL
-            : ADVISOR_CLICK_TYPES.WEBSITE;
+          : ADVISOR_CLICK_TYPES.WEBSITE;
       if (advisor?.id) {
         void trackAdvisorClick(advisor.id, clickType);
-      }
-      if (type === "email") {
-        window.location.href = url;
-        return;
       }
       window.open(url, "_blank", "noreferrer");
       return;
     }
     setPendingActionType(type);
     setAuthDialogOpen(true);
+  };
+
+  const submitPincode = async (event: React.FormEvent) => {
+    event.preventDefault();
+    const normalized = pincode.trim();
+    if (!/^[1-9]\d{5}$/.test(normalized)) {
+      setPincodeError("Enter a valid 6-digit Indian PIN code");
+      return;
+    }
+    try {
+      setPincodeSubmitting(true);
+      setPincodeError("");
+      await updateUserPincode(normalized);
+      sessionStorage.setItem("pincodeCollected", "true");
+      setPincodeDialogOpen(false);
+      setEmailVisible(true);
+      if (advisor?.id) await trackAdvisorClick(advisor.id, ADVISOR_CLICK_TYPES.EMAIL);
+    } catch (error: unknown) {
+      const message = typeof error === "object" && error !== null && "response" in error
+        ? (error as { response?: { data?: { msg?: string } } }).response?.data?.msg
+        : undefined;
+      setPincodeError(message || "Unable to save your location. Please try again.");
+    } finally {
+      setPincodeSubmitting(false);
+    }
   };
 
   const handleToggleSave = async () => {
@@ -260,6 +299,11 @@ export function useAdvisorProfileController() {
     navigate,
     role,
     authDialogOpen,
+    pincodeDialogOpen,
+    pincode,
+    pincodeSubmitting,
+    pincodeError,
+    emailVisible,
     pendingActionType,
     saveActionError,
     userCanOpenLinks,
@@ -274,6 +318,9 @@ export function useAdvisorProfileController() {
     logoutAndLoginAsUser,
     shareProfile,
     openAction,
+    submitPincode,
+    setPincode,
+    setPincodeDialogOpen,
     handleToggleSave,
     handleFormChange,
     handleFormSubmit,

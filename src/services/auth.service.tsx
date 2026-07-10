@@ -37,9 +37,8 @@ export async function loginApi(email: string, password: string, role: AuthRole) 
 
 export async function googleAuthApi(params: {
   idToken: string;
-  role: AuthRole;
-  name?: string;
-  phone?: string;
+  role?: AuthRole;
+  phone: string;
 }) {
   const response = await api.post("/auth/google", params, { withCredentials: true });
   const payload = response.data;

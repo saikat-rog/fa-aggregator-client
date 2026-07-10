@@ -11,6 +11,11 @@ export const ADVISOR_CLICK_TYPES = {
 export type AdvisorClickType =
   (typeof ADVISOR_CLICK_TYPES)[keyof typeof ADVISOR_CLICK_TYPES];
 
+export const updateUserPincode = async (pincode: string) => {
+  const response = await api.put("/user/approx-location/pincode", { pincode });
+  return response.data;
+};
+
 const recentAdvisorClicks = new Map<string, number>();
 const ADVISOR_CLICK_DEDUPE_MS = 500;
 const TRACKED_CLICKS_STORAGE_KEY = "trackedAdvisorClicksV1";

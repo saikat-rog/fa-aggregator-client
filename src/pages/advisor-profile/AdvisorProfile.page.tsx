@@ -55,6 +55,7 @@ export function AdvisorProfilePage() {
                 personalWebsite={advisorData.personalWebsite}
                 emailForContact={advisorData.emailForContact}
                 userCanOpenLinks={controller.userCanOpenLinks}
+                emailVisible={controller.emailVisible}
                 socialLinks={controller.socialLinks}
                 onWebsiteOpen={(url) => controller.openAction("website", url)}
                 onEmailOpen={(mailto) => controller.openAction("email", mailto)}
@@ -114,6 +115,54 @@ export function AdvisorProfilePage() {
         }}
         onLogoutAndLoginAsUser={controller.logoutAndLoginAsUser}
       />
+      {controller.pincodeDialogOpen ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="pincode-dialog-title"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget && !controller.pincodeSubmitting) {
+              controller.setPincodeDialogOpen(false);
+            }
+          }}
+        >
+          <form
+            onSubmit={controller.submitPincode}
+            className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl"
+          >
+            <h2 id="pincode-dialog-title" className="text-xl font-semibold text-slate-950">
+              Enter your PIN code
+            </h2>
+            <p className="mt-2 text-sm text-slate-600">
+              Provide your six-digit Indian PIN code to view the advisor’s email.
+            </p>
+            <label className="mt-4 block text-sm font-medium text-slate-700">
+              PIN code
+              <input
+                value={controller.pincode}
+                onChange={(event) => controller.setPincode(event.target.value.replace(/\D/g, "").slice(0, 6))}
+                inputMode="numeric"
+                autoComplete="postal-code"
+                pattern="[1-9][0-9]{5}"
+                maxLength={6}
+                autoFocus
+                required
+                className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              />
+            </label>
+            {controller.pincodeError ? (
+              <p role="alert" className="mt-3 text-sm text-rose-700">{controller.pincodeError}</p>
+            ) : null}
+            <div className="mt-5 flex justify-end gap-2">
+              <button type="button" disabled={controller.pincodeSubmitting} onClick={() => controller.setPincodeDialogOpen(false)} className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 disabled:opacity-60">Cancel</button>
+              <button type="submit" disabled={controller.pincodeSubmitting} className="rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60">
+                {controller.pincodeSubmitting ? "Saving..." : "Save and view email"}
+              </button>
+            </div>
+          </form>
+        </div>
+      ) : null}
     </div>
   );
 }
