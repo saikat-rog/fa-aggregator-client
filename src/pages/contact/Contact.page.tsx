@@ -8,6 +8,7 @@ import {
   FiTarget,
   FiTrendingUp,
   FiUsers,
+  FiGlobe,
 } from "react-icons/fi";
 
 const influencerScopeOptions = [
@@ -31,6 +32,7 @@ const campaignObjectiveOptions = [
 type FormState = {
   companyName: string;
   businessEmail: string;
+  url: string;
   currentMonthlySales: string;
   goalMonthlySales: string;
   desiredInfluencerScope: string;
@@ -41,6 +43,7 @@ type FormState = {
 const initialState: FormState = {
   companyName: "",
   businessEmail: "",
+  url: "",
   currentMonthlySales: "",
   goalMonthlySales: "",
   desiredInfluencerScope: "",
@@ -49,6 +52,15 @@ const initialState: FormState = {
 };
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const isHttpUrl = (value: string) => {
+  if (!value.trim()) return false;
+  try {
+    const parsed = new URL(value);
+    return parsed.protocol === "http:" || parsed.protocol === "https:";
+  } catch {
+    return false;
+  }
+};
 
 export function ContactPage() {
   const [form, setForm] = useState<FormState>(initialState);
@@ -64,6 +76,11 @@ export function ContactPage() {
         ? "Business Email is required"
         : !emailRegex.test(form.businessEmail.trim())
           ? "Enter a valid email"
+          : "",
+      url: !form.url.trim()
+        ? "Website or campaign URL is required"
+        : !isHttpUrl(form.url)
+          ? "Enter a valid HTTP or HTTPS URL"
           : "",
       currentMonthlySales:
         !form.currentMonthlySales.trim() ? "Current Monthly Sales is required" : "",
@@ -104,13 +121,14 @@ export function ContactPage() {
       const response = await submitBusinessRequirement({
         companyName: form.companyName.trim(),
         businessEmail: form.businessEmail.trim(),
+        url: form.url.trim(),
         currentMonthlySales: form.currentMonthlySales.trim(),
         goalMonthlySales: form.goalMonthlySales.trim(),
         desiredInfluencerScope: form.desiredInfluencerScope.trim(),
         campaignObjective: form.campaignObjective.trim(),
         detailedRequirements: form.detailedRequirements.trim(),
       });
-      setSuccessMessage(response.msg || "Business requirements submitted successfully.");
+      setSuccessMessage(`${response.msg || "Business requirements received."} Your submission is awaiting admin approval.`);
       setForm(initialState);
       setSubmitAttempted(false);
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -159,6 +177,23 @@ export function ContactPage() {
               />
             </div>
             {submitAttempted && fieldErrors.companyName ? <span className="text-xs text-rose-600">{fieldErrors.companyName}</span> : null}
+          </label>
+
+          <label className="space-y-2 text-sm font-medium text-slate-700 md:col-span-2">
+            <span className="mb-1 block">Website or campaign URL</span>
+            <div className="relative">
+              <FiGlobe className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-700" />
+              <input
+                type="url"
+                required
+                inputMode="url"
+                placeholder="https://example.com"
+                value={form.url}
+                onChange={(e) => setField("url", e.target.value)}
+                className="w-full rounded-xl border border-slate-300 py-2 pl-9 pr-3 outline-none focus:border-blue-400"
+              />
+            </div>
+            {submitAttempted && fieldErrors.url ? <span className="text-xs text-rose-600">{fieldErrors.url}</span> : null}
           </label>
 
           <label className="space-y-2 text-sm font-medium text-slate-700">

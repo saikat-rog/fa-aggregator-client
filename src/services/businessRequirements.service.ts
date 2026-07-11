@@ -4,6 +4,7 @@ import adminApi from "../lib/adminApi";
 export type BusinessRequirementPayload = {
   companyName: string;
   businessEmail: string;
+  url: string;
   currentMonthlySales: string;
   goalMonthlySales: string;
   desiredInfluencerScope: string;
@@ -13,6 +14,8 @@ export type BusinessRequirementPayload = {
 
 export type BusinessRequirementItem = BusinessRequirementPayload & {
   _id: string;
+  status: "pending" | "approved";
+  approvedAt: string | null;
   createdAt?: string;
   updatedAt?: string;
 };
@@ -25,6 +28,11 @@ export type BusinessRequirementsAdminList = {
     total: number;
     totalPages: number;
   };
+};
+
+export type ApprovedBusinessRequirementItem = Omit<BusinessRequirementItem, "businessEmail">;
+export type ApprovedBusinessRequirementsList = Omit<BusinessRequirementsAdminList, "requirements"> & {
+  requirements: ApprovedBusinessRequirementItem[];
 };
 
 type NormalizedResponse<T> = {
@@ -52,9 +60,22 @@ export async function submitBusinessRequirement(payload: BusinessRequirementPayl
 export async function getBusinessRequirementsAdmin(params: {
   page: number;
   limit: number;
+  status?: "pending" | "approved";
 }) {
   const response = await adminApi.get("/admin/business-requirements", { params });
   const body = response.data as NormalizedResponse<BusinessRequirementsAdminList>;
+  return unwrapOrThrow(body);
+}
+
+export async function approveBusinessRequirementAdmin(id: string) {
+  const response = await adminApi.patch(`/admin/business-requirements/${id}/approve`);
+  const body = response.data as NormalizedResponse<BusinessRequirementItem>;
+  return unwrapOrThrow(body);
+}
+
+export async function getApprovedBusinessRequirements(params: { page: number; limit: number }) {
+  const response = await api.get("/business-requirements/approved", { params });
+  const body = response.data as NormalizedResponse<ApprovedBusinessRequirementsList>;
   return unwrapOrThrow(body);
 }
 

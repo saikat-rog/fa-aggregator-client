@@ -3,6 +3,7 @@ import { FiBriefcase, FiExternalLink } from "react-icons/fi";
 import {
   getBusinessRequirementByIdAdmin,
   getBusinessRequirementsAdmin,
+  approveBusinessRequirementAdmin,
   type BusinessRequirementItem,
 } from "../../../services/businessRequirements.service";
 import { PaginationControls } from "../PaginationControls";
@@ -47,6 +48,8 @@ export function BusinessRequirementsPanel({ params, setParam }: Props) {
   const page = getNum(params.get("requirementsPage"), 1);
   const limit = getNum(params.get("requirementsLimit"), 10);
   const selectedId = params.get("requirementsId") ?? "";
+  const statusParam = params.get("requirementsStatus");
+  const status = statusParam === "pending" || statusParam === "approved" ? statusParam : undefined;
 
   const [rows, setRows] = useState<BusinessRequirementItem[]>([]);
   const [pagination, setPagination] = useState({
@@ -57,6 +60,8 @@ export function BusinessRequirementsPanel({ params, setParam }: Props) {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [approvingId, setApprovingId] = useState("");
+  const [notice, setNotice] = useState("");
 
   const [detail, setDetail] = useState<BusinessRequirementItem | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
@@ -67,7 +72,7 @@ export function BusinessRequirementsPanel({ params, setParam }: Props) {
       try {
         setLoading(true);
         setError("");
-        const payload = await getBusinessRequirementsAdmin({ page, limit });
+        const payload = await getBusinessRequirementsAdmin({ page, limit, status });
         setRows(payload.requirements ?? []);
         setPagination(payload.pagination ?? { page, limit, total: 0, totalPages: 1 });
       } catch (err: unknown) {
@@ -78,14 +83,27 @@ export function BusinessRequirementsPanel({ params, setParam }: Props) {
     };
 
     void load();
-  }, [page, limit]);
+  }, [page, limit, status]);
+
+  const onApprove = async (id: string) => {
+    if (approvingId) return;
+    try {
+      setApprovingId(id);
+      setError("");
+      setNotice("");
+      const approved = await approveBusinessRequirementAdmin(id);
+      setRows((current) => status === "pending" ? current.filter((item) => item._id !== id) : current.map((item) => item._id === id ? approved : item));
+      setDetail((current) => current?._id === id ? approved : current);
+      setNotice("Business requirement approved successfully.");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to approve business requirement.");
+    } finally {
+      setApprovingId("");
+    }
+  };
 
   useEffect(() => {
-    if (!selectedId) {
-      setDetail(null);
-      setDetailError("");
-      return;
-    }
+    if (!selectedId) return;
 
     const loadDetail = async () => {
       try {
@@ -159,7 +177,16 @@ export function BusinessRequirementsPanel({ params, setParam }: Props) {
         </button>
       </div>
 
+      <div className="mt-4 flex flex-wrap gap-2" aria-label="Filter business requirements by status">
+        {(["all", "pending", "approved"] as const).map((value) => (
+          <button key={value} type="button" onClick={() => { setParam("requirementsStatus", value === "all" ? undefined : value); setParam("requirementsPage", "1"); }} className={`rounded-lg px-3 py-1.5 text-sm font-semibold capitalize ${((value === "all" && !status) || value === status) ? "bg-blue-700 text-white" : "border border-slate-200 text-slate-700 hover:bg-slate-50"}`}>
+            {value}
+          </button>
+        ))}
+      </div>
+
       {loading ? <p className={statusInfoClassName}>Loading submissions...</p> : null}
+      {notice ? <p className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{notice}</p> : null}
       {error ? <p className={statusErrorClassName}>{error}</p> : null}
 
       {!loading && !error && rows.length === 0 ? (
@@ -177,6 +204,8 @@ export function BusinessRequirementsPanel({ params, setParam }: Props) {
                 <th className="px-4 py-3">Goal Monthly Sales</th>
                 <th className="px-4 py-3">Desired Influencer Scope</th>
                 <th className="px-4 py-3">Campaign Objective</th>
+                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3">Approved At</th>
                 <th className="px-4 py-3">Submitted At</th>
                 <th className="px-4 py-3">Action</th>
               </tr>
@@ -190,6 +219,8 @@ export function BusinessRequirementsPanel({ params, setParam }: Props) {
                   <td className="px-4 py-3 text-slate-600">{formatSalesValue(item.goalMonthlySales)}</td>
                   <td className="px-4 py-3 text-slate-600">{item.desiredInfluencerScope}</td>
                   <td className="px-4 py-3 text-slate-600">{item.campaignObjective}</td>
+                  <td className="px-4 py-3 capitalize text-slate-600">{item.status}</td>
+                  <td className="px-4 py-3 text-slate-600">{formatDate(item.approvedAt ?? undefined)}</td>
                   <td className="px-4 py-3 text-slate-600">{formatDate(item.createdAt)}</td>
                   <td className="px-4 py-3">
                     <button
@@ -200,6 +231,11 @@ export function BusinessRequirementsPanel({ params, setParam }: Props) {
                       <FiExternalLink className="h-3.5 w-3.5" />
                       View
                     </button>
+                    {item.status === "pending" ? (
+                      <button type="button" disabled={Boolean(approvingId)} onClick={() => void onApprove(item._id)} className="ml-2 rounded-lg bg-emerald-600 px-2.5 py-1.5 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60">
+                        {approvingId === item._id ? "Approving..." : "Approve"}
+                      </button>
+                    ) : null}
                   </td>
                 </tr>
               ))}
@@ -237,6 +273,9 @@ export function BusinessRequirementsPanel({ params, setParam }: Props) {
             <div className="grid gap-3 text-sm text-slate-700 md:grid-cols-2">
               <p><span className="font-semibold text-slate-900">Company Name:</span> {detail.companyName}</p>
               <p><span className="font-semibold text-slate-900">Business Email:</span> {detail.businessEmail}</p>
+              <p><span className="font-semibold text-slate-900">URL:</span> {detail.url ? <a href={detail.url} target="_blank" rel="noopener noreferrer" className="text-blue-700 underline">{detail.url}</a> : "—"}</p>
+              <p><span className="font-semibold text-slate-900">Status:</span> <span className="capitalize">{detail.status}</span></p>
+              <p><span className="font-semibold text-slate-900">Approved At:</span> {formatDate(detail.approvedAt ?? undefined)}</p>
               <p><span className="font-semibold text-slate-900">Current Monthly Sales:</span> {formatSalesValue(detail.currentMonthlySales)}</p>
               <p><span className="font-semibold text-slate-900">Goal Monthly Sales:</span> {formatSalesValue(detail.goalMonthlySales)}</p>
               <p><span className="font-semibold text-slate-900">Desired Influencer Scope:</span> {detail.desiredInfluencerScope}</p>
