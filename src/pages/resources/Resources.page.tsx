@@ -7,17 +7,6 @@ import {
 
 const PAGE_SIZE = 10;
 
-const formatSales = (value: string) => {
-  const number = Number(value);
-  return Number.isFinite(number)
-    ? new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(number)
-    : value;
-};
-
-const formatDate = (value: string | null) => value
-  ? new Date(value).toLocaleDateString("en-IN", { year: "numeric", month: "long", day: "numeric" })
-  : "—";
-
 export function ResourcesPage() {
   const [requirements, setRequirements] = useState<ApprovedBusinessRequirementItem[]>([]);
   const [page, setPage] = useState(1);
@@ -62,18 +51,8 @@ export function ResourcesPage() {
         <div className="grid gap-6 md:grid-cols-2">
           {requirements.map((item) => (
             <article key={item._id} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <h2 className="text-2xl font-semibold text-slate-900">{item.companyName}</h2>
-                <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">Approved {formatDate(item.approvedAt)}</span>
-              </div>
+              <h2 className="text-2xl font-semibold text-slate-900">{item.companyName}</h2>
               {item.url ? <a href={item.url} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex items-center gap-1.5 break-all text-sm font-semibold text-blue-700 hover:text-blue-800">{item.url}<FiExternalLink aria-hidden="true" /></a> : null}
-              <dl className="mt-5 grid gap-4 sm:grid-cols-2">
-                <div><dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Current monthly sales</dt><dd className="mt-1 text-slate-800">{formatSales(item.currentMonthlySales)}</dd></div>
-                <div><dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Goal monthly sales</dt><dd className="mt-1 text-slate-800">{formatSales(item.goalMonthlySales)}</dd></div>
-                <div><dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Influencer scope</dt><dd className="mt-1 text-slate-800">{item.desiredInfluencerScope}</dd></div>
-                <div><dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Campaign objective</dt><dd className="mt-1 text-slate-800">{item.campaignObjective}</dd></div>
-              </dl>
-              <div className="mt-5 border-t border-slate-100 pt-4"><h3 className="text-sm font-semibold text-slate-900">Detailed requirements</h3><p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-600">{item.detailedRequirements}</p></div>
             </article>
           ))}
         </div>
