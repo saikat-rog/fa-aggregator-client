@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
-import { FiExternalLink } from "react-icons/fi";
+import { FiExternalLink, FiLock } from "react-icons/fi";
+import { Link } from "react-router-dom";
 import {
   getApprovedBusinessRequirements,
+  trackRequirementClickApi,
   type ApprovedBusinessRequirementItem,
 } from "../../services/businessRequirements.service";
 
@@ -13,6 +15,12 @@ export function ResourcesPage() {
   const [totalPages, setTotalPages] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [trackingId, setTrackingId] = useState("");
+
+  const isAuthenticated = Boolean(localStorage.getItem("token"));
+  const role = localStorage.getItem("role");
+  const isUser = isAuthenticated && role === "user";
+  const isAdvisor = isAuthenticated && role === "advisor";
 
   useEffect(() => {
     let active = true;
@@ -34,13 +42,32 @@ export function ResourcesPage() {
     return () => { active = false; };
   }, [page]);
 
+  const onOpenResourceLink = async (id: string, fallbackUrl?: string) => {
+    try {
+      setTrackingId(id);
+      const res = await trackRequirementClickApi(id);
+      const targetUrl = res.url || fallbackUrl;
+      if (targetUrl) {
+        window.open(targetUrl, "_blank", "noopener,noreferrer");
+      }
+    } catch (err: unknown) {
+      if (fallbackUrl) {
+        window.open(fallbackUrl, "_blank", "noopener,noreferrer");
+      }
+    } finally {
+      setTrackingId("");
+    }
+  };
+
   return (
     <div className="space-y-8">
       <section className="relative overflow-hidden rounded-3xl bg-linear-to-br from-blue-900 via-blue-700 to-blue-800 px-6 py-16 text-center text-white lg:px-10">
         <div className="pointer-events-none absolute -left-16 -top-20 h-56 w-56 rounded-full bg-blue-400/20 blur-3xl" />
         <div className="pointer-events-none absolute -right-12 bottom-0 h-52 w-52 rounded-full bg-blue-600/30 blur-3xl" />
         <h1 className="relative text-4xl font-bold lg:text-6xl">Approved Business Requirements</h1>
-        <p className="relative mx-auto mt-4 max-w-2xl text-lg text-blue-100">Explore approved campaign opportunities from businesses looking to grow.</p>
+        <p className="relative mx-auto mt-4 max-w-2xl text-lg text-blue-100">
+          Explore campaign requirements posted by verified advisors.
+        </p>
       </section>
 
       {isLoading ? <p role="status" className="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-600">Loading approved requirements...</p> : null}
@@ -50,9 +77,42 @@ export function ResourcesPage() {
       {!isLoading && !error && requirements.length > 0 ? (
         <div className="grid gap-6 md:grid-cols-2">
           {requirements.map((item) => (
-            <article key={item._id} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-              <h2 className="text-2xl font-semibold text-slate-900">{item.companyName}</h2>
-              {item.url ? <a href={item.url} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex items-center gap-1.5 break-all text-sm font-semibold text-blue-700 hover:text-blue-800">{item.url}<FiExternalLink aria-hidden="true" /></a> : null}
+            <article key={item._id} className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div>
+                <h2 className="text-2xl font-semibold text-slate-900">{item.companyName}</h2>
+                <p className="mt-2 text-sm text-slate-600"><span className="font-semibold text-slate-700">Objective:</span> {item.campaignObjective}</p>
+                <p className="mt-1 text-sm text-slate-600"><span className="font-semibold text-slate-700">Scope:</span> {item.desiredInfluencerScope}</p>
+                {item.detailedRequirements ? (
+                  <p className="mt-3 text-sm text-slate-600 line-clamp-3"><span className="font-semibold text-slate-700">Details:</span> {item.detailedRequirements}</p>
+                ) : null}
+              </div>
+
+              <div className="mt-4 pt-4 border-t border-slate-100">
+                {isUser && item.url ? (
+                  <button
+                    type="button"
+                    disabled={trackingId === item._id}
+                    onClick={() => void onOpenResourceLink(item._id, item.url)}
+                    className="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-700 hover:text-blue-800 disabled:opacity-60"
+                  >
+                    {trackingId === item._id ? "Opening..." : "View Resource Link"}
+                    <FiExternalLink aria-hidden="true" />
+                  </button>
+                ) : isAdvisor ? (
+                  <span className="inline-flex items-center gap-1.5 rounded-lg bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700">
+                    <FiLock className="h-3.5 w-3.5" />
+                    Resource links are reserved for user accounts
+                  </span>
+                ) : (
+                  <Link
+                    to="/auth?role=user"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-700 hover:underline"
+                  >
+                    <FiLock className="h-3.5 w-3.5 text-slate-400" />
+                    Log in as User to access link
+                  </Link>
+                )}
+              </div>
             </article>
           ))}
         </div>

@@ -12,8 +12,13 @@ export type BusinessRequirementPayload = {
   detailedRequirements: string;
 };
 
-export type BusinessRequirementItem = BusinessRequirementPayload & {
+export type BusinessRequirementItem = Omit<BusinessRequirementPayload, "url"> & {
   _id: string;
+  url?: string;
+  isUrlProtected?: boolean;
+  advisorId?: string;
+  postedByAdvisorName?: string;
+  postedByAdvisorUsername?: string;
   status: "pending" | "approved";
   approvedAt: string | null;
   createdAt?: string;
@@ -33,6 +38,30 @@ export type BusinessRequirementsAdminList = {
 export type ApprovedBusinessRequirementItem = Omit<BusinessRequirementItem, "businessEmail">;
 export type ApprovedBusinessRequirementsList = Omit<BusinessRequirementsAdminList, "requirements"> & {
   requirements: ApprovedBusinessRequirementItem[];
+};
+
+export type RequirementClickItem = {
+  _id: string;
+  requirementId: string;
+  companyName?: string;
+  url?: string;
+  advisorId?: string;
+  advisorName?: string;
+  advisorUsername?: string;
+  userId: string;
+  userName?: string;
+  userEmail?: string;
+  clickedAt: string;
+};
+
+export type RequirementClicksAdminList = {
+  clicks: RequirementClickItem[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
 };
 
 const unwrapData = <T>(resData: unknown): T => {
@@ -93,6 +122,16 @@ export async function approveBusinessRequirementAdmin(id: string) {
 export async function getApprovedBusinessRequirements(params: { page: number; limit: number }) {
   const response = await api.get("/business-requirements/approved", { params });
   return unwrapData<ApprovedBusinessRequirementsList>(response.data);
+}
+
+export async function trackRequirementClickApi(id: string) {
+  const response = await api.post(`/business-requirements/${id}/track-click`);
+  return unwrapData<{ msg: string; url: string }>(response.data);
+}
+
+export async function getRequirementClicksAdmin(params: { page: number; limit: number }) {
+  const response = await adminApi.get("/admin/business-requirements/clicks", { params });
+  return unwrapData<RequirementClicksAdminList>(response.data);
 }
 
 export async function getBusinessRequirementByIdAdmin(id: string) {

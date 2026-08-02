@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { FiUser, FiBriefcase, FiAlertCircle, FiShield, FiPhone, FiCheck } from "react-icons/fi";
 import {
   googleAuthApi,
@@ -51,7 +51,12 @@ const extractApiMessage = (error: unknown) => {
 };
 
 const RightAuthForms = () => {
-  const [formRole, setFormRole] = useState<AuthRole>("user");
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlRole = searchParams.get("role");
+  const initialRole: AuthRole = urlRole === "advisor" ? "advisor" : "user";
+
+  const [formRole, setFormRole] = useState<AuthRole>(initialRole);
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [advisorDeclarationChecked, setAdvisorDeclarationChecked] = useState(false);
@@ -67,12 +72,31 @@ const RightAuthForms = () => {
     phone: "",
   });
 
-  const navigate = useNavigate();
-  const formRoleRef = useRef<AuthRole>("user");
+  const formRoleRef = useRef<AuthRole>(initialRole);
+
+  useEffect(() => {
+    const roleParam = searchParams.get("role");
+    if (roleParam === "advisor" || roleParam === "user") {
+      setFormRole(roleParam);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     formRoleRef.current = formRole;
   }, [formRole]);
+
+  const changeRole = (newRole: AuthRole) => {
+    setFormRole(newRole);
+    setErrorMessage("");
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.set("role", newRole);
+        return next;
+      },
+      { replace: true },
+    );
+  };
 
   const getGoogleClientId = () =>
     import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
@@ -252,10 +276,7 @@ const RightAuthForms = () => {
           <div className="grid grid-cols-2 gap-2">
             <button
               type="button"
-              onClick={() => {
-                setFormRole("user");
-                setErrorMessage("");
-              }}
+              onClick={() => changeRole("user")}
               className={`flex items-center justify-center gap-2.5 rounded-xl px-4 py-3 text-sm font-bold transition-all duration-200 ${
                 formRole === "user"
                   ? "bg-white text-blue-700 shadow-md shadow-slate-200/60 ring-1 ring-blue-500/20"
@@ -268,10 +289,7 @@ const RightAuthForms = () => {
 
             <button
               type="button"
-              onClick={() => {
-                setFormRole("advisor");
-                setErrorMessage("");
-              }}
+              onClick={() => changeRole("advisor")}
               className={`flex items-center justify-center gap-2.5 rounded-xl px-4 py-3 text-sm font-bold transition-all duration-200 ${
                 formRole === "advisor"
                   ? "bg-white text-cyan-800 shadow-md shadow-slate-200/60 ring-1 ring-cyan-500/20"

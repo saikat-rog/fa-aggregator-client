@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
-import { FiBriefcase, FiExternalLink } from "react-icons/fi";
+import { FiBriefcase, FiExternalLink, FiMousePointer } from "react-icons/fi";
 import {
   getBusinessRequirementByIdAdmin,
   getBusinessRequirementsAdmin,
+  getRequirementClicksAdmin,
   approveBusinessRequirementAdmin,
   type BusinessRequirementItem,
+  type RequirementClickItem,
 } from "../../../services/businessRequirements.service";
 import { PaginationControls } from "../PaginationControls";
 import {
@@ -46,6 +48,8 @@ const formatDate = (value?: string) =>
     : "—";
 
 export function BusinessRequirementsPanel({ params, setParam }: Props) {
+  const activeTab = params.get("requirementsSubTab") === "clicks" ? "clicks" : "submissions";
+
   const page = getNum(params.get("requirementsPage"), 1);
   const limit = getNum(params.get("requirementsLimit"), 10);
   const selectedId = params.get("requirementsId") ?? "";
@@ -53,6 +57,7 @@ export function BusinessRequirementsPanel({ params, setParam }: Props) {
   const status = statusParam === "pending" || statusParam === "approved" ? statusParam : undefined;
 
   const [rows, setRows] = useState<BusinessRequirementItem[]>([]);
+  const [clickRows, setClickRows] = useState<RequirementClickItem[]>([]);
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 10,
@@ -69,22 +74,28 @@ export function BusinessRequirementsPanel({ params, setParam }: Props) {
   const [detailError, setDetailError] = useState("");
 
   useEffect(() => {
-    const load = async () => {
+    const loadData = async () => {
       try {
         setLoading(true);
         setError("");
-        const payload = await getBusinessRequirementsAdmin({ page, limit, status });
-        setRows(payload.requirements ?? []);
-        setPagination(payload.pagination ?? { page, limit, total: 0, totalPages: 1 });
+        if (activeTab === "submissions") {
+          const payload = await getBusinessRequirementsAdmin({ page, limit, status });
+          setRows(payload.requirements ?? []);
+          setPagination(payload.pagination ?? { page, limit, total: 0, totalPages: 1 });
+        } else {
+          const payload = await getRequirementClicksAdmin({ page, limit });
+          setClickRows(payload.clicks ?? []);
+          setPagination(payload.pagination ?? { page, limit, total: 0, totalPages: 1 });
+        }
       } catch (err: unknown) {
-        setError(err instanceof Error ? err.message : "Failed to load business requirements.");
+        setError(err instanceof Error ? err.message : "Failed to load data.");
       } finally {
         setLoading(false);
       }
     };
 
-    void load();
-  }, [page, limit, status]);
+    void loadData();
+  }, [activeTab, page, limit, status]);
 
   const onApprove = async (id: string) => {
     if (approvingId) return;
@@ -104,7 +115,7 @@ export function BusinessRequirementsPanel({ params, setParam }: Props) {
   };
 
   useEffect(() => {
-    if (!selectedId) {
+    if (!selectedId || activeTab !== "submissions") {
       setDetail(null);
       setDetailError("");
       return;
@@ -133,7 +144,7 @@ export function BusinessRequirementsPanel({ params, setParam }: Props) {
     };
 
     void loadDetail();
-  }, [selectedId, rows]);
+  }, [selectedId, rows, activeTab]);
 
   const csvData = useMemo(() => {
     const headers = [
@@ -182,32 +193,78 @@ export function BusinessRequirementsPanel({ params, setParam }: Props) {
           <FiBriefcase className="text-blue-700" />
           Business Requirements
         </h3>
+        {activeTab === "submissions" ? (
+          <button
+            type="button"
+            onClick={onExportCsv}
+            className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-sm font-semibold text-blue-700 transition hover:bg-blue-100"
+          >
+            Export CSV
+          </button>
+        ) : null}
+      </div>
+
+      <div className="mt-4 flex gap-2 border-b border-slate-200 pb-3">
         <button
           type="button"
-          onClick={onExportCsv}
-          className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-sm font-semibold text-blue-700 transition hover:bg-blue-100"
+          onClick={() => {
+            setParam("requirementsSubTab", undefined);
+            setParam("requirementsPage", "1");
+          }}
+          className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition ${
+            activeTab === "submissions"
+              ? "bg-blue-700 text-white shadow-sm"
+              : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+          }`}
         >
-          Export CSV
+          <FiBriefcase className="h-4 w-4" />
+          Submissions
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setParam("requirementsSubTab", "clicks");
+            setParam("requirementsPage", "1");
+          }}
+          className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition ${
+            activeTab === "clicks"
+              ? "bg-blue-700 text-white shadow-sm"
+              : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+          }`}
+        >
+          <FiMousePointer className="h-4 w-4" />
+          Link Click Logs
         </button>
       </div>
 
-      <div className="mt-4 flex flex-wrap gap-2" aria-label="Filter business requirements by status">
-        {(["all", "pending", "approved"] as const).map((value) => (
-          <button key={value} type="button" onClick={() => { setParam("requirementsStatus", value === "all" ? undefined : value); setParam("requirementsPage", "1"); }} className={`rounded-lg px-3 py-1.5 text-sm font-semibold capitalize ${((value === "all" && !status) || value === status) ? "bg-blue-700 text-white" : "border border-slate-200 text-slate-700 hover:bg-slate-50"}`}>
-            {value}
-          </button>
-        ))}
-      </div>
+      {activeTab === "submissions" ? (
+        <div className="mt-3 flex flex-wrap gap-2" aria-label="Filter business requirements by status">
+          {(["all", "pending", "approved"] as const).map((value) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => { setParam("requirementsStatus", value === "all" ? undefined : value); setParam("requirementsPage", "1"); }}
+              className={`rounded-lg px-3 py-1.5 text-sm font-semibold capitalize ${((value === "all" && !status) || value === status) ? "bg-blue-600 text-white" : "border border-slate-200 text-slate-700 hover:bg-slate-50"}`}
+            >
+              {value}
+            </button>
+          ))}
+        </div>
+      ) : null}
 
-      {loading ? <p className={statusInfoClassName}>Loading submissions...</p> : null}
+      {loading ? <p className={statusInfoClassName}>Loading...</p> : null}
       {notice ? <p className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{notice}</p> : null}
       {error ? <p className={statusErrorClassName}>{error}</p> : null}
 
-      {!loading && !error && rows.length === 0 ? (
+      {!loading && !error && activeTab === "submissions" && rows.length === 0 ? (
         <p className={statusEmptyClassName}>No business requirements submitted yet.</p>
       ) : null}
 
-      {!loading && !error && rows.length > 0 ? (
+      {!loading && !error && activeTab === "clicks" && clickRows.length === 0 ? (
+        <p className={statusEmptyClassName}>No requirement link clicks logged yet.</p>
+      ) : null}
+
+      {!loading && !error && activeTab === "submissions" && rows.length > 0 ? (
         <div className="mt-4 overflow-auto rounded-2xl border border-slate-200">
           <table className="min-w-full text-left text-sm">
             <thead className="bg-slate-50">
@@ -258,6 +315,46 @@ export function BusinessRequirementsPanel({ params, setParam }: Props) {
         </div>
       ) : null}
 
+      {!loading && !error && activeTab === "clicks" && clickRows.length > 0 ? (
+        <div className="mt-4 overflow-auto rounded-2xl border border-slate-200">
+          <table className="min-w-full text-left text-sm">
+            <thead className="bg-slate-50">
+              <tr className="border-b border-slate-200 text-xs uppercase tracking-wide text-blue-700">
+                <th className="px-4 py-3">User (Who Clicked)</th>
+                <th className="px-4 py-3">User Email</th>
+                <th className="px-4 py-3">Requirement Company</th>
+                <th className="px-4 py-3">Posted By Advisor</th>
+                <th className="px-4 py-3">Resource Link</th>
+                <th className="px-4 py-3">Clicked At</th>
+              </tr>
+            </thead>
+            <tbody>
+              {clickRows.map((click) => (
+                <tr key={click._id} className="border-b border-slate-100 transition hover:bg-slate-50/80">
+                  <td className="px-4 py-3 font-medium text-slate-800">{click.userName || "—"}</td>
+                  <td className="px-4 py-3 text-slate-600">{click.userEmail || "—"}</td>
+                  <td className="px-4 py-3 font-medium text-slate-700">{click.companyName || "—"}</td>
+                  <td className="px-4 py-3 text-slate-600">
+                    {click.advisorName || "—"} {click.advisorUsername ? `(@${click.advisorUsername})` : ""}
+                  </td>
+                  <td className="px-4 py-3">
+                    {click.url ? (
+                      <a href={click.url} target="_blank" rel="noopener noreferrer" className="text-blue-700 underline flex items-center gap-1">
+                        <FiExternalLink className="h-3 w-3" />
+                        {click.url.length > 40 ? `${click.url.slice(0, 37)}...` : click.url}
+                      </a>
+                    ) : (
+                      "—"
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-slate-600">{formatDate(click.clickedAt)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : null}
+
       <PaginationControls
         pagination={pagination}
         onPageChange={(v) => setParam("requirementsPage", String(v))}
@@ -267,7 +364,7 @@ export function BusinessRequirementsPanel({ params, setParam }: Props) {
         }}
       />
 
-      {selectedId ? (
+      {selectedId && activeTab === "submissions" ? (
         <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
           <div className="mb-3 flex items-center justify-between gap-2">
             <h4 className="text-base font-semibold text-slate-900">Requirement Details</h4>
