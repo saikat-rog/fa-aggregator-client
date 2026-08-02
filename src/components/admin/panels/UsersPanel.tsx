@@ -106,7 +106,13 @@ export function UsersPanel({ params, setParam, setManyParams }: Props) {
                   <td className="px-4 py-3 font-medium text-slate-800">{user.name || "-"}</td>
                   <td className="px-4 py-3 text-slate-600">{user.email || "-"}</td>
                   <td className="px-4 py-3 text-slate-600">{user.phone || "-"}</td>
-                  <td className="px-4 py-3 text-slate-600">{[user.approxLocation?.country, user.approxLocation?.state].filter(Boolean).join(", ") || "-"}</td>
+                  <td className="px-4 py-3 text-slate-600">
+                    {(() => {
+                      const loc = [user.approxLocation?.state, user.approxLocation?.country].filter(Boolean).join(", ");
+                      const pin = user.approxLocation?.pincode ? `PIN: ${user.approxLocation.pincode}` : "";
+                      return [loc, pin].filter(Boolean).join(" - ") || "-";
+                    })()}
+                  </td>
                 </tr>
               ))}
             </tbody>

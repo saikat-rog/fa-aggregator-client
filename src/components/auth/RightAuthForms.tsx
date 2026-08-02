@@ -55,6 +55,7 @@ const RightAuthForms = () => {
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [advisorDeclarationChecked, setAdvisorDeclarationChecked] = useState(false);
+  const [persistedAuth, setPersistedAuth] = useState<AuthSuccessPayload | null>(null);
 
   const [googlePhone, setGooglePhone] = useState<GooglePhoneState>({
     open: false,
@@ -115,15 +116,6 @@ const RightAuthForms = () => {
     navigateByRole(navigate, authResponse.role);
   };
 
-  const tryGoogleAuth = async (params: {
-    idToken: string;
-    role?: AuthRole;
-    phone: string;
-  }) => {
-    const response = await googleAuthApi(params);
-    applyAuthSuccess(response);
-  };
-
   const onGoogleCredential = async (credential?: string) => {
     if (!credential) {
       setErrorMessage("Google sign-in failed. Please try again.");
@@ -131,31 +123,30 @@ const RightAuthForms = () => {
     }
 
     setErrorMessage("");
-    // First attempt authentication without explicit phone modal, unless backend requires it
     try {
       setIsGoogleSubmitting(true);
-      await tryGoogleAuth({
+      // Attempt silent auth first
+      const response = await googleAuthApi({
         idToken: credential,
         role: formRoleRef.current,
         phone: "",
       });
-    } catch (err: unknown) {
-      const msg = extractApiMessage(err);
-      if (msg && msg.toLowerCase().includes("phone")) {
-        // Backend requested phone number
-        setGooglePhone({
-          open: true,
-          idToken: credential,
-          role: formRoleRef.current,
-        });
-      } else {
-        // If initial silent call failed with missing phone or generic error, prompt for phone
-        setGooglePhone({
-          open: true,
-          idToken: credential,
-          role: formRoleRef.current,
-        });
+
+      // If user already has a phone number registered, do not prompt for phone
+      if (response.hasPhone || Boolean(response.phone)) {
+        applyAuthSuccess(response);
+        return;
       }
+
+      // User has no phone number: prompt the optional phone number dialog
+      setPersistedAuth(response);
+      setGooglePhone({
+        open: true,
+        idToken: credential,
+        role: formRoleRef.current,
+      });
+    } catch (err: unknown) {
+      setErrorMessage(extractApiMessage(err) || "Google authentication failed.");
     } finally {
       setIsGoogleSubmitting(false);
     }
@@ -164,23 +155,39 @@ const RightAuthForms = () => {
   const onGooglePhoneSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const phone = googlePhoneForm.phone.trim();
-    if (!phone) {
-      setErrorMessage("Mobile number is required.");
-      return;
+    const formattedPhone = phone ? `+${googlePhoneForm.countryCode}${phone}` : "";
+
+    if (formattedPhone && googlePhone.idToken) {
+      try {
+        setIsGoogleSubmitting(true);
+        setErrorMessage("");
+        const response = await googleAuthApi({
+          idToken: googlePhone.idToken,
+          role: googlePhone.role,
+          phone: formattedPhone,
+        });
+        applyAuthSuccess(response);
+        return;
+      } catch (error: unknown) {
+        setErrorMessage(extractApiMessage(error) || "Failed to save phone number.");
+        setIsGoogleSubmitting(false);
+        return;
+      }
     }
 
-    try {
-      setIsGoogleSubmitting(true);
-      setErrorMessage("");
-      await tryGoogleAuth({
-        idToken: googlePhone.idToken,
-        role: googlePhone.role,
-        phone: `+${googlePhoneForm.countryCode}${phone}`,
-      });
-    } catch (error: unknown) {
-      setErrorMessage(extractApiMessage(error) || "Google authentication failed.");
-    } finally {
-      setIsGoogleSubmitting(false);
+    // If phone field left blank, proceed with persisted session
+    if (persistedAuth) {
+      applyAuthSuccess(persistedAuth);
+    } else {
+      setGooglePhone({ open: false, idToken: "", role: "user" });
+    }
+  };
+
+  const onGooglePhoneSkip = () => {
+    if (persistedAuth) {
+      applyAuthSuccess(persistedAuth);
+    } else {
+      setGooglePhone({ open: false, idToken: "", role: "user" });
     }
   };
 
@@ -404,7 +411,7 @@ const RightAuthForms = () => {
         </div>
       </div>
 
-      {/* Mobile Number Popup Dialog (When required by Google auth) */}
+      {/* Mobile Number Popup Dialog (Optional for Google Sign In - Shown only when user has no phone) */}
       <AnimatePresence>
         {googlePhone.open ? (
           <motion.div
@@ -423,9 +430,9 @@ const RightAuthForms = () => {
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 mb-4">
                 <FiPhone className="h-6 w-6" />
               </div>
-              <h3 className="text-xl font-bold text-slate-900">Complete your profile</h3>
-              <p className="mt-1 text-xs text-slate-500">
-                Enter your mobile number to complete your Google registration as {googlePhone.role}.
+              <h3 className="text-xl font-bold text-slate-900">Add Phone Number (Optional)</h3>
+              <p className="mt-1 text-xs leading-relaxed text-slate-500">
+                Provide your mobile number to receive updates and connect with {googlePhone.role === "advisor" ? "clients" : "advisors"}, or click Skip to continue as <span className="font-semibold text-slate-700">{googlePhone.role}</span>.
               </p>
 
               <div className="mt-5 flex h-12 gap-2.5">
@@ -442,7 +449,6 @@ const RightAuthForms = () => {
                     inputMode="numeric"
                     aria-label="Country code"
                     className="w-full bg-transparent px-1 text-center text-sm font-bold outline-none"
-                    required
                   />
                 </div>
                 <input
@@ -455,27 +461,27 @@ const RightAuthForms = () => {
                   }
                   inputMode="numeric"
                   aria-label="Mobile number"
-                  placeholder="10-digit mobile number"
+                  placeholder="10-digit mobile number (Optional)"
                   className="flex-1 rounded-xl border border-slate-300 px-4 text-sm font-medium outline-none focus:border-blue-500"
-                  required
                   autoFocus
                 />
               </div>
 
-              <div className="mt-6 flex justify-end gap-3">
+              <div className="mt-6 flex justify-end gap-2.5">
                 <button
                   type="button"
-                  onClick={() => setGooglePhone({ open: false, idToken: "", role: formRole })}
-                  className="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-50"
+                  disabled={isGoogleSubmitting}
+                  onClick={onGooglePhoneSkip}
+                  className="rounded-xl border border-slate-300 px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-60 transition"
                 >
-                  Cancel
+                  Skip
                 </button>
                 <button
                   type="submit"
                   disabled={isGoogleSubmitting}
-                  className="rounded-xl bg-blue-600 px-5 py-2.5 text-xs font-bold text-white shadow-md shadow-blue-500/20 hover:bg-blue-700 disabled:opacity-60"
+                  className="rounded-xl bg-blue-700 px-5 py-2.5 text-xs font-bold text-white shadow-md shadow-blue-500/20 hover:bg-blue-800 disabled:opacity-60 transition"
                 >
-                  {isGoogleSubmitting ? "Completing..." : "Complete Sign In"}
+                  {isGoogleSubmitting ? "Completing..." : "Continue"}
                 </button>
               </div>
             </motion.form>

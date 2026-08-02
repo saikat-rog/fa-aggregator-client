@@ -33,6 +33,7 @@ export interface AdminUser {
   approxLocation?: {
     country?: string;
     state?: string;
+    pincode?: string;
   };
   role?: string;
   createdAt?: string;

@@ -21,6 +21,7 @@ import {
   trackAdvisorClick,
 } from "../../services/advisor.service";
 import { AuthPromptDialog } from "../dialog/AuthPromptDialog";
+import { PincodePromptDialog } from "../dialog/PincodePromptDialog";
 import { getDisplayCategory, getDisplayPpp } from "./advisorDisplay.utils";
 
 export interface AdvisorCardData {
@@ -65,9 +66,15 @@ export function AdvisorCard({ advisor }: AdvisorCardProps) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [role, setRole] = useState<string | null>(null);
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
+  const [pincodeDialogOpen, setPincodeDialogOpen] = useState(false);
   const [saveActionError, setSaveActionError] = useState("");
   const [pendingActionType, setPendingActionType] = useState<
     "website" | "email" | "social" | null
+  >(null);
+  const [pendingTargetAction, setPendingTargetAction] = useState<
+    | { kind: "link"; type: "website" | "email" | "social"; url: string }
+    | { kind: "save" }
+    | null
   >(null);
   const {
     isSaved,
@@ -96,24 +103,37 @@ export function AdvisorCard({ advisor }: AdvisorCardProps) {
 
   const userCanOpenLinks = isAuthenticated && role === "user";
 
+  const isPincodeCollected = () =>
+    typeof window !== "undefined" &&
+    sessionStorage.getItem("pincodeCollected") === "true";
+
   const socialButtonClassName =
     "inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-2 text-xs font-semibold text-white transition hover:bg-white/20";
 
+  const executeLinkAction = (type: "website" | "email" | "social", url: string) => {
+    const clickType =
+      type === "social"
+        ? ADVISOR_CLICK_TYPES.SOCIAL
+        : type === "email"
+          ? ADVISOR_CLICK_TYPES.EMAIL
+          : ADVISOR_CLICK_TYPES.WEBSITE;
+    void trackAdvisorClick(advisor.id, clickType);
+    if (type === "email") {
+      window.location.href = url;
+      return;
+    }
+
+    window.open(url, "_blank", "noreferrer");
+  };
+
   const openAction = (type: "website" | "email" | "social", url: string) => {
     if (userCanOpenLinks) {
-      const clickType =
-        type === "social"
-          ? ADVISOR_CLICK_TYPES.SOCIAL
-          : type === "email"
-            ? ADVISOR_CLICK_TYPES.EMAIL
-            : ADVISOR_CLICK_TYPES.WEBSITE;
-      void trackAdvisorClick(advisor.id, clickType);
-      if (type === "email") {
-        window.location.href = url;
+      if (!isPincodeCollected()) {
+        setPendingTargetAction({ kind: "link", type, url });
+        setPincodeDialogOpen(true);
         return;
       }
-
-      window.open(url, "_blank", "noreferrer");
+      executeLinkAction(type, url);
       return;
     }
 
@@ -138,13 +158,7 @@ export function AdvisorCard({ advisor }: AdvisorCardProps) {
     navigate(`/${advisor.username}`);
   };
 
-  const handleToggleSave = async () => {
-    if (!isAuthenticated || role !== "user") {
-      setPendingActionType("website");
-      setAuthDialogOpen(true);
-      return;
-    }
-
+  const executeSaveAction = async () => {
     try {
       setSaveActionError("");
       if (isSaved(advisor.id)) {
@@ -162,6 +176,35 @@ export function AdvisorCard({ advisor }: AdvisorCardProps) {
           ? (error as { response?: { data?: { msg?: string } } }).response?.data?.msg
           : "Unable to update saved advisor.";
       setSaveActionError(msg ?? "Unable to update saved advisor.");
+    }
+  };
+
+  const handleToggleSave = async () => {
+    if (!isAuthenticated || role !== "user") {
+      setPendingActionType("website");
+      setAuthDialogOpen(true);
+      return;
+    }
+
+    if (!isPincodeCollected()) {
+      setPendingTargetAction({ kind: "save" });
+      setPincodeDialogOpen(true);
+      return;
+    }
+
+    await executeSaveAction();
+  };
+
+  const handlePincodeSuccess = () => {
+    setPincodeDialogOpen(false);
+    if (pendingTargetAction) {
+      const action = pendingTargetAction;
+      setPendingTargetAction(null);
+      if (action.kind === "link") {
+        executeLinkAction(action.type, action.url);
+      } else if (action.kind === "save") {
+        void executeSaveAction();
+      }
     }
   };
 
@@ -435,6 +478,11 @@ export function AdvisorCard({ advisor }: AdvisorCardProps) {
           navigate("/auth");
         }}
         onLogoutAndLoginAsUser={logoutAndLoginAsUser}
+      />
+      <PincodePromptDialog
+        open={pincodeDialogOpen}
+        onClose={() => setPincodeDialogOpen(false)}
+        onSuccess={handlePincodeSuccess}
       />
     </>
   );

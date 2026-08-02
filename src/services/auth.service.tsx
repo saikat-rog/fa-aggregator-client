@@ -6,6 +6,8 @@ export type AuthSuccessPayload = {
   accessToken: string;
   role: AuthRole;
   roles?: AuthRole[];
+  hasPhone?: boolean;
+  phone?: string | null;
 };
 
 export async function registerApi(
