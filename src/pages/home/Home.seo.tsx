@@ -6,18 +6,18 @@ export function HomeSeo() {
   const { landingSlug, slug } = useParams();
   const activeSlug = landingSlug ?? slug;
   const landing = activeSlug ? seoLandings[activeSlug] : undefined;
-  const title = landing?.title || "Find Trusted Financial Advisors | Invest24";
+  const title = landing?.title || "Find Trusted Financial Advisors | Folksmint";
   const description =
     landing?.description ||
-    "Discover verified financial advisors by country, state, industries, and audience signals on Invest24.";
+    "Discover verified financial advisors by country, state, industries, and audience signals on Folksmint.";
   const keywords =
     landing?.slug
-      ? `${landing.slug.replaceAll("-", ", ")}, financial advisor, investment advisor, invest24`
-      : "financial advisor, investment advisor, wealth advisor, stock market advisor, invest24";
+      ? `${landing.slug.replaceAll("-", ", ")}, financial advisor, investment advisor, folksmint`
+      : "financial advisor, investment advisor, wealth advisor, stock market advisor, folksmint";
   const pageUrl =
     landing?.canonicalUrl ||
     (typeof window !== "undefined" ? window.location.href : "");
-  const siteName = "Invest24";
+  const siteName = "Folksmint";
   const defaultOgImage =
     typeof window !== "undefined"
       ? `${window.location.origin}/favicon.svg`

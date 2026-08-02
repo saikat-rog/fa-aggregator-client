@@ -39,6 +39,7 @@ export const followerFieldPlatformLabels: Record<FollowerField, string> = {
 };
 
 export const followerCountOptions = [
+  { label: "100 to 1K", value: "100" },
   { label: "1K+", value: "1000" },
   { label: "5K+", value: "5000" },
   { label: "10K+", value: "10000" },

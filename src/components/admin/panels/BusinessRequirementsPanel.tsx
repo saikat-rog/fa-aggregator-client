@@ -20,16 +20,17 @@ type Props = {
   setParam: (key: string, value?: string) => void;
 };
 
-const formatSalesValue = (value: string) => {
+const formatSalesValue = (value?: string | number) => {
+  if (value === undefined || value === null || value === "") return "—";
   const parsed = Number(value);
-  if (Number.isFinite(parsed)) {
+  if (Number.isFinite(parsed) && !Number.isNaN(parsed)) {
     return new Intl.NumberFormat("en-IN", {
       style: "currency",
       currency: "INR",
       maximumFractionDigits: 0,
     }).format(parsed);
   }
-  return value;
+  return String(value);
 };
 
 const formatDate = (value?: string) =>
@@ -103,23 +104,36 @@ export function BusinessRequirementsPanel({ params, setParam }: Props) {
   };
 
   useEffect(() => {
-    if (!selectedId) return;
+    if (!selectedId) {
+      setDetail(null);
+      setDetailError("");
+      return;
+    }
+
+    const matchedRow = rows.find((r) => r._id === selectedId);
+    if (matchedRow) {
+      setDetail(matchedRow);
+    }
 
     const loadDetail = async () => {
       try {
-        setDetailLoading(true);
+        setDetailLoading(!matchedRow);
         setDetailError("");
         const payload = await getBusinessRequirementByIdAdmin(selectedId);
-        setDetail(payload);
+        if (payload && payload._id) {
+          setDetail(payload);
+        }
       } catch (err: unknown) {
-        setDetailError(err instanceof Error ? err.message : "Failed to load requirement details.");
+        if (!matchedRow) {
+          setDetailError(err instanceof Error ? err.message : "Failed to load requirement details.");
+        }
       } finally {
         setDetailLoading(false);
       }
     };
 
     void loadDetail();
-  }, [selectedId]);
+  }, [selectedId, rows]);
 
   const csvData = useMemo(() => {
     const headers = [
@@ -141,10 +155,10 @@ export function BusinessRequirementsPanel({ params, setParam }: Props) {
         String(item.goalMonthlySales),
         item.desiredInfluencerScope,
         item.campaignObjective,
-        item.detailedRequirements.replace(/\n/g, " "),
+        item.detailedRequirements?.replace(/\n/g, " ") ?? "",
         formatDate(item.createdAt),
       ]
-        .map((value) => `"${String(value).replace(/"/g, '""')}"`)
+        .map((value) => `"${String(value ?? "").replace(/"/g, '""')}"`)
         .join(","),
     );
 
@@ -213,13 +227,13 @@ export function BusinessRequirementsPanel({ params, setParam }: Props) {
             <tbody>
               {rows.map((item) => (
                 <tr key={item._id} className="border-b border-slate-100 transition hover:bg-slate-50/80">
-                  <td className="px-4 py-3 font-medium text-slate-800">{item.companyName}</td>
-                  <td className="px-4 py-3 text-slate-600">{item.businessEmail}</td>
+                  <td className="px-4 py-3 font-medium text-slate-800">{item.companyName || "—"}</td>
+                  <td className="px-4 py-3 text-slate-600">{item.businessEmail || "—"}</td>
                   <td className="px-4 py-3 text-slate-600">{formatSalesValue(item.currentMonthlySales)}</td>
                   <td className="px-4 py-3 text-slate-600">{formatSalesValue(item.goalMonthlySales)}</td>
-                  <td className="px-4 py-3 text-slate-600">{item.desiredInfluencerScope}</td>
-                  <td className="px-4 py-3 text-slate-600">{item.campaignObjective}</td>
-                  <td className="px-4 py-3 capitalize text-slate-600">{item.status}</td>
+                  <td className="px-4 py-3 text-slate-600">{item.desiredInfluencerScope || "—"}</td>
+                  <td className="px-4 py-3 text-slate-600">{item.campaignObjective || "—"}</td>
+                  <td className="px-4 py-3 capitalize text-slate-600">{item.status || "—"}</td>
                   <td className="px-4 py-3 text-slate-600">{formatDate(item.approvedAt ?? undefined)}</td>
                   <td className="px-4 py-3 text-slate-600">{formatDate(item.createdAt)}</td>
                   <td className="px-4 py-3">
@@ -269,20 +283,20 @@ export function BusinessRequirementsPanel({ params, setParam }: Props) {
           {detailLoading ? <p className={statusInfoClassName}>Loading details...</p> : null}
           {detailError ? <p className={statusErrorClassName}>{detailError}</p> : null}
 
-          {detail && !detailLoading && !detailError ? (
+          {detail && !detailLoading ? (
             <div className="grid gap-3 text-sm text-slate-700 md:grid-cols-2">
-              <p><span className="font-semibold text-slate-900">Company Name:</span> {detail.companyName}</p>
-              <p><span className="font-semibold text-slate-900">Business Email:</span> {detail.businessEmail}</p>
+              <p><span className="font-semibold text-slate-900">Company Name:</span> {detail.companyName || "—"}</p>
+              <p><span className="font-semibold text-slate-900">Business Email:</span> {detail.businessEmail || "—"}</p>
               <p><span className="font-semibold text-slate-900">URL:</span> {detail.url ? <a href={detail.url} target="_blank" rel="noopener noreferrer" className="text-blue-700 underline">{detail.url}</a> : "—"}</p>
-              <p><span className="font-semibold text-slate-900">Status:</span> <span className="capitalize">{detail.status}</span></p>
+              <p><span className="font-semibold text-slate-900">Status:</span> <span className="capitalize">{detail.status || "—"}</span></p>
               <p><span className="font-semibold text-slate-900">Approved At:</span> {formatDate(detail.approvedAt ?? undefined)}</p>
               <p><span className="font-semibold text-slate-900">Current Monthly Sales:</span> {formatSalesValue(detail.currentMonthlySales)}</p>
               <p><span className="font-semibold text-slate-900">Goal Monthly Sales:</span> {formatSalesValue(detail.goalMonthlySales)}</p>
-              <p><span className="font-semibold text-slate-900">Desired Influencer Scope:</span> {detail.desiredInfluencerScope}</p>
-              <p><span className="font-semibold text-slate-900">Campaign Objective:</span> {detail.campaignObjective}</p>
+              <p><span className="font-semibold text-slate-900">Desired Influencer Scope:</span> {detail.desiredInfluencerScope || "—"}</p>
+              <p><span className="font-semibold text-slate-900">Campaign Objective:</span> {detail.campaignObjective || "—"}</p>
               <p className="md:col-span-2"><span className="font-semibold text-slate-900">Detailed Requirements:</span></p>
               <p className="md:col-span-2 whitespace-pre-wrap rounded-xl border border-slate-200 bg-white p-3 text-slate-700">
-                {detail.detailedRequirements}
+                {detail.detailedRequirements || "—"}
               </p>
               <p><span className="font-semibold text-slate-900">Created At:</span> {formatDate(detail.createdAt)}</p>
               <p><span className="font-semibold text-slate-900">Updated At:</span> {formatDate(detail.updatedAt)}</p>

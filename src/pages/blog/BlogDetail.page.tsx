@@ -49,7 +49,7 @@ export function BlogDetailPage() {
       .finally(() => setLoading(false));
   }, [slug]);
 
-  const title = blog?.seo?.metaTitle || blog?.title || "Blog | Invest24";
+  const title = blog?.seo?.metaTitle || blog?.title || "Blog | Folksmint";
   const description = blog?.seo?.metaDescription || blog?.excerpt || "";
   const coverImageUrl = blog?.coverImageUrl?.trim() || "";
   const ogImage = blog?.seo?.ogImageUrl || coverImageUrl || "";

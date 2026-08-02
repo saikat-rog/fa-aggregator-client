@@ -1,21 +1,79 @@
-import { Link } from 'react-router-dom';
+import { Link } from "react-router-dom";
+import { FiShield, FiZap, FiUsers, FiCheckCircle, FiArrowRight } from "react-icons/fi";
 
 const LeftInfo = () => {
-    return (
-        <section className="rounded-3xl bg-linear-to-br from-blue-700 to-cyan-500 p-8 text-white shadow-xl shadow-blue-100">
-        <p className="mb-3 inline-block rounded-full bg-white/20 px-3 py-1 text-xs font-semibold">/auth</p>
-        <h1 className="text-3xl font-bold">Welcome to FinBlue</h1>
-        <p className="mt-2 text-blue-100">A sleek place where users and financial advisors connect with trust.</p>
-        <ul className="mt-8 space-y-3 text-sm text-blue-50">
-          <li>Fast advisor discovery by location</li>
-          <li>Role based login and onboarding</li>
-          <li>Simple admin verification workflow</li>
-        </ul>
-        <div className="mt-8 rounded-2xl bg-white/10 p-4 text-sm">
-          Admin? Use <Link to="/lol" className="font-semibold underline">`/lol`</Link> for admin login.
+  return (
+    <section className="relative flex flex-col justify-between overflow-hidden rounded-3xl bg-linear-to-br from-blue-900 via-blue-800 to-indigo-900 p-7 text-white shadow-2xl shadow-blue-900/30">
+      {/* Decorative gradient overlay & glow shapes */}
+      <div className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-cyan-500/20 blur-2xl" />
+      <div className="pointer-events-none absolute -bottom-16 -left-16 h-64 w-64 rounded-full bg-blue-500/20 blur-2xl" />
+
+      <div className="relative z-10 space-y-6">
+        <div>
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-400/30 bg-blue-500/20 px-3.5 py-1 text-xs font-semibold tracking-wide text-cyan-200 backdrop-blur-md">
+            <FiShield className="h-3.5 w-3.5 text-cyan-400" />
+            Secure Authentication Portal
+          </span>
+          <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+            Welcome to <span className="bg-linear-to-r from-cyan-300 to-blue-200 bg-clip-text text-transparent">Folksmint</span>
+          </h1>
+          <p className="mt-2.5 text-base text-blue-100/90 leading-relaxed">
+            The premier platform connecting individuals with verified financial advisors. One-click, hassle-free Google login.
+          </p>
         </div>
-      </section>
-    );
+
+        {/* Feature Cards Grid */}
+        <div className="space-y-3 pt-2">
+          <div className="flex items-start gap-3.5 rounded-2xl border border-white/10 bg-white/10 p-3.5 backdrop-blur-md transition hover:bg-white/15">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-cyan-400/20 text-cyan-300">
+              <FiZap className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-white">Instant 1-Click Access</h3>
+              <p className="mt-0.5 text-xs text-blue-100/80">
+                Log in seamlessly with your Google Account for both Users and Advisors.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3.5 rounded-2xl border border-white/10 bg-white/10 p-3.5 backdrop-blur-md transition hover:bg-white/15">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-400/20 text-blue-300">
+              <FiUsers className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-white">Dual Role Hub</h3>
+              <p className="mt-0.5 text-xs text-blue-100/80">
+                Select your persona to access customized user discovery or advisor management tools.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3.5 rounded-2xl border border-white/10 bg-white/10 p-3.5 backdrop-blur-md transition hover:bg-white/15">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-400/20 text-emerald-300">
+              <FiCheckCircle className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-white">Verified & Privacy First</h3>
+              <p className="mt-0.5 text-xs text-blue-100/80">
+                Strict data compliance. Your data remains encrypted and safe.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer Admin Link */}
+      <div className="relative z-10 mt-8 flex items-center justify-between rounded-2xl border border-white/10 bg-black/20 p-4 text-xs backdrop-blur-md">
+        <span className="text-blue-200">Administrator access?</span>
+        <Link
+          to="/admin"
+          className="inline-flex items-center gap-1 font-semibold text-cyan-300 transition hover:text-cyan-200 hover:underline"
+        >
+          Admin Portal <FiArrowRight className="h-3.5 w-3.5" />
+        </Link>
+      </div>
+    </section>
+  );
 };
 
 export default LeftInfo;

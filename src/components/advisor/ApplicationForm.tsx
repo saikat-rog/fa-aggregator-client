@@ -96,6 +96,11 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
     [options],
   );
 
+  const categoryOptions = useMemo(
+    () => [...(options?.categories ?? [])].sort((a, b) => a.localeCompare(b)),
+    [options],
+  );
+
   const submitListingApplication = async (
     event: React.FormEvent<HTMLFormElement>,
   ) => {
@@ -468,18 +473,38 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
             ) : null}
           </div>
           <div>
-            <input
-              required
-              name="category"
-              type="text"
-              value={categoryValue}
-              onChange={(event) => {
-                setCategoryValue(event.target.value);
-                setCategoryError("");
-              }}
-              placeholder="Category"
-              className="w-full rounded-xl border border-blue-100 px-4 py-3 outline-none focus:border-blue-400"
-            />
+            {categoryOptions.length > 0 ? (
+              <select
+                required
+                name="category"
+                value={categoryValue}
+                onChange={(event) => {
+                  setCategoryValue(event.target.value);
+                  setCategoryError("");
+                }}
+                className="w-full rounded-xl border border-blue-100 px-4 py-3 outline-none focus:border-blue-400"
+              >
+                <option value="">Select category</option>
+                {categoryOptions.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <input
+                required
+                name="category"
+                type="text"
+                value={categoryValue}
+                onChange={(event) => {
+                  setCategoryValue(event.target.value);
+                  setCategoryError("");
+                }}
+                placeholder="Category"
+                className="w-full rounded-xl border border-blue-100 px-4 py-3 outline-none focus:border-blue-400"
+              />
+            )}
             {categoryError ? (
               <p className="mt-1 text-xs text-rose-600">{categoryError}</p>
             ) : null}
@@ -579,7 +604,7 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
           </button>
           
         </div>
-          <p><strong>NOTE: </strong>Once submitted, please DM us in our official instagram page "invest24" from your given Instagram profile.</p>
+          <p><strong>NOTE: </strong>Once submitted, please DM us in our official instagram page "folksmint" from your given Instagram profile.</p>
       </form>
 
       {applicationNote ? (

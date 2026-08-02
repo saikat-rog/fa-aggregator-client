@@ -74,6 +74,12 @@ export function useHomeController({
     [formOptions],
   );
 
+  const categoryOptions = useMemo(
+    () =>
+      (formOptions?.categories ?? []).slice().sort((a, b) => a.localeCompare(b)),
+    [formOptions],
+  );
+
   useEffect(() => {
     if (disableUrlSync) return;
     const current = filtersFromSearchParams(searchParams);
@@ -201,6 +207,7 @@ export function useHomeController({
     countries,
     states,
     industryOptions,
+    categoryOptions,
     isLoading,
     error,
     advisors,

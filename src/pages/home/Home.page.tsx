@@ -11,6 +11,7 @@ export function HomePage(props: HomePageProps = {}) {
     countries,
     states,
     industryOptions,
+    categoryOptions,
     isLoading,
     error,
     advisors,
@@ -32,6 +33,7 @@ export function HomePage(props: HomePageProps = {}) {
         countries={countries}
         states={states}
         industryOptions={industryOptions}
+        categoryOptions={categoryOptions}
         disableUrlSync={disableUrlSync}
         onSetFilters={setFilters}
         onSetSearchParams={setSearchParams}

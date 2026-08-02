@@ -4,6 +4,7 @@ import { UsersPanel } from "./panels/UsersPanel";
 import { AdvisorsPanel } from "./panels/AdvisorsPanel";
 import { ApplicationsPanel } from "./panels/ApplicationsPanel";
 import { IndustriesPanel } from "./panels/IndustriesPanel";
+import { CategoriesPanel } from "./panels/CategoriesPanel";
 import { BlogsPanel } from "./panels/BlogsPanel";
 import { BusinessRequirementsPanel } from "./panels/BusinessRequirementsPanel";
 
@@ -48,6 +49,7 @@ export function AdminPageContent() {
       {view === "advisors" ? <AdvisorsPanel params={params} setParam={setParam} /> : null}
       {view === "applications" ? <ApplicationsPanel params={params} setParam={setParam} /> : null}
       {view === "industries" ? <IndustriesPanel /> : null}
+      {view === "categories" ? <CategoriesPanel /> : null}
       {view === "blogs" ? <BlogsPanel params={params} setParam={setParam} setManyParams={setManyParams} /> : null}
       {view === "requirements" ? <BusinessRequirementsPanel params={params} setParam={setParam} /> : null}
     </div>

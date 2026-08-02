@@ -9,10 +9,10 @@ export function AdvisorProfileSeo({ advisor }: Props) {
   const advisorName = advisor.name?.trim() || advisor.username || "Financial Advisor";
   const advisorLocation = [advisor.state, advisor.country].filter(Boolean).join(", ");
   const pageUrl = typeof window !== "undefined" ? window.location.href : "";
-  const pageTitle = `${advisorName} | Financial Advisor${advisorLocation ? ` in ${advisorLocation}` : ""} | Invest24`;
+  const pageTitle = `${advisorName} | Financial Advisor${advisorLocation ? ` in ${advisorLocation}` : ""} | Folksmint`;
   const pageDescription =
     advisor.about?.trim() ||
-    `View ${advisorName}'s advisor profile${advisorLocation ? ` in ${advisorLocation}` : ""} on Invest24.`;
+    `View ${advisorName}'s advisor profile${advisorLocation ? ` in ${advisorLocation}` : ""} on Folksmint.`;
   const pageKeywords = [
     advisorName,
     advisor.username,

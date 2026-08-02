@@ -1,27 +1,12 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { FiUser, FiBriefcase, FiAlertCircle, FiShield, FiPhone, FiCheck } from "react-icons/fi";
 import {
-  forgotPasswordApi,
   googleAuthApi,
-  loginApi,
-  registerApi,
-  reVerifyEmailApi,
-  resetPasswordApi,
-  verifyEmailApi,
   type AuthRole,
   type AuthSuccessPayload,
 } from "../../services/auth.service";
-
-type AuthMode = "login" | "signup";
-type SignupStep = "details" | "otp";
-type ForgotStep = "request" | "reset";
-
-type PendingSignup = {
-  email: string;
-  password: string;
-  role: AuthRole;
-};
 
 type GooglePhoneState = {
   open: boolean;
@@ -29,15 +14,9 @@ type GooglePhoneState = {
   role: AuthRole;
 };
 
-const GOOGLE_REDIRECT_STATE_KEY = "invest24GoogleRedirectState";
-const GOOGLE_ONLY_HELP_TEXT =
-  "After login, create password in Settings";
-const GOOGLE_ONLY_FALLBACK_MESSAGE =
-  "Google authentication is enabled for this account. Please login with Google first, then set a password.";
-const NO_PASSWORD_FOR_ROLE_MESSAGE =
-  "This role has no password yet. Login with Google and create a password first.";
+const GOOGLE_REDIRECT_STATE_KEY = "folksmintGoogleRedirectState";
 const ADVISOR_DECLARATION_MESSAGE =
-  "Please confirm you are an influencer and not claiming anything fake.";
+  "Please confirm you are an authorized financial advisor or content creator before proceeding.";
 
 const persistAuthSession = (authResponse: AuthSuccessPayload) => {
   localStorage.setItem("token", authResponse.accessToken);
@@ -46,6 +25,7 @@ const persistAuthSession = (authResponse: AuthSuccessPayload) => {
     "roles",
     JSON.stringify(Array.isArray(authResponse.roles) ? authResponse.roles : [authResponse.role]),
   );
+  localStorage.setItem("googleLinked", "true");
 };
 
 const navigateByRole = (navigate: ReturnType<typeof useNavigate>, role: AuthRole) => {
@@ -72,32 +52,10 @@ const extractApiMessage = (error: unknown) => {
 
 const RightAuthForms = () => {
   const [formRole, setFormRole] = useState<AuthRole>("user");
-  const [mode, setMode] = useState<AuthMode>("login");
-  const [signupStep, setSignupStep] = useState<SignupStep>("details");
-  const [forgotStep, setForgotStep] = useState<ForgotStep>("request");
-
-  const [pendingSignup, setPendingSignup] = useState<PendingSignup | null>(null);
-  const [forgotOpen, setForgotOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
-  const [resendCooldown, setResendCooldown] = useState(0);
-  const [resendMessage, setResendMessage] = useState("");
-  const [countryCode, setCountryCode] = useState("91");
-  const [advisorDeclarationChecked, setAdvisorDeclarationChecked] =
-    useState(false);
-  const [otpDigits, setOtpDigits] = useState<string[]>(Array(6).fill(""));
-  const [resendAttempts, setResendAttempts] = useState(0);
-  const [otpCooldownStarted, setOtpCooldownStarted] = useState(false);
-  const [showGoogleOnlyGuidance, setShowGoogleOnlyGuidance] = useState(false);
-  const [forgotPayload, setForgotPayload] = useState({
-    email: "",
-    role: "user" as AuthRole,
-    otp: "",
-    newPassword: "",
-    confirmPassword: "",
-  });
+  const [advisorDeclarationChecked, setAdvisorDeclarationChecked] = useState(false);
+
   const [googlePhone, setGooglePhone] = useState<GooglePhoneState>({
     open: false,
     idToken: "",
@@ -107,17 +65,18 @@ const RightAuthForms = () => {
     countryCode: "91",
     phone: "",
   });
+
   const navigate = useNavigate();
-  const pendingSignupEmail = pendingSignup?.email || "your email";
-  const digitRefs = useRef<HTMLInputElement[]>([]);
   const formRoleRef = useRef<AuthRole>("user");
-  const modeRef = useRef<AuthMode>("login");
-  const MAX_RESEND_ATTEMPTS = 5;
+
+  useEffect(() => {
+    formRoleRef.current = formRole;
+  }, [formRole]);
 
   const getGoogleClientId = () =>
     import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
 
-  const redirectToGoogleSignIn = (sourceMode: AuthMode) => {
+  const redirectToGoogleSignIn = (selectedRole: AuthRole) => {
     const clientId = getGoogleClientId();
     if (!clientId) {
       setErrorMessage("Google login is not configured.");
@@ -128,11 +87,11 @@ const RightAuthForms = () => {
       typeof crypto !== "undefined" && "randomUUID" in crypto
         ? crypto.randomUUID()
         : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
     sessionStorage.setItem(
       GOOGLE_REDIRECT_STATE_KEY,
       JSON.stringify({
-        mode: sourceMode,
-        role: formRoleRef.current,
+        role: selectedRole,
         nonce,
       }),
     );
@@ -151,53 +110,8 @@ const RightAuthForms = () => {
     );
   };
 
-  const resetSignupFlow = () => {
-    setSignupStep("details");
-    setPendingSignup(null);
-    setSuccessMessage("");
-    setErrorMessage("");
-    setOtpDigits(Array(6).fill(""));
-    setResendCooldown(0);
-    setResendMessage("");
-    setResendAttempts(0);
-    setCountryCode("91");
-    setAdvisorDeclarationChecked(false);
-    setOtpCooldownStarted(false);
-    setShowGoogleOnlyGuidance(false);
-  };
-
-  const switchMode = (nextMode: AuthMode) => {
-    setMode(nextMode);
-    setErrorMessage("");
-    setSuccessMessage("");
-    setShowGoogleOnlyGuidance(false);
-    setForgotOpen(false);
-    setForgotStep("request");
-    if (nextMode === "login") {
-      resetSignupFlow();
-    }
-  };
-
-  const switchRole = (nextRole: AuthRole) => {
-    setFormRole(nextRole);
-    setForgotOpen(false);
-    setForgotStep("request");
-    resetSignupFlow();
-  };
-
-  useEffect(() => {
-    formRoleRef.current = formRole;
-  }, [formRole]);
-
-  useEffect(() => {
-    modeRef.current = mode;
-  }, [mode]);
-
-  const applyAuthSuccess = (authResponse: AuthSuccessPayload, viaGoogle: boolean) => {
+  const applyAuthSuccess = (authResponse: AuthSuccessPayload) => {
     persistAuthSession(authResponse);
-    if (viaGoogle) {
-      localStorage.setItem("googleLinked", "true");
-    }
     navigateByRole(navigate, authResponse.role);
   };
 
@@ -207,7 +121,7 @@ const RightAuthForms = () => {
     phone: string;
   }) => {
     const response = await googleAuthApi(params);
-    applyAuthSuccess(response, true);
+    applyAuthSuccess(response);
   };
 
   const onGoogleCredential = async (credential?: string) => {
@@ -217,12 +131,34 @@ const RightAuthForms = () => {
     }
 
     setErrorMessage("");
-    setSuccessMessage("");
-    setGooglePhone({
-      open: true,
-      idToken: credential,
-      role: formRoleRef.current,
-    });
+    // First attempt authentication without explicit phone modal, unless backend requires it
+    try {
+      setIsGoogleSubmitting(true);
+      await tryGoogleAuth({
+        idToken: credential,
+        role: formRoleRef.current,
+        phone: "",
+      });
+    } catch (err: unknown) {
+      const msg = extractApiMessage(err);
+      if (msg && msg.toLowerCase().includes("phone")) {
+        // Backend requested phone number
+        setGooglePhone({
+          open: true,
+          idToken: credential,
+          role: formRoleRef.current,
+        });
+      } else {
+        // If initial silent call failed with missing phone or generic error, prompt for phone
+        setGooglePhone({
+          open: true,
+          idToken: credential,
+          role: formRoleRef.current,
+        });
+      }
+    } finally {
+      setIsGoogleSubmitting(false);
+    }
   };
 
   const onGooglePhoneSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -248,185 +184,15 @@ const RightAuthForms = () => {
     }
   };
 
-  const handleGoogleSignIn = (sourceMode: AuthMode) => {
+  const handleGoogleAuthClick = () => {
     setErrorMessage("");
-    setSuccessMessage("");
-    setShowGoogleOnlyGuidance(false);
-    redirectToGoogleSignIn(sourceMode);
-  };
 
-  const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    const email = String(formData.get("email") || "").trim();
-    const name = String(formData.get("name") || "").trim();
-    const password = String(formData.get("password") || "");
-    const phone = String(formData.get("phone") || "").trim();
-    const fullPhone = phone ? `+${countryCode}${phone}` : undefined;
-
-    try {
-      setIsSubmitting(true);
-      setErrorMessage("");
-      setSuccessMessage("");
-      setShowGoogleOnlyGuidance(false);
-
-      let authResponse: AuthSuccessPayload | null = null;
-      if (mode === "signup") {
-        if (signupStep === "details") {
-          if (formRole === "advisor" && !advisorDeclarationChecked) {
-            setErrorMessage(ADVISOR_DECLARATION_MESSAGE);
-            return;
-          }
-          await registerApi(email, password, name, fullPhone, formRole);
-          setPendingSignup({ email, password, role: formRole });
-          setSignupStep("otp");
-          setSuccessMessage(
-            "We sent a 6-digit verification code to your email. Enter it below to finish creating your account.",
-          );
-          return;
-        }
-
-        if (!pendingSignup) {
-          setSignupStep("details");
-          setErrorMessage("Your signup session expired. Please register again.");
-          return;
-        }
-
-        const otpToVerify = otpDigits.join("");
-        if (otpToVerify.length !== 6) {
-          setErrorMessage("Enter the 6-digit OTP sent to your email.");
-          return;
-        }
-
-        await verifyEmailApi(pendingSignup.email, otpToVerify);
-        setSuccessMessage("Email verified successfully. Signing you in now...");
-        authResponse = await loginApi(
-          pendingSignup.email,
-          pendingSignup.password,
-          pendingSignup.role,
-        );
-      } else {
-        authResponse = await loginApi(email, password, formRole);
-      }
-
-      if (authResponse?.accessToken) {
-        applyAuthSuccess(authResponse, false);
-      }
-    } catch (error: unknown) {
-      const fallbackMessage =
-        mode === "signup"
-          ? "Signup failed. Please try again."
-          : "Login failed. Please check your credentials.";
-      const apiError = extractApiMessage(error);
-      const normalized = (apiError || "").toLowerCase();
-      const shouldShowGoogleHelp =
-        normalized.includes("google authentication is enabled") ||
-        apiError === GOOGLE_ONLY_FALLBACK_MESSAGE;
-
-      setErrorMessage(apiError || fallbackMessage);
-      setShowGoogleOnlyGuidance(shouldShowGoogleHelp);
-      if (mode === "signup" && signupStep === "otp") {
-        setSuccessMessage(
-          "We could not verify your email. Check the code and try again.",
-        );
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleResend = async () => {
-    if (!pendingSignup?.email) {
-      setErrorMessage("No email available to resend the code.");
+    if (formRole === "advisor" && !advisorDeclarationChecked) {
+      setErrorMessage(ADVISOR_DECLARATION_MESSAGE);
       return;
     }
 
-    if (resendAttempts >= MAX_RESEND_ATTEMPTS) {
-      setErrorMessage(
-        "You have reached the maximum resend attempts. Contact support.",
-      );
-      return;
-    }
-
-    try {
-      setIsSubmitting(true);
-      setErrorMessage("");
-      setResendMessage("");
-      await reVerifyEmailApi(pendingSignup.email, pendingSignup.role);
-      setResendMessage("OTP resent to your email again.");
-      setResendCooldown(16);
-      setResendAttempts((s) => s + 1);
-    } catch (error: unknown) {
-      const status =
-        typeof error === "object" && error !== null && "response" in error
-          ? (error as { response?: { status?: number } }).response?.status
-          : undefined;
-      if (status === 429) {
-        setErrorMessage("Too many requests. Try again later.");
-      } else {
-        setErrorMessage(extractApiMessage(error) || "Could not resend OTP. Try again later.");
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const onForgotRequest = async () => {
-    try {
-      setIsSubmitting(true);
-      setErrorMessage("");
-      setSuccessMessage("");
-      await forgotPasswordApi(forgotPayload.email, forgotPayload.role);
-      setForgotStep("reset");
-      setSuccessMessage("OTP sent. Enter code and set your new password.");
-    } catch (error: unknown) {
-      setErrorMessage(extractApiMessage(error) || "Could not send reset OTP.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const onForgotReset = async () => {
-    if (forgotPayload.newPassword.length < 8) {
-      setErrorMessage("Password must be at least 8 characters.");
-      return;
-    }
-    if (forgotPayload.newPassword !== forgotPayload.confirmPassword) {
-      setErrorMessage("Passwords do not match.");
-      return;
-    }
-
-    try {
-      setIsSubmitting(true);
-      setErrorMessage("");
-      setSuccessMessage("");
-      await resetPasswordApi({
-        email: forgotPayload.email,
-        role: forgotPayload.role,
-        otp: forgotPayload.otp,
-        newPassword: forgotPayload.newPassword,
-      });
-      setSuccessMessage("Password reset successful. You can sign in now.");
-      setForgotOpen(false);
-      setForgotStep("request");
-      setForgotPayload({
-        email: "",
-        role: formRole,
-        otp: "",
-        newPassword: "",
-        confirmPassword: "",
-      });
-    } catch (error: unknown) {
-      const msg = extractApiMessage(error);
-      const normalized = msg.toLowerCase();
-      const noPasswordForRole =
-        normalized.includes("no password") && normalized.includes("role");
-      setErrorMessage(
-        noPasswordForRole ? NO_PASSWORD_FOR_ROLE_MESSAGE : msg || "Could not reset password.",
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
+    redirectToGoogleSignIn(formRole);
   };
 
   useEffect(() => {
@@ -439,20 +205,14 @@ const RightAuthForms = () => {
 
     try {
       const parsedState = storedState
-        ? (JSON.parse(storedState) as {
-            mode?: AuthMode;
-            role?: AuthRole;
-          })
+        ? (JSON.parse(storedState) as { role?: AuthRole })
         : null;
       if (parsedState?.role) {
         formRoleRef.current = parsedState.role;
         setFormRole(parsedState.role);
       }
-      if (parsedState?.mode) {
-        setMode(parsedState.mode);
-      }
     } catch {
-      // Continue with the current role/mode if stored redirect state is invalid.
+      // Continue with current role
     }
 
     window.history.replaceState(
@@ -463,586 +223,265 @@ const RightAuthForms = () => {
     void onGoogleCredential(idToken);
   }, []);
 
-  useEffect(() => {
-    if (signupStep === "otp" && !otpCooldownStarted) {
-      setResendCooldown(16);
-      setOtpCooldownStarted(true);
-    }
-
-    if (signupStep === "otp") {
-      const idx = otpDigits.findIndex((d) => d === "");
-      const toFocus = idx === -1 ? 5 : idx;
-      setTimeout(() => digitRefs.current[toFocus]?.focus(), 40);
-    }
-  }, [signupStep, otpCooldownStarted, otpDigits]);
-
-  useEffect(() => {
-    if (resendCooldown <= 0) return;
-    const id = setInterval(
-      () => setResendCooldown((c) => (c > 0 ? c - 1 : 0)),
-      1000,
-    );
-    return () => clearInterval(id);
-  }, [resendCooldown]);
-
-  useEffect(() => {
-    if (!forgotOpen) return;
-    setForgotPayload((prev) => ({ ...prev, role: formRole }));
-  }, [forgotOpen, formRole]);
-
-  const canSubmitForgotRequest = useMemo(
-    () => forgotPayload.email.trim().length > 0,
-    [forgotPayload.email],
-  );
-  const disablePrimarySubmit =
-    isSubmitting ||
-    isGoogleSubmitting ||
-    (mode === "signup" &&
-      signupStep === "details" &&
-      formRole === "advisor" &&
-      !advisorDeclarationChecked &&
-      !forgotOpen);
-
   return (
-    <section className="rounded-3xl border border-blue-100 bg-white py-4 px-3 md:p-5 shadow-lg">
-      {successMessage ? (
-        <div className="mb-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
-          {successMessage}
+    <section className="relative flex flex-col justify-between rounded-3xl border border-slate-200/80 bg-white p-6 md:p-8 shadow-xl shadow-slate-200/40">
+      <div>
+        {/* Header Title */}
+        <div className="mb-6">
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-600">
+            <FiShield className="h-4 w-4" />
+            <span>Fast & Secure Google Login</span>
+          </div>
+          <h2 className="mt-1.5 text-2xl font-extrabold text-slate-900 sm:text-3xl">
+            Get started in seconds
+          </h2>
+          <p className="mt-1 text-sm text-slate-500">
+            Choose your role below to continue with your Google account.
+          </p>
         </div>
-      ) : null}
 
-      <div className="mb-5 rounded-2xl p-2">
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-          Continue as
-        </p>
-        <div className="mt-3 grid grid-cols-2 gap-3">
-          <button
-            type="button"
-            onClick={() => switchRole("user")}
-            className={`rounded-xl border px-3 py-3 text-sm font-semibold transition ${
-              formRole === "user"
-                ? "border-blue-500 bg-blue-50 text-blue-700"
-                : "border-slate-200 bg-white text-slate-700 hover:border-blue-200"
-            }`}
-          >
-            Looking for Advisors
-          </button>
-          <button
-            type="button"
-            onClick={() => switchRole("advisor")}
-            className={`rounded-xl border px-3 py-3 text-sm font-semibold transition ${
-              formRole === "advisor"
-                ? "border-cyan-500 bg-cyan-50 text-cyan-800"
-                : "border-slate-200 bg-white text-slate-700 hover:border-cyan-200"
-            }`}
-          >
-            I am a Financial Advisor
-          </button>
-        </div>
-      </div>
-
-      <div className="mb-5 flex rounded-full border border-blue-500 bg-slate-100 p-1">
-        <button
-          onClick={() => switchMode("login")}
-          type="button"
-          className={`flex-1 rounded-full px-3 py-2 text-sm font-medium transition ${
-            mode === "login" ? "bg-blue-700 text-white shadow" : "text-slate-600"
-          }`}
-        >
-          Login
-        </button>
-        <button
-          onClick={() => switchMode("signup")}
-          type="button"
-          className={`flex-1 rounded-full px-3 py-2 text-sm font-medium transition ${
-            mode === "signup" ? "bg-blue-700 text-white shadow" : "text-slate-600"
-          }`}
-        >
-          Signup
-        </button>
-      </div>
-
-      <AnimatePresence mode="wait">
-        <motion.form
-          key={`${formRole}-${mode}-${signupStep}`}
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-          transition={{ duration: 0.22 }}
-          onSubmit={onSubmit}
-          className="relative space-y-3 rounded-2xl p-4 transition"
-        >
-          {!forgotOpen && formRole === "advisor" && mode === "signup" ? (
-            <div className="rounded-xl border border-blue-400 bg-white/70 px-2 py-2 text-xs font-semibold text-blue-800">
-              NOTE: Advisor onboarding mode: these details are used for advisor
-              profile review.
-            </div>
-          ) : null}
-
-          {!forgotOpen && mode === "signup" && signupStep === "details" ? (
-            <>
-              <input
-                name="name"
-                required
-                placeholder="Full name"
-                autoComplete="name"
-                className="w-full rounded-xl border border-blue-100 px-4 py-3 outline-none focus:border-blue-400"
-              />
-              <div className="rounded-xl bg-white p-2">
-                <div className="flex items-stretch gap-2">
-                  <div className="flex h-12 w-20 overflow-hidden rounded-lg border border-blue-100 bg-white">
-                    <div className="flex h-full items-center border-r border-blue-100 bg-slate-50 px-2 text-sm font-semibold text-slate-500">
-                      +
-                    </div>
-                    <input
-                      value={countryCode}
-                      onChange={(event) =>
-                        setCountryCode(event.target.value.replace(/\D/g, ""))
-                      }
-                      inputMode="numeric"
-                      aria-label="Country code"
-                      placeholder="91"
-                      className="h-full w-full bg-transparent px-2 text-center text-base font-medium text-slate-700 outline-none placeholder:text-slate-300"
-                    />
-                  </div>
-                  <input
-                    name="phone"
-                    type="tel"
-                    placeholder="Phone number (optional)"
-                    autoComplete="tel"
-                    inputMode="numeric"
-                    pattern="^$|[0-9]{7,15}"
-                    title="Enter a valid phone number (7-15 digits)."
-                    onChange={(event) => {
-                      event.currentTarget.value = event.currentTarget.value.replace(
-                        /\D/g,
-                        "",
-                      );
-                    }}
-                    className="h-12 flex-1 rounded-lg border border-blue-100 px-3 py-3 text-base outline-none focus:border-blue-400"
-                  />
-                </div>
-              </div>
-            </>
-          ) : null}
-
-          {!forgotOpen && mode === "signup" && signupStep === "otp" ? (
-            <div className="space-y-3 rounded-2xl border border-dashed border-blue-200 bg-white/80 p-4">
-              <div>
-                <p className="text-sm font-semibold text-slate-900">
-                  Verify your email
-                </p>
-                <p className="mt-1 text-sm text-slate-600">
-                  We sent a 6-digit code to {pendingSignupEmail}.
-                </p>
-              </div>
-              <label className="block text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
-                One-time password
-              </label>
-              <div className="flex items-center justify-center gap-2">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <input
-                    key={i}
-                    ref={(el) => {
-                      digitRefs.current[i] = el as HTMLInputElement;
-                    }}
-                    value={otpDigits[i]}
-                    onChange={(e) => {
-                      const v = e.target.value.replace(/\D/g, "").slice(0, 1);
-                      setOtpDigits((prev) => {
-                        const next = [...prev];
-                        next[i] = v;
-                        return next;
-                      });
-                      if (v && i < 5) {
-                        digitRefs.current[i + 1]?.focus();
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Backspace" && !otpDigits[i] && i > 0) {
-                        digitRefs.current[i - 1]?.focus();
-                      }
-                    }}
-                    onPaste={(e) => {
-                      const text = e.clipboardData
-                        .getData("text")
-                        .replace(/\D/g, "")
-                        .slice(0, 6);
-                      if (!text) return;
-                      const chars = text.split("");
-                      setOtpDigits((prev) => {
-                        const next = [...prev];
-                        for (let j = 0; j < 6; j++) next[j] = chars[j] || "";
-                        return next;
-                      });
-                    }}
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    maxLength={1}
-                    className="h-12 w-12 rounded-md border border-blue-100 bg-slate-50 text-center text-2xl font-mono outline-none focus:border-blue-400"
-                  />
-                ))}
-              </div>
-              {resendCooldown > 0 ? (
-                <div className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-sm font-semibold text-amber-800">
-                  <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24">
-                    <circle
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                      strokeDasharray="60"
-                      strokeDashoffset="0"
-                      fill="none"
-                    />
-                  </svg>
-                  <span>{`Resend available in ${resendCooldown}s`}</span>
-                </div>
-              ) : null}
-              <div className="mt-2 flex items-center justify-center gap-3">
-                {resendCooldown === 0 ? (
-                  <button
-                    type="button"
-                    onClick={handleResend}
-                    disabled={
-                      resendCooldown > 0 ||
-                      isSubmitting ||
-                      resendAttempts >= MAX_RESEND_ATTEMPTS
-                    }
-                    className={`rounded-lg px-3 py-2 text-sm font-semibold transition disabled:opacity-60 ${
-                      resendCooldown > 0
-                        ? "border border-slate-200 bg-white text-slate-600"
-                        : "border border-blue-100 bg-blue-50 text-blue-700"
-                    }`}
-                  >
-                    {resendCooldown > 0
-                      ? `Resend in ${resendCooldown}s`
-                      : resendAttempts >= MAX_RESEND_ATTEMPTS
-                        ? "Limit reached"
-                        : "Resend code"}
-                  </button>
-                ) : null}
-                {resendMessage ? (
-                  <p className="text-sm text-emerald-700">{resendMessage}</p>
-                ) : null}
-              </div>
-            </div>
-          ) : null}
-
-          {!forgotOpen && (mode === "signup" && signupStep === "otp" ? null : (
-            <>
-              <input
-                name="email"
-                type="email"
-                required
-                placeholder="Email"
-                autoComplete="email"
-                className="w-full rounded-xl border border-blue-100 px-4 py-3 outline-none focus:border-blue-400"
-              />
-              <input
-                name="password"
-                type="password"
-                required
-                placeholder="Password"
-                minLength={8}
-                autoComplete={mode === "login" ? "current-password" : "new-password"}
-                className="w-full rounded-xl border border-blue-100 px-4 py-3 outline-none focus:border-blue-400"
-              />
-            </>
-          ))}
-
-          {!forgotOpen && mode === "signup" && signupStep === "details" && formRole === "advisor" ? (
-            <label className="mt-1 inline-flex items-start gap-2 rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-sm text-slate-700">
-              <input
-                type="checkbox"
-                checked={advisorDeclarationChecked}
-                onChange={(event) =>
-                  setAdvisorDeclarationChecked(event.target.checked)
-                }
-                className="mt-0.5 h-4 w-4 accent-blue-600"
-              />
-              <span>
-                Please confirm you are an influencer already and not claiming
-                anything fake.
-              </span>
-            </label>
-          ) : null}
-
-          {!forgotOpen ? (
-          <button
-            disabled={disablePrimarySubmit}
-            className="mt-2 w-full rounded-xl bg-blue-600 px-4 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-70"
-          >
-              {isSubmitting
-                ? "Please wait..."
-                : mode === "login"
-                  ? "Sign in"
-                  : signupStep === "details"
-                    ? "Create account"
-                    : "Verify & Sign in"}
-            </button>
-          ) : null}
-
-          {!forgotOpen && (mode === "login" || (mode === "signup" && signupStep === "details")) ? (
-            <>
-              <div className="my-2 flex items-center gap-2 text-xs text-slate-500">
-                <span className="h-px flex-1 bg-slate-200" />
-                <span>or</span>
-                <span className="h-px flex-1 bg-slate-200" />
-              </div>
-              <button
-                type="button"
-                onClick={() => handleGoogleSignIn(modeRef.current)}
-                disabled={isGoogleSubmitting}
-                className="inline-flex w-full items-center justify-center gap-3 rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-medium text-slate-700 shadow-xs transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-70"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 48 48"
-                  className="h-5 w-5 shrink-0"
-                  aria-hidden="true"
-                >
-                  <path
-                    fill="#FFC107"
-                    d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12S17.4 12 24 12c3 0 5.7 1.1 7.8 3l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"
-                  />
-                  <path
-                    fill="#FF3D00"
-                    d="M6.3 14.7l6.6 4.8C14.7 15 19 12 24 12c3 0 5.7 1.1 7.8 3l5.7-5.7C34 6.1 29.3 4 24 4c-7.7 0-14.3 4.3-17.7 10.7z"
-                  />
-                  <path
-                    fill="#4CAF50"
-                    d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2c-2 1.5-4.5 2.4-7.2 2.4-5.3 0-9.7-3.3-11.3-8l-6.6 5.1C9.5 39.6 16.2 44 24 44z"
-                  />
-                  <path
-                    fill="#1976D2"
-                    d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.1 5.8 0 0 0 0 0 0l6.2 5.2C37 38.6 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"
-                  />
-                </svg>
-                {isGoogleSubmitting
-                  ? "Please wait..."
-                  : mode === "login"
-                    ? "Continue with Google"
-                    : "Sign up with Google"}
-              </button>
-            </>
-          ) : null}
-
-          {errorMessage && errorMessage !== ADVISOR_DECLARATION_MESSAGE ? (
-            <p className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
-              {errorMessage}
-            </p>
-          ) : null}
-
-          {showGoogleOnlyGuidance ? (
-            <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
-              <p className="font-semibold">Google login required for this role.</p>
-              <div className="mt-2 flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => handleGoogleSignIn("login")}
-                  className="rounded-lg bg-amber-600 px-3 py-2 text-xs font-semibold text-white hover:bg-amber-700"
-                >
-                  Continue with Google
-                </button>
-                <span>{GOOGLE_ONLY_HELP_TEXT}</span>
-              </div>
-            </div>
-          ) : null}
-
-          {!forgotOpen && mode === "login" ? (
+        {/* Role Selector Tabs */}
+        <div className="mb-6 rounded-2xl bg-slate-100/90 p-1.5 backdrop-blur-xs">
+          <div className="grid grid-cols-2 gap-2">
             <button
               type="button"
               onClick={() => {
-                setForgotOpen(true);
-                setForgotStep("request");
+                setFormRole("user");
                 setErrorMessage("");
-                setSuccessMessage("");
               }}
-              className="w-full text-sm text-blue-700"
+              className={`flex items-center justify-center gap-2.5 rounded-xl px-4 py-3 text-sm font-bold transition-all duration-200 ${
+                formRole === "user"
+                  ? "bg-white text-blue-700 shadow-md shadow-slate-200/60 ring-1 ring-blue-500/20"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
+              }`}
             >
-              Forgot password?
+              <FiUser className={`h-4 w-4 ${formRole === "user" ? "text-blue-600" : "text-slate-400"}`} />
+              <span>User</span>
             </button>
-          ) : null}
 
-          {forgotOpen && mode === "login" ? (
-            <div className="space-y-3">
-              <p className="text-sm font-semibold text-slate-800">
-                Forgot password for <span className="capitalize">{formRole}</span> role
-              </p>
-              {forgotStep === "request" ? (
-                <div className="space-y-2">
-                  <input
-                    value={forgotPayload.email}
-                    onChange={(e) =>
-                      setForgotPayload((prev) => ({ ...prev, email: e.target.value }))
-                    }
-                    placeholder="Email"
-                    type="email"
-                    className="w-full rounded-xl border border-blue-100 px-4 py-3 outline-none focus:border-blue-400"
-                  />
-                  <button
-                    type="button"
-                    disabled={!canSubmitForgotRequest || isSubmitting}
-                    onClick={onForgotRequest}
-                    className="w-full rounded-xl bg-blue-600 px-4 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    Send OTP
-                  </button>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <input
-                    value={forgotPayload.otp}
-                    onChange={(e) =>
-                      setForgotPayload((prev) => ({ ...prev, otp: e.target.value.replace(/\D/g, "") }))
-                    }
-                    placeholder="OTP"
-                    inputMode="numeric"
-                    className="w-full rounded-xl border border-blue-100 px-4 py-3 outline-none focus:border-blue-400"
-                  />
-                  <input
-                    value={forgotPayload.newPassword}
-                    onChange={(e) =>
-                      setForgotPayload((prev) => ({ ...prev, newPassword: e.target.value }))
-                    }
-                    placeholder="New password (min 8)"
-                    type="password"
-                    className="w-full rounded-xl border border-blue-100 px-4 py-3 outline-none focus:border-blue-400"
-                  />
-                  <input
-                    value={forgotPayload.confirmPassword}
-                    onChange={(e) =>
-                      setForgotPayload((prev) => ({ ...prev, confirmPassword: e.target.value }))
-                    }
-                    placeholder="Confirm new password"
-                    type="password"
-                    className="w-full rounded-xl border border-blue-100 px-4 py-3 outline-none focus:border-blue-400"
-                  />
-                  <button
-                    type="button"
-                    disabled={isSubmitting}
-                    onClick={onForgotReset}
-                    className="w-full rounded-xl bg-blue-600 px-4 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    Reset password
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setForgotStep("request")}
-                    className="text-xs font-semibold text-blue-700 underline"
-                  >
-                    Start over
-                  </button>
-                </div>
-              )}
-              <button
-                type="button"
-                onClick={() => {
-                  setForgotOpen(false);
-                  setForgotStep("request");
-                  setErrorMessage("");
-                  setSuccessMessage("");
-                }}
-                className="w-full text-sm font-semibold text-blue-700 underline"
-              >
-                Back to sign in
-              </button>
-            </div>
-          ) : null}
+            <button
+              type="button"
+              onClick={() => {
+                setFormRole("advisor");
+                setErrorMessage("");
+              }}
+              className={`flex items-center justify-center gap-2.5 rounded-xl px-4 py-3 text-sm font-bold transition-all duration-200 ${
+                formRole === "advisor"
+                  ? "bg-white text-cyan-800 shadow-md shadow-slate-200/60 ring-1 ring-cyan-500/20"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
+              }`}
+            >
+              <FiBriefcase className={`h-4 w-4 ${formRole === "advisor" ? "text-cyan-600" : "text-slate-400"}`} />
+              <span>Financial Advisor</span>
+            </button>
+          </div>
+        </div>
 
-          {isSubmitting || isGoogleSubmitting ? (
-            <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/60">
-              <div className="flex items-center gap-3 rounded-full bg-white/80 px-4 py-2 shadow">
-                <svg className="h-5 w-5 animate-spin text-blue-600" viewBox="0 0 24 24">
-                  <circle
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                    strokeDasharray="60"
-                    strokeDashoffset="0"
-                    fill="none"
-                  />
-                </svg>
-                <span className="text-sm font-medium text-slate-700">Processing...</span>
+        {/* Dynamic Role Info Card */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={formRole}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.18 }}
+            className="mb-6 rounded-2xl border border-blue-100 bg-blue-50/60 p-4"
+          >
+            {formRole === "user" ? (
+              <div className="flex items-start gap-3 text-xs text-blue-950">
+                <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white font-bold">
+                  ✓
+                </span>
+                <div>
+                  <p className="font-bold text-sm text-blue-900">Looking for Financial Advice</p>
+                  <p className="mt-0.5 text-slate-600">
+                    Discover top SEBI registered and verified financial advisors, view profiles, and send direct enquiries.
+                  </p>
+                </div>
               </div>
-            </div>
-          ) : null}
-        </motion.form>
-      </AnimatePresence>
+            ) : (
+              <div className="flex items-start gap-3 text-xs text-cyan-950">
+                <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-cyan-600 text-white font-bold">
+                  ✓
+                </span>
+                <div>
+                  <p className="font-bold text-sm text-cyan-900">Financial Advisor Portal</p>
+                  <p className="mt-0.5 text-slate-600">
+                    Set up your advisor profile, showcase credentials, track analytics, and manage client enquiries.
+                  </p>
+                </div>
+              </div>
+            )}
+          </motion.div>
+        </AnimatePresence>
 
+        {/* Advisor Declaration Checkbox if Advisor is selected */}
+        {formRole === "advisor" && (
+          <div className="mb-6">
+            <label className="flex items-start gap-3 rounded-xl border border-amber-200/80 bg-amber-50/70 p-3.5 text-xs text-amber-900 cursor-pointer transition hover:bg-amber-50">
+              <input
+                type="checkbox"
+                checked={advisorDeclarationChecked}
+                onChange={(e) => setAdvisorDeclarationChecked(e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded accent-cyan-600"
+              />
+              <span className="leading-relaxed">
+                I confirm that I am a legitimate financial advisor / financial content creator and will provide accurate information.
+              </span>
+            </label>
+          </div>
+        )}
+
+        {/* Single Primary Google Sign-In Action */}
+        <div className="space-y-4">
+          <button
+            type="button"
+            onClick={handleGoogleAuthClick}
+            disabled={isGoogleSubmitting}
+            className="group relative flex w-full items-center justify-center gap-3.5 rounded-2xl border border-slate-300 bg-white px-5 py-4 text-base font-bold text-slate-800 shadow-md shadow-slate-200/50 transition-all hover:border-blue-400 hover:bg-slate-50 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500/40 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {/* Google SVG Icon */}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 48 48"
+              className="h-6 w-6 shrink-0 transition-transform group-hover:scale-105"
+              aria-hidden="true"
+            >
+              <path
+                fill="#FFC107"
+                d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12S17.4 12 24 12c3 0 5.7 1.1 7.8 3l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"
+              />
+              <path
+                fill="#FF3D00"
+                d="M6.3 14.7l6.6 4.8C14.7 15 19 12 24 12c3 0 5.7 1.1 7.8 3l5.7-5.7C34 6.1 29.3 4 24 4c-7.7 0-14.3 4.3-17.7 10.7z"
+              />
+              <path
+                fill="#4CAF50"
+                d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2c-2 1.5-4.5 2.4-7.2 2.4-5.3 0-9.7-3.3-11.3-8l-6.6 5.1C9.5 39.6 16.2 44 24 44z"
+              />
+              <path
+                fill="#1976D2"
+                d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.1 5.8 0 0 0 0 0 0l6.2 5.2C37 38.6 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"
+              />
+            </svg>
+
+            <span className="hover:cursor-pointer">
+              {isGoogleSubmitting
+                ? "Authenticating with Google..."
+                : `Continue with Google`}
+            </span>
+          </button>
+
+          {/* Error Message */}
+          {errorMessage ? (
+            <motion.div
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3.5 text-xs font-semibold text-rose-700"
+            >
+              <FiAlertCircle className="h-4 w-4 shrink-0" />
+              <span>{errorMessage}</span>
+            </motion.div>
+          ) : null}
+        </div>
+      </div>
+
+      {/* Trust & Guarantee Badges */}
+      <div className="mt-8 border-t border-slate-100 pt-5">
+        <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">
+          <div className="flex items-center gap-1.5">
+            <FiCheck className="h-3.5 w-3.5 text-emerald-500" />
+            <span>No password needed</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <FiCheck className="h-3.5 w-3.5 text-emerald-500" />
+            <span>Instant profile setup</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <FiCheck className="h-3.5 w-3.5 text-emerald-500" />
+            <span>256-bit OAuth security</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Number Popup Dialog (When required by Google auth) */}
       <AnimatePresence>
         {googlePhone.open ? (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4"
           >
             <motion.form
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               onSubmit={onGooglePhoneSubmit}
-              className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-xl"
+              className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl"
             >
-              <h3 className="text-lg font-semibold text-slate-900">Enter your mobile number</h3>
-              <p className="mt-1 text-sm text-slate-600">
-                We’ll use your name and email from your Google account.
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 mb-4">
+                <FiPhone className="h-6 w-6" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900">Complete your profile</h3>
+              <p className="mt-1 text-xs text-slate-500">
+                Enter your mobile number to complete your Google registration as {googlePhone.role}.
               </p>
-              <div className="mt-4 flex h-11 gap-2">
-                <div className="flex w-24 overflow-hidden rounded-lg border border-slate-300">
-                  <span className="flex items-center bg-slate-50 px-2 text-slate-500">+</span>
+
+              <div className="mt-5 flex h-12 gap-2.5">
+                <div className="flex w-24 overflow-hidden rounded-xl border border-slate-300 bg-slate-50">
+                  <span className="flex items-center px-2.5 text-sm font-semibold text-slate-500">+</span>
                   <input
                     value={googlePhoneForm.countryCode}
-                    onChange={(event) => setGooglePhoneForm((prev) => ({
-                      ...prev,
-                      countryCode: event.target.value.replace(/\D/g, ""),
-                    }))}
+                    onChange={(event) =>
+                      setGooglePhoneForm((prev) => ({
+                        ...prev,
+                        countryCode: event.target.value.replace(/\D/g, ""),
+                      }))
+                    }
                     inputMode="numeric"
                     aria-label="Country code"
-                    className="w-full px-2 text-center outline-none"
+                    className="w-full bg-transparent px-1 text-center text-sm font-bold outline-none"
                     required
                   />
                 </div>
                 <input
                   value={googlePhoneForm.phone}
-                  onChange={(event) => setGooglePhoneForm((prev) => ({
-                    ...prev,
-                    phone: event.target.value.replace(/\D/g, ""),
-                  }))}
+                  onChange={(event) =>
+                    setGooglePhoneForm((prev) => ({
+                      ...prev,
+                      phone: event.target.value.replace(/\D/g, ""),
+                    }))
+                  }
                   inputMode="numeric"
                   aria-label="Mobile number"
-                  placeholder="Mobile number"
-                  className="flex-1 rounded-lg border border-slate-300 px-3 outline-none"
+                  placeholder="10-digit mobile number"
+                  className="flex-1 rounded-xl border border-slate-300 px-4 text-sm font-medium outline-none focus:border-blue-500"
                   required
                   autoFocus
                 />
               </div>
-              <div className="mt-4 flex justify-end gap-2">
+
+              <div className="mt-6 flex justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setGooglePhone({ open: false, idToken: "", role: formRole })}
-                  className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700"
+                  className="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isGoogleSubmitting}
-                  className="rounded-lg bg-blue-600 px-3 py-2 text-sm font-semibold text-white disabled:opacity-60"
+                  className="rounded-xl bg-blue-600 px-5 py-2.5 text-xs font-bold text-white shadow-md shadow-blue-500/20 hover:bg-blue-700 disabled:opacity-60"
                 >
-                  {isGoogleSubmitting ? "Continuing..." : "Continue"}
+                  {isGoogleSubmitting ? "Completing..." : "Complete Sign In"}
                 </button>
               </div>
             </motion.form>
           </motion.div>
         ) : null}
       </AnimatePresence>
-
     </section>
   );
 };

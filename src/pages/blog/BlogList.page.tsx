@@ -29,7 +29,7 @@ export function BlogListPage() {
   };
 
   useEffect(() => {
-    document.title = "Blog | Invest24";
+    document.title = "Blog | Folksmint";
     const meta = document.querySelector('meta[name="description"]');
     if (meta) meta.setAttribute("content", "Read market insights and finance blogs.");
   }, []);

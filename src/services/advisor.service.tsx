@@ -111,6 +111,7 @@ export interface AdvisorFormOptionsResponseData {
   countries: string[];
   locations: Record<string, { states: string[] }>;
   industries: string[];
+  categories?: string[];
   markets: string[];
   marketIndicesByCountry: Record<string, string[]>;
 }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FaFilter, FaRotateRight, FaTags } from "react-icons/fa6";
+import { FaFilter, FaLayerGroup, FaRotateRight, FaTags } from "react-icons/fa6";
 import {
   followerCountOptions,
   followerFieldPlatformLabels,
@@ -14,6 +14,7 @@ type HomeFiltersSectionProps = {
   countries: string[];
   states: string[];
   industryOptions: string[];
+  categoryOptions?: string[];
   disableUrlSync: boolean;
   onSetFilters: (updater: (prev: AdvisorFilters) => AdvisorFilters) => void;
   onSetSearchParams: (query: string) => void;
@@ -26,6 +27,7 @@ export function HomeFiltersSection({
   countries,
   states,
   industryOptions,
+  categoryOptions = [],
   disableUrlSync,
   onSetFilters,
   onSetSearchParams,
@@ -81,7 +83,7 @@ export function HomeFiltersSection({
         Filter advisors by location, category, and follower thresholds.
       </p>
 
-      <div className="mt-6 grid gap-2 lg:grid-cols-[1fr_1fr_1fr_auto]">
+      <div className="mt-6 grid gap-2 lg:grid-cols-[1fr_1fr_auto]">
         <select
           value={filters.country}
           onChange={(event) => {
@@ -115,12 +117,6 @@ export function HomeFiltersSection({
             </option>
           ))}
         </select>
-        <input
-          value={filters.category}
-          onChange={(event) => onSetFilterValue("category", event.target.value)}
-          placeholder="Category (type to search)"
-          className="w-full rounded-xl border border-blue-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none focus:border-blue-400"
-        />
 
         <div className="flex items-center justify-end gap-2">
           <button
@@ -141,7 +137,7 @@ export function HomeFiltersSection({
         </div>
       </div>
 
-      <div className="mt-3">
+      <div className="mt-4">
         <p className="mb-2 inline-flex items-center gap-1.5 text-md text-white">
           <FaTags />
           Select Industries
@@ -175,6 +171,36 @@ export function HomeFiltersSection({
         </div>
       </div>
 
+      <div className="mt-4">
+        <p className="mb-2 inline-flex items-center gap-1.5 text-md text-white">
+          <FaLayerGroup />
+          Select Category
+        </p>
+        <div className="max-w-md">
+          {categoryOptions.length > 0 ? (
+            <select
+              value={filters.category}
+              onChange={(event) => onSetFilterValue("category", event.target.value)}
+              className="w-full rounded-xl border border-blue-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none focus:border-blue-400"
+            >
+              <option value="">All categories</option>
+              {categoryOptions.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <input
+              value={filters.category}
+              onChange={(event) => onSetFilterValue("category", event.target.value)}
+              placeholder="Category (type to search)"
+              className="w-full rounded-xl border border-blue-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none focus:border-blue-400"
+            />
+          )}
+        </div>
+      </div>
+
       <button
         type="button"
         onClick={() => {
@@ -190,7 +216,7 @@ export function HomeFiltersSection({
         Reset Filters
       </button>
 
-      <div className="mt-1">
+      <div className="mt-4">
         <p className="mb-2 inline-flex items-center gap-1.5 text-md text-white">
           <FaFilter />
           Search by followers and subscribers count

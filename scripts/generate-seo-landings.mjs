@@ -85,8 +85,8 @@ const run = async () => {
       const slug = `financial-advisors-${toSlug(state)}-${toSlug(country)}`;
       return {
         slug,
-        title: `Financial Advisors in ${state}, ${country} | Invest24`,
-        description: `Find verified financial advisors in ${state}, ${country} on Invest24.`,
+        title: `Financial Advisors in ${state}, ${country} | Folksmint`,
+        description: `Find verified financial advisors in ${state}, ${country} on Folksmint.`,
         filters: { country, state },
       };
     });
@@ -96,8 +96,8 @@ const run = async () => {
     const slug = `financial-advisors-${toSlug(country)}`;
     return {
       slug,
-      title: `Financial Advisors in ${country} | Invest24`,
-      description: `Find verified financial advisors in ${country} on Invest24.`,
+      title: `Financial Advisors in ${country} | Folksmint`,
+      description: `Find verified financial advisors in ${country} on Folksmint.`,
       filters: { country },
     };
   });
