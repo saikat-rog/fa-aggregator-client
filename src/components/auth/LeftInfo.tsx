@@ -1,5 +1,4 @@
-import { Link } from "react-router-dom";
-import { FiShield, FiZap, FiUsers, FiCheckCircle, FiArrowRight } from "react-icons/fi";
+import { FiShield, FiZap, FiUsers, FiCheckCircle } from "react-icons/fi";
 
 const LeftInfo = () => {
   return (
@@ -60,17 +59,6 @@ const LeftInfo = () => {
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Footer Admin Link */}
-      <div className="relative z-10 mt-8 flex items-center justify-between rounded-2xl border border-white/10 bg-black/20 p-4 text-xs backdrop-blur-md">
-        <span className="text-blue-200">Administrator access?</span>
-        <Link
-          to="/admin"
-          className="inline-flex items-center gap-1 font-semibold text-cyan-300 transition hover:text-cyan-200 hover:underline"
-        >
-          Admin Portal <FiArrowRight className="h-3.5 w-3.5" />
-        </Link>
       </div>
     </section>
   );

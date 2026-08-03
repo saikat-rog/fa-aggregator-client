@@ -68,7 +68,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-[radial-linear(circle_at_top,#e8f2ff_0,#f8fbff_50%,#ffffff_100%)] text-slate-900">
       <Navbar className="px-4">
         <NavBody>
-          <Link to="/u" className="shrink-0 text-xl font-bold tracking-tight text-blue-700">
+          <Link to="/" className="shrink-0 text-xl font-bold tracking-tight text-blue-700">
             Folksmint
           </Link>
           <nav className="flex items-center gap-2">
@@ -107,7 +107,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </NavBody>
         <MobileNav>
           <MobileNavHeader>
-            <Link to="/u" className="shrink-0 text-lg font-bold tracking-tight text-blue-700">
+            <Link to="/" className="shrink-0 text-lg font-bold tracking-tight text-blue-700">
               Folksmint
             </Link>
             <MobileNavToggle isOpen={isMobileMenuOpen} onClick={() => setIsMobileMenuOpen((prev) => !prev)} />

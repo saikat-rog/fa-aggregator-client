@@ -51,7 +51,7 @@ export function AdminPageContent() {
       {view === "industries" ? <IndustriesPanel /> : null}
       {view === "categories" ? <CategoriesPanel /> : null}
       {view === "blogs" ? <BlogsPanel params={params} setParam={setParam} setManyParams={setManyParams} /> : null}
-      {view === "requirements" ? <BusinessRequirementsPanel params={params} setParam={setParam} /> : null}
+      {view === "requirements" ? <BusinessRequirementsPanel params={params} setParam={setParam} setManyParams={setManyParams} /> : null}
     </div>
   );
 }

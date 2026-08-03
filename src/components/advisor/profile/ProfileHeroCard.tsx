@@ -13,7 +13,10 @@ import {
   FaXTwitter,
   FaYoutube,
 } from "react-icons/fa6";
-import { getDisplayCategory, getDisplayPpp } from "../advisorDisplay.utils";
+import {
+  getDisplayCategory,
+  getDisplayPpp,
+} from "../advisorDisplay.utils";
 
 type SocialLinks = {
   instagram?: string;
@@ -200,10 +203,19 @@ export function ProfileHeroCard({
             </p>
           ) : null}
         </div>
-        <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-slate-50 px-3 py-1 text-xs text-slate-600">
-          <FaLocationDot className="text-blue-600" />
-          {state}, {country}
-        </div>
+        {(() => {
+          const isUnknownState = !state || state === "Unknown state" || state === "-";
+          const isUnknownCountry = !country || country === "Unknown country" || country === "-";
+          const displayLocation = !isUnknownState
+            ? (!isUnknownCountry ? `${state}, ${country}` : state)
+            : (!isUnknownCountry ? country : "");
+          return displayLocation ? (
+            <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-slate-50 px-3 py-1 text-xs text-slate-600">
+              <FaLocationDot className="text-blue-600" />
+              {displayLocation}
+            </div>
+          ) : null;
+        })()}
         {(personalWebsite || emailForContact) ? (
           <div className="mt-4 grid gap-2 sm:grid-cols-2">
             {personalWebsite ? (

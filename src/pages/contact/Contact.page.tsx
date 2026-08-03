@@ -55,12 +55,22 @@ const initialState: FormState = {
   detailedRequirements: "",
 };
 
+const normalizeUrl = (value: string) => {
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+  if (/^https?:\/\//i.test(trimmed)) {
+    return trimmed;
+  }
+  return `https://${trimmed}`;
+};
+
 const isValidEmail = (email: string) => /^\S+@\S+\.\S+$/.test(email);
 const isValidUrl = (value: string) => {
-  if (!value) return false;
+  const normalized = normalizeUrl(value);
+  if (!normalized) return false;
   try {
-    const parsed = new URL(value);
-    return ["http:", "https:"].includes(parsed.protocol);
+    const parsed = new URL(normalized);
+    return ["http:", "https:"].includes(parsed.protocol) && parsed.hostname.includes(".");
   } catch {
     return false;
   }
@@ -95,9 +105,9 @@ export function ContactPage() {
     }
 
     if (!form.url.trim()) {
-      errors.url = "URL is required.";
+      errors.url = "Website or Landing Page URL is required.";
     } else if (!isValidUrl(form.url.trim())) {
-      errors.url = "Must be a valid HTTP or HTTPS URL.";
+      errors.url = "Enter a valid website or landing page link (e.g. www.example.com or https://example.com).";
     }
 
     if (!form.currentMonthlySales.trim()) errors.currentMonthlySales = "Current monthly sales is required.";
@@ -141,7 +151,7 @@ export function ContactPage() {
       const response = await submitBusinessRequirement({
         companyName: form.companyName.trim(),
         businessEmail: form.businessEmail.trim(),
-        url: form.url.trim(),
+        url: normalizeUrl(form.url.trim()),
         currentMonthlySales: form.currentMonthlySales.trim(),
         goalMonthlySales: form.goalMonthlySales.trim(),
         desiredInfluencerScope: form.desiredInfluencerScope.trim(),
@@ -225,10 +235,10 @@ export function ContactPage() {
             <div className="relative">
               <FiGlobe className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-blue-700" />
               <input
-                type="url"
+                type="text"
                 value={form.url}
                 onChange={(e) => setField("url", e.target.value)}
-                placeholder="https://example.com"
+                placeholder="e.g. www.example.com or https://example.com"
                 className="w-full rounded-xl border border-slate-300 py-2 pl-9 pr-3 outline-none focus:border-blue-400"
               />
             </div>

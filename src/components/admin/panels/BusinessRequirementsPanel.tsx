@@ -20,6 +20,7 @@ import {
 type Props = {
   params: URLSearchParams;
   setParam: (key: string, value?: string) => void;
+  setManyParams?: (updates: Record<string, string | undefined>) => void;
 };
 
 const formatSalesValue = (value?: string | number) => {
@@ -47,7 +48,16 @@ const formatDate = (value?: string) =>
       })
     : "—";
 
-export function BusinessRequirementsPanel({ params, setParam }: Props) {
+export function BusinessRequirementsPanel({ params, setParam, setManyParams }: Props) {
+  const updateMany = (updates: Record<string, string | undefined>) => {
+    if (setManyParams) {
+      setManyParams(updates);
+    } else {
+      for (const [key, value] of Object.entries(updates)) {
+        setParam(key, value);
+      }
+    }
+  };
   const activeTab = params.get("requirementsSubTab") === "clicks" ? "clicks" : "submissions";
 
   const page = getNum(params.get("requirementsPage"), 1);
@@ -208,8 +218,7 @@ export function BusinessRequirementsPanel({ params, setParam }: Props) {
         <button
           type="button"
           onClick={() => {
-            setParam("requirementsSubTab", undefined);
-            setParam("requirementsPage", "1");
+            updateMany({ requirementsSubTab: undefined, requirementsPage: "1" });
           }}
           className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition ${
             activeTab === "submissions"
@@ -223,8 +232,7 @@ export function BusinessRequirementsPanel({ params, setParam }: Props) {
         <button
           type="button"
           onClick={() => {
-            setParam("requirementsSubTab", "clicks");
-            setParam("requirementsPage", "1");
+            updateMany({ requirementsSubTab: "clicks", requirementsPage: "1" });
           }}
           className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition ${
             activeTab === "clicks"
@@ -243,7 +251,12 @@ export function BusinessRequirementsPanel({ params, setParam }: Props) {
             <button
               key={value}
               type="button"
-              onClick={() => { setParam("requirementsStatus", value === "all" ? undefined : value); setParam("requirementsPage", "1"); }}
+              onClick={() => {
+                updateMany({
+                  requirementsStatus: value === "all" ? undefined : value,
+                  requirementsPage: "1",
+                });
+              }}
               className={`rounded-lg px-3 py-1.5 text-sm font-semibold capitalize ${((value === "all" && !status) || value === status) ? "bg-blue-600 text-white" : "border border-slate-200 text-slate-700 hover:bg-slate-50"}`}
             >
               {value}
@@ -359,8 +372,10 @@ export function BusinessRequirementsPanel({ params, setParam }: Props) {
         pagination={pagination}
         onPageChange={(v) => setParam("requirementsPage", String(v))}
         onLimitChange={(v) => {
-          setParam("requirementsLimit", String(v));
-          setParam("requirementsPage", "1");
+          updateMany({
+            requirementsLimit: String(v),
+            requirementsPage: "1",
+          });
         }}
       />
 

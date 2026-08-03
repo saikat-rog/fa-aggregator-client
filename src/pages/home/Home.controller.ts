@@ -48,14 +48,13 @@ export function useHomeController({
   const latestRequestIdRef = useRef(0);
 
   const countries = useMemo(() => {
-    if (!formOptions) return [];
+    if (!formOptions) return ["India", "United States"];
     const fromArray = formOptions.countries ?? [];
-    if (fromArray.length > 0) {
-      return fromArray.slice().sort((a, b) => a.localeCompare(b));
-    }
-    return Object.keys(formOptions.locations ?? {}).sort((a, b) =>
-      a.localeCompare(b),
-    );
+    const rawList =
+      fromArray.length > 0 ? fromArray : Object.keys(formOptions.locations ?? {});
+    return rawList
+      .filter((c) => c === "India" || c === "United States")
+      .sort((a, b) => a.localeCompare(b));
   }, [formOptions]);
 
   const states = useMemo(

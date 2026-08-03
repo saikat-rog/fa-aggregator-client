@@ -11,6 +11,7 @@ import {
   FaInstagram,
   FaLinkedin,
   FaLocationDot,
+  FaTiktok,
   FaYoutube,
   FaXTwitter,
 } from "react-icons/fa6";
@@ -22,7 +23,12 @@ import {
 } from "../../services/advisor.service";
 import { AuthPromptDialog } from "../dialog/AuthPromptDialog";
 import { PincodePromptDialog } from "../dialog/PincodePromptDialog";
-import { getDisplayCategory, getDisplayPpp } from "./advisorDisplay.utils";
+import {
+  getDisplayCategory,
+  getDisplayEngagementRate,
+  getDisplayFollowers,
+  getDisplayPpp,
+} from "./advisorDisplay.utils";
 
 export interface AdvisorCardData {
   id: string;
@@ -40,6 +46,14 @@ export interface AdvisorCardData {
   socialLinks?: AdvisorApiItem["socialLinks"];
   ppp?: number | null;
   category?: string | null;
+  instagramFollowers?: number | null;
+  linkedinFollowers?: number | null;
+  twitterFollowers?: number | null;
+  facebookFollowers?: number | null;
+  youtubeSubscribers?: number | null;
+  tiktokFollowers?: number | null;
+  followersCount?: number | null;
+  instagramEngagementRateScore?: number | null;
 }
 
 export interface AdvisorCardProps {
@@ -266,10 +280,19 @@ export function AdvisorCard({ advisor }: AdvisorCardProps) {
                       {advisor.name}
                     </button>
                     <div className="mt-1 flex flex-wrap items-center gap-2">
-                      <p className="flex items-center gap-1.5 text-sm text-blue-100">
-                        <FaLocationDot className="text-blue-100" />
-                        {advisor.state}, {advisor.country}
-                      </p>
+                      {(() => {
+                        const isUnknownState = !advisor.state || advisor.state === "Unknown state";
+                        const isUnknownCountry = !advisor.country || advisor.country === "Unknown country";
+                        const displayLocation = !isUnknownState
+                          ? (!isUnknownCountry ? `${advisor.state}, ${advisor.country}` : advisor.state)
+                          : (!isUnknownCountry ? advisor.country : "");
+                        return displayLocation ? (
+                          <p className="flex items-center gap-1.5 text-sm text-blue-100">
+                            <FaLocationDot className="text-blue-100" />
+                            {displayLocation}
+                          </p>
+                        ) : null;
+                      })()}
                       <button
                         type="button"
                         onClick={openProfile}
@@ -289,6 +312,11 @@ export function AdvisorCard({ advisor }: AdvisorCardProps) {
 
               <div className="rounded-2xl text-white">
                 <div className="mb-2 flex flex-wrap gap-2">
+                  {getDisplayEngagementRate(advisor.instagramEngagementRateScore) !== "N/A" ? (
+                    <span className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-[11px] font-semibold">
+                      Eng. Rate: {getDisplayEngagementRate(advisor.instagramEngagementRateScore)}
+                    </span>
+                  ) : null}
                   <span className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-[11px] font-semibold">
                     PPP: {getDisplayPpp(advisor.ppp)}
                   </span>
@@ -328,7 +356,7 @@ export function AdvisorCard({ advisor }: AdvisorCardProps) {
                       }
                       className={socialButtonClassName}
                     >
-                      <FaInstagram /> Instagram
+                      <FaInstagram /> Instagram{advisor.instagramFollowers && advisor.instagramFollowers > 0 ? ` (${getDisplayFollowers(advisor.instagramFollowers)})` : ""}
                     </button>
                   ) : null}
                   {socialLinks.linkedin ? (
@@ -342,7 +370,7 @@ export function AdvisorCard({ advisor }: AdvisorCardProps) {
                       }
                       className={socialButtonClassName}
                     >
-                      <FaLinkedin /> LinkedIn
+                      <FaLinkedin /> LinkedIn{advisor.linkedinFollowers && advisor.linkedinFollowers > 0 ? ` (${getDisplayFollowers(advisor.linkedinFollowers)})` : ""}
                     </button>
                   ) : null}
                   {socialLinks.twitter ? (
@@ -356,7 +384,7 @@ export function AdvisorCard({ advisor }: AdvisorCardProps) {
                       }
                       className={socialButtonClassName}
                     >
-                      <FaXTwitter /> Twitter
+                      <FaXTwitter /> Twitter{advisor.twitterFollowers && advisor.twitterFollowers > 0 ? ` (${getDisplayFollowers(advisor.twitterFollowers)})` : ""}
                     </button>
                   ) : null}
                   {socialLinks.facebook ? (
@@ -370,7 +398,7 @@ export function AdvisorCard({ advisor }: AdvisorCardProps) {
                       }
                       className={socialButtonClassName}
                     >
-                      <FaFacebook /> Facebook
+                      <FaFacebook /> Facebook{advisor.facebookFollowers && advisor.facebookFollowers > 0 ? ` (${getDisplayFollowers(advisor.facebookFollowers)})` : ""}
                     </button>
                   ) : null}
                   {socialLinks.youtube ? (
@@ -384,7 +412,21 @@ export function AdvisorCard({ advisor }: AdvisorCardProps) {
                       }
                       className={socialButtonClassName}
                     >
-                      <FaYoutube /> YouTube
+                      <FaYoutube /> YouTube{advisor.youtubeSubscribers && advisor.youtubeSubscribers > 0 ? ` (${getDisplayFollowers(advisor.youtubeSubscribers)})` : ""}
+                    </button>
+                  ) : null}
+                  {socialLinks.tiktok ? (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        openAction(
+                          "social",
+                          `https://tiktok.com/@${socialLinks.tiktok}`,
+                        )
+                      }
+                      className={socialButtonClassName}
+                    >
+                      <FaTiktok /> TikTok{advisor.tiktokFollowers && advisor.tiktokFollowers > 0 ? ` (${getDisplayFollowers(advisor.tiktokFollowers)})` : ""}
                     </button>
                   ) : null}
                 </div>

@@ -75,13 +75,13 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
   }, [options, selectedCountry]);
 
   const countryOptions = useMemo(() => {
-    if (!options) return [];
-    if (options.countries?.length) {
-      return [...options.countries].sort((a, b) => a.localeCompare(b));
-    }
-    return Object.keys(options.locations || {}).sort((a, b) =>
-      a.localeCompare(b),
-    );
+    if (!options) return ["India", "United States"];
+    const rawCountries = options.countries?.length
+      ? options.countries
+      : Object.keys(options.locations || {});
+    return rawCountries
+      .filter((c) => c === "India" || c === "United States")
+      .sort((a, b) => a.localeCompare(b));
   }, [options]);
 
   const allIndices = useMemo(() => {

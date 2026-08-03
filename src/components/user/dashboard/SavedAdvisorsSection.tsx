@@ -69,8 +69,8 @@ export function SavedAdvisorsSection({
               name: advisor.name?.trim() || "Verified Advisor",
               username: advisor.username || "unknown",
               industries: advisor.industries ?? [],
-              country: advisor.country || "Unknown country",
-              state: advisor.state || "Unknown state",
+              country: advisor.country?.trim() || "",
+              state: advisor.state?.trim() || "",
               marketFocus: advisor.marketFocus ?? ["All Markets"],
               specialties:
                 advisor.expertiseIndeces?.length
@@ -84,6 +84,17 @@ export function SavedAdvisorsSection({
               socialLinks: advisor.socialLinks,
               ppp: advisor.ppp,
               category: advisor.category,
+              instagramFollowers: advisor.instagramFollowers,
+              followersCount:
+                (advisor.instagramFollowers || 0) +
+                (advisor.linkedinFollowers || 0) +
+                (advisor.twitterFollowers || 0) +
+                (advisor.facebookFollowers || 0) +
+                (advisor.youtubeSubscribers || 0) +
+                (advisor.tiktokFollowers || 0) ||
+                advisor.instagramFollowers ||
+                null,
+              instagramEngagementRateScore: advisor.instagramEngagementRateScore,
             };
 
             return <AdvisorCard key={advisor.id} advisor={cardData} />;
