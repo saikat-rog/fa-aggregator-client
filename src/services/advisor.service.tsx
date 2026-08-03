@@ -146,6 +146,7 @@ export type SavedAdvisor = {
   twitterFollowers?: number;
   ppp?: number | null;
   category?: string | null;
+  instagramEngagementRateScore?: number | null;
 };
 
 export type EnquiryStatus = "pending" | "responded";
