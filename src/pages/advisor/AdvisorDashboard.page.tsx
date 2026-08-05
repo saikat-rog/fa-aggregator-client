@@ -10,6 +10,9 @@ import {
   type Enquiry,
   type EnquiryPagination,
 } from "../../services/advisor.service";
+import { getMyRequirementClicks, type RequirementClickItem } from "../../services/businessRequirements.service";
+import { FiExternalLink, FiMousePointer } from "react-icons/fi";
+
 
 const platformWarnings = [
   {
@@ -47,7 +50,15 @@ const AdvisorDashboardPage = () => {
   const [emailClicks, setEmailClicks] = useState<number>(-1);
   const [websiteClicks, setWebsiteClicks] = useState<number>(-1);
   const [profileShareClicks, setProfileShareClicks] = useState<number>(-1);
+  const [resourceClicks, setResourceClicks] = useState<number>(-1);
   const [analyticsLoading, setAnalyticsLoading] = useState(true);
+  const [resourceClickRows, setResourceClickRows] = useState<RequirementClickItem[]>([]);
+  const [resourceClicksLoading, setResourceClicksLoading] = useState(true);
+  const [resourceClicksError, setResourceClicksError] = useState<string | null>(null);
+  const [clicksPage, setClicksPage] = useState(1);
+  const [clicksLimit, setClicksLimit] = useState(10);
+  const [clicksPagination, setClicksPagination] = useState({ page: 1, limit: 10, total: 0, totalPages: 1 });
+
   const [enquiries, setEnquiries] = useState<Enquiry[]>([]);
   const [enquiriesLoading, setEnquiriesLoading] = useState(true);
   const [enquiriesError, setEnquiriesError] = useState<string | null>(null);
@@ -120,6 +131,11 @@ const AdvisorDashboardPage = () => {
             ? data.profileShareClicks
             : -1,
         );
+        setResourceClicks(
+          typeof data?.resourceClicks === "number"
+            ? data.resourceClicks
+            : -1,
+        );
       } catch {
         setApplicationStatus(null);
         setRejectionReason("");
@@ -128,7 +144,9 @@ const AdvisorDashboardPage = () => {
         setEmailClicks(-1);
         setWebsiteClicks(-1);
         setProfileShareClicks(-1);
+        setResourceClicks(-1);
       } finally {
+
         setAnalyticsLoading(false);
       }
     };
@@ -137,7 +155,26 @@ const AdvisorDashboardPage = () => {
   }, []);
 
   useEffect(() => {
+    const loadClicks = async () => {
+      try {
+        setResourceClicksLoading(true);
+        setResourceClicksError(null);
+        const payload = await getMyRequirementClicks({ page: clicksPage, limit: clicksLimit });
+        setResourceClickRows(payload.clicks ?? []);
+        setClicksPagination(payload.pagination ?? { page: clicksPage, limit: clicksLimit, total: 0, totalPages: 1 });
+      } catch (err: unknown) {
+        setResourceClicksError(err instanceof Error ? err.message : "Failed to load resource clicks.");
+      } finally {
+        setResourceClicksLoading(false);
+      }
+    };
+    void loadClicks();
+  }, [clicksPage, clicksLimit]);
+
+
+  useEffect(() => {
     setSearchParams((prev) => {
+
       const next = new URLSearchParams(prev);
       next.set("enquiryPage", String(enquiryPage));
       next.set("enquiryLimit", String(enquiryLimit));
@@ -254,7 +291,7 @@ const AdvisorDashboardPage = () => {
         </p>
       </section>
 
-      <section className="grid grid-cols-2 gap-4 lg:grid-cols-5">
+      <section className="grid grid-cols-2 gap-4 lg:grid-cols-6">
         <article className="rounded-2xl border border-blue-100 bg-white p-4 shadow-sm">
           <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
             Profile Clicks
@@ -263,6 +300,16 @@ const AdvisorDashboardPage = () => {
             {analyticsLoading ? "..." : renderMetricValue(profileClicks)}
           </p>
           <p className="mt-1 text-xs text-slate-500">Profile opens tracked</p>
+        </article>
+
+        <article className="rounded-2xl border border-blue-100 bg-white p-4 shadow-sm">
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+            Resource Clicks
+          </p>
+          <p className="mt-2 text-3xl font-bold text-slate-900">
+            {analyticsLoading ? "..." : renderMetricValue(resourceClicks)}
+          </p>
+          <p className="mt-1 text-xs text-slate-500">Link clicks on requirements</p>
         </article>
 
         <article className="rounded-2xl border border-blue-100 bg-white p-4 shadow-sm">
@@ -305,6 +352,7 @@ const AdvisorDashboardPage = () => {
           <p className="mt-1 text-xs text-slate-500">Share button clicks</p>
         </article>
       </section>
+
 
       <section className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
         {applicationStatus === 1 ? (
@@ -569,6 +617,130 @@ const AdvisorDashboardPage = () => {
         )}
       </section>
       ) : null}
+
+      <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="flex items-center gap-2 text-xl font-semibold text-slate-900">
+              <FiMousePointer className="text-blue-700" />
+              My Requirement Link Clicks
+            </h2>
+            <p className="mt-1 text-sm text-slate-600">
+              Track which users clicked links on your posted business requirements.
+            </p>
+          </div>
+
+          <label className="inline-flex items-center gap-2 text-sm text-slate-600">
+            <span>Per page</span>
+            <select
+              value={clicksLimit}
+              onChange={(e) => {
+                setClicksLimit(Number(e.target.value));
+                setClicksPage(1);
+              }}
+              className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-400"
+            >
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+            </select>
+          </label>
+        </div>
+
+        {resourceClicksLoading ? (
+          <div className="mt-6 flex items-center justify-center py-8">
+            <div className="inline-flex items-center gap-3 text-sm font-medium text-blue-700">
+              <span className="h-5 w-5 animate-spin rounded-full border-2 border-blue-200 border-t-blue-700" />
+              Loading click history...
+            </div>
+          </div>
+        ) : resourceClicksError ? (
+          <div className="mt-5 rounded-2xl border border-rose-200 bg-rose-50 p-4">
+            <p className="text-sm font-medium text-rose-700">{resourceClicksError}</p>
+          </div>
+        ) : resourceClickRows.length === 0 ? (
+          <div className="mt-6 rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-8 text-center">
+            <p className="text-base font-semibold text-slate-700">No resource clicks recorded yet</p>
+            <p className="mt-1 text-sm text-slate-500">
+              When users click links on your approved requirements, their details will appear here.
+            </p>
+          </div>
+        ) : (
+          <div className="mt-5 overflow-x-auto">
+            <table className="min-w-full divide-y divide-slate-200">
+              <thead>
+                <tr className="text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  <th className="px-3 py-3">User (Who Clicked)</th>
+                  <th className="px-3 py-3">User Email</th>
+                  <th className="px-3 py-3">Requirement Company</th>
+                  <th className="px-3 py-3">Resource Link</th>
+                  <th className="px-3 py-3">Clicked At</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {resourceClickRows.map((click) => (
+                  <tr key={click._id} className="align-top">
+                    <td className="px-3 py-3 text-sm font-medium text-slate-800">
+                      {click.userName || "—"}
+                    </td>
+                    <td className="px-3 py-3 text-sm text-slate-600">
+                      {click.userEmail || "—"}
+                    </td>
+                    <td className="px-3 py-3 text-sm font-medium text-slate-700">
+                      {click.companyName || "—"}
+                    </td>
+                    <td className="px-3 py-3 text-sm text-slate-600">
+                      {click.url ? (
+                        <a
+                          href={click.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-blue-700 hover:underline"
+                        >
+                          <FiExternalLink className="h-3.5 w-3.5" />
+                          {click.url.length > 35 ? `${click.url.slice(0, 32)}...` : click.url}
+                        </a>
+                      ) : (
+                        "—"
+                      )}
+                    </td>
+                    <td className="px-3 py-3 text-sm text-slate-600">
+                      {formatDate(click.clickedAt)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
+              <p className="text-sm text-slate-600">
+                Page {clicksPagination.page} of {clicksPagination.totalPages} •{" "}
+                {clicksPagination.total} total clicks
+              </p>
+              <div className="inline-flex items-center gap-2">
+                <button
+                  type="button"
+                  disabled={clicksPagination.page <= 1}
+                  onClick={() => setClicksPage((prev) => Math.max(1, prev - 1))}
+                  className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Previous
+                </button>
+                <button
+                  type="button"
+                  disabled={clicksPagination.page >= clicksPagination.totalPages}
+                  onClick={() => setClicksPage((prev) => Math.min(clicksPagination.totalPages, prev + 1))}
+                  className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </section>
+
+
 
       {/* <LoginMethodsCard /> */}
 

@@ -17,6 +17,7 @@ import { NotFoundState } from "./components/pageNotFound/PageNotFound";
 import { SeoLandingPage } from "./pages/home/SeoLanding.page";
 import { seoLandings } from "./config/seoLandings";
 import { ResourcesPage } from "./pages/resources/Resources.page";
+import { ResourceDetailPage } from "./pages/resources/ResourceDetail.page";
 import { ContactPage } from "./pages/contact/Contact.page";
 
 function SlugRouteResolver() {
@@ -70,6 +71,7 @@ function App() {
           />
           <Route path="/lol" element={<Navigate to="/admin" replace />} />
           <Route path="/resources" element={<ResourcesPage />} />
+          <Route path="/resources/:id" element={<ResourceDetailPage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/:slug" element={<SlugRouteResolver />} />
           <Route path="/blogs" element={<BlogListPage />} />
@@ -83,6 +85,7 @@ function App() {
       </SavedAdvisorsProvider>
     </BrowserRouter>
   );
+
 }
 
 export default App;

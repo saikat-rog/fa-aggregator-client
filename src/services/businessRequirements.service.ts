@@ -134,7 +134,18 @@ export async function getRequirementClicksAdmin(params: { page: number; limit: n
   return unwrapData<RequirementClicksAdminList>(response.data);
 }
 
+export async function getMyRequirementClicks(params: { page: number; limit: number }) {
+  const response = await api.get("/business-requirements/my-clicks", { params });
+  return unwrapData<RequirementClicksAdminList>(response.data);
+}
+
 export async function getBusinessRequirementByIdAdmin(id: string) {
   const response = await adminApi.get(`/admin/business-requirements/${id}`);
   return unwrapRequirement(response.data);
 }
+
+export async function getApprovedBusinessRequirementByIdPublic(id: string) {
+  const response = await api.get(`/business-requirements/approved/${id}`);
+  return unwrapRequirement(response.data);
+}
+
