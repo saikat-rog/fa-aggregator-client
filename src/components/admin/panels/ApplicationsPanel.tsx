@@ -9,6 +9,7 @@ import { getNum, inputClassName, panelClassName, statusEmptyClassName, statusErr
 interface Props {
   params: URLSearchParams;
   setParam: (k: string, v?: string) => void;
+  setManyParams?: (updates: Record<string, string | undefined>) => void;
 }
 
 type EditFormState = {
@@ -62,10 +63,12 @@ const createFormState = (app: AdvisorApplication): EditFormState => ({
   category: app.category ?? "",
 });
 
-export function ApplicationsPanel({ params, setParam }: Props) {
+export function ApplicationsPanel({ params, setParam, setManyParams }: Props) {
   const page = getNum(params.get("applicationsPage"), 1);
   const limit = getNum(params.get("applicationsLimit"), 10);
-  const status = params.get("applicationsStatus") ?? "pending";
+  const rawStatus = params.get("applicationsStatus");
+  const activeStatus = rawStatus || "pending";
+  const apiStatus = activeStatus === "all" ? undefined : activeStatus;
   const selectedId = params.get("applicationId") ?? "";
 
   const [data, setData] = useState<{ applications: AdvisorApplication[]; pagination: any } | null>(null);
@@ -79,11 +82,23 @@ export function ApplicationsPanel({ params, setParam }: Props) {
   const [form, setForm] = useState<EditFormState | null>(null);
   const [initialSerialized, setInitialSerialized] = useState("");
 
+  const handleStatusChange = (newStatus: string) => {
+    if (setManyParams) {
+      setManyParams({
+        applicationsStatus: newStatus,
+        applicationsPage: "1",
+      });
+    } else {
+      setParam("applicationsStatus", newStatus);
+      setParam("applicationsPage", "1");
+    }
+  };
+
   const load = () => {
     const ctrl = new AbortController();
     setLoading(true);
     setError(null);
-    getAdvisorApplications({ page, limit, status: status || undefined }, ctrl.signal)
+    getAdvisorApplications({ page, limit, status: apiStatus }, ctrl.signal)
       .then(setData)
       .catch((err) => {
         if (err?.name !== "CanceledError" && err?.name !== "AbortError") setError("Failed to load applications.");
@@ -92,7 +107,7 @@ export function ApplicationsPanel({ params, setParam }: Props) {
     return () => ctrl.abort();
   };
 
-  useEffect(load, [page, limit, status]);
+  useEffect(load, [page, limit, apiStatus]);
 
   useEffect(() => {
     advisorFormOptionsApi().then(setOptions).catch(() => null);
@@ -289,8 +304,8 @@ export function ApplicationsPanel({ params, setParam }: Props) {
     <section className={panelClassName}>
       <h3 className="inline-flex items-center gap-2 text-lg font-semibold"><FiList className="text-blue-700" /> Advisor Applications</h3>
       <div className="mt-3 flex gap-2">
-        {["pending", "approved", "rejected", ""].map((tab) => (
-          <button key={tab || "all"} className={`rounded-full border px-3 py-1 text-sm font-medium transition ${status === tab ? "border-blue-700 bg-blue-700 text-white" : "border-slate-200 bg-white text-slate-700 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"}`} onClick={() => setParam("applicationsStatus", tab || undefined)}>{tab || "all"}</button>
+        {["pending", "approved", "rejected", "all"].map((tab) => (
+          <button key={tab} className={`rounded-full border px-3 py-1 text-sm font-medium transition ${activeStatus === tab ? "border-blue-700 bg-blue-700 text-white" : "border-slate-200 bg-white text-slate-700 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"}`} onClick={() => handleStatusChange(tab)}>{tab}</button>
         ))}
       </div>
 

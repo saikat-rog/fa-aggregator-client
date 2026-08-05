@@ -47,7 +47,7 @@ export function AdminPageContent() {
 
       {view === "users" ? <UsersPanel params={params} setParam={setParam} setManyParams={setManyParams} /> : null}
       {view === "advisors" ? <AdvisorsPanel params={params} setParam={setParam} /> : null}
-      {view === "applications" ? <ApplicationsPanel params={params} setParam={setParam} /> : null}
+      {view === "applications" ? <ApplicationsPanel params={params} setParam={setParam} setManyParams={setManyParams} /> : null}
       {view === "industries" ? <IndustriesPanel /> : null}
       {view === "categories" ? <CategoriesPanel /> : null}
       {view === "blogs" ? <BlogsPanel params={params} setParam={setParam} setManyParams={setManyParams} /> : null}
