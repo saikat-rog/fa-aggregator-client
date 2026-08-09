@@ -84,6 +84,7 @@ export function ContactPage() {
   const [successMessage, setSuccessMessage] = useState("");
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const [showAdvisorModal, setShowAdvisorModal] = useState(false);
+  const [showUnapprovedModal, setShowUnapprovedModal] = useState(false);
 
   const fieldErrors = useMemo(() => {
     const errors: Record<keyof FormState, string> = {
@@ -168,6 +169,9 @@ export function ContactPage() {
           ? error.message
           : "Unable to submit requirements. Please try again.";
       setErrorMessage(msg);
+      if (msg.toLowerCase().includes("approved advisor")) {
+        setShowUnapprovedModal(true);
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -391,6 +395,40 @@ export function ContactPage() {
               >
                 <FiUserCheck className="h-4 w-4" />
                 Log In as Advisor
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {/* Advisor Approval Required Modal */}
+      {showUnapprovedModal ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs">
+          <div className="relative w-full max-w-md overflow-hidden rounded-3xl border border-amber-100 bg-white p-6 shadow-2xl">
+            <button
+              type="button"
+              onClick={() => setShowUnapprovedModal(false)}
+              className="absolute right-4 top-4 rounded-full p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+            >
+              <FiX className="h-5 w-5" />
+            </button>
+
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-amber-700">
+              <FiLock className="h-6 w-6" />
+            </div>
+
+            <h3 className="mt-4 text-xl font-bold text-slate-900">Approved Advisor Required</h3>
+            <p className="mt-2 text-sm leading-relaxed text-slate-600">
+              Posting business requirements is exclusively allowed for <span className="font-semibold text-slate-800">Approved Advisors</span>. Your advisor profile must be reviewed and approved by an admin before you can post business requirements.
+            </p>
+
+            <div className="mt-6 flex flex-col gap-2.5 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                onClick={() => setShowUnapprovedModal(false)}
+                className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+              >
+                Close
               </button>
             </div>
           </div>

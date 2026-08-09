@@ -10,6 +10,9 @@ import { SocialShareButtons } from "../../components/resources/SocialShareButton
 
 const PAGE_SIZE = 10;
 
+const getProxiedImageUrl = (url: string) =>
+  `https://images.weserv.nl/?url=${encodeURIComponent(url)}`;
+
 export function ResourcesPage() {
   const [requirements, setRequirements] = useState<ApprovedBusinessRequirementItem[]>([]);
   const [page, setPage] = useState(1);
@@ -86,13 +89,41 @@ export function ResourcesPage() {
                     </Link>
                     <Link
                       to={`/resources/${item._id}`}
-                      className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-blue-50 hover:text-blue-700"
+                      className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-blue-50 hover:text-blue-700 shrink-0"
                     >
                       <FiEye className="h-3.5 w-3.5" />
                       Details
                     </Link>
                   </div>
-                  <p className="mt-2 text-sm text-slate-600"><span className="font-semibold text-slate-700">Objective:</span> {item.campaignObjective}</p>
+                  {item.postedByAdvisorName ? (
+                    <div className="mt-2 flex items-center gap-2 text-xs text-slate-500">
+                      {item.instagramProfilePictureUrl ? (
+                        <img
+                          src={getProxiedImageUrl(item.instagramProfilePictureUrl)}
+                          alt={item.postedByAdvisorName}
+                          className="h-5 w-5 rounded-full object-cover border border-slate-200"
+                          onError={(e) => {
+                            (e.target as HTMLElement).style.display = "none";
+                          }}
+                        />
+                      ) : (
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-[10px] font-bold text-blue-700">
+                          {item.postedByAdvisorName.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                      <span>
+                        Posted by{" "}
+                        {item.postedByAdvisorUsername ? (
+                          <Link to={`/${item.postedByAdvisorUsername}`} className="font-semibold text-slate-700 hover:text-blue-700 hover:underline">
+                            {item.postedByAdvisorName}
+                          </Link>
+                        ) : (
+                          <span className="font-semibold text-slate-700">{item.postedByAdvisorName}</span>
+                        )}
+                      </span>
+                    </div>
+                  ) : null}
+                  <p className="mt-3 text-sm text-slate-600"><span className="font-semibold text-slate-700">Objective:</span> {item.campaignObjective}</p>
                   <p className="mt-1 text-sm text-slate-600"><span className="font-semibold text-slate-700">Scope:</span> {item.desiredInfluencerScope}</p>
                   {item.detailedRequirements ? (
                     <p className="mt-3 text-sm text-slate-600 line-clamp-3"><span className="font-semibold text-slate-700">Details:</span> {item.detailedRequirements}</p>

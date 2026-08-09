@@ -8,6 +8,9 @@ import {
 } from "../../services/businessRequirements.service";
 import { SocialShareButtons } from "../../components/resources/SocialShareButtons";
 
+const getProxiedImageUrl = (url: string) =>
+  `https://images.weserv.nl/?url=${encodeURIComponent(url)}`;
+
 export function ResourceDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [requirement, setRequirement] = useState<ApprovedBusinessRequirementItem | null>(null);
@@ -100,14 +103,36 @@ export function ResourceDetailPage() {
               </span>
               <h1 className="mt-3 text-3xl font-bold text-slate-900">{requirement.companyName}</h1>
               {requirement.postedByAdvisorName ? (
-                <p className="mt-2 flex items-center gap-1.5 text-sm text-slate-600">
-                  <FiUser className="h-4 w-4 text-slate-400" />
-                  Posted by Advisor:{" "}
-                  <span className="font-semibold text-slate-800">{requirement.postedByAdvisorName}</span>
-                  {requirement.postedByAdvisorUsername ? (
-                    <span className="text-xs text-slate-500">(@{requirement.postedByAdvisorUsername})</span>
-                  ) : null}
-                </p>
+                <div className="mt-4 flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50/80 p-3">
+                  {requirement.instagramProfilePictureUrl ? (
+                    <img
+                      src={getProxiedImageUrl(requirement.instagramProfilePictureUrl)}
+                      alt={requirement.postedByAdvisorName}
+                      className="h-12 w-12 rounded-full object-cover border border-slate-200 shadow-xs shrink-0"
+                      onError={(e) => {
+                        (e.target as HTMLElement).style.display = "none";
+                      }}
+                    />
+                  ) : (
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-700 font-bold border border-blue-200">
+                      {requirement.postedByAdvisorName.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <div>
+                    <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Posted by Advisor</span>
+                    {requirement.postedByAdvisorUsername ? (
+                      <Link
+                        to={`/${requirement.postedByAdvisorUsername}`}
+                        className="block text-base font-bold text-slate-900 hover:text-blue-700 transition"
+                      >
+                        {requirement.postedByAdvisorName}{" "}
+                        <span className="text-xs font-normal text-slate-500">(@{requirement.postedByAdvisorUsername})</span>
+                      </Link>
+                    ) : (
+                      <p className="text-base font-bold text-slate-900">{requirement.postedByAdvisorName}</p>
+                    )}
+                  </div>
+                </div>
               ) : null}
             </div>
           </div>

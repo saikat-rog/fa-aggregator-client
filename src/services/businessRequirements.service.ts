@@ -19,6 +19,7 @@ export type BusinessRequirementItem = Omit<BusinessRequirementPayload, "url"> & 
   advisorId?: string;
   postedByAdvisorName?: string;
   postedByAdvisorUsername?: string;
+  instagramProfilePictureUrl?: string | null;
   status: "pending" | "approved";
   approvedAt: string | null;
   createdAt?: string;
