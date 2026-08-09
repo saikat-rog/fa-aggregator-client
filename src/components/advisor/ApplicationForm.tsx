@@ -188,6 +188,7 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
       return;
     }
 
+    /* TEMPORARILY DISABLED: Market Focus and Expertise Indices validation
     if (payload.marketFocus.length === 0) {
       setErrorMessage("Please select at least one market focus.");
       return;
@@ -197,6 +198,7 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
       setErrorMessage("Please select at least one expertise index.");
       return;
     }
+    */
 
     if (socialHandles.length === 0) {
       setErrorMessage("Please provide at least one social media handle.");
@@ -544,6 +546,7 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
           className="w-full rounded-xl border border-blue-100 px-4 py-3 outline-none focus:border-blue-400"
         />
 
+        {/* TEMPORARILY DISABLED MARKET FOCUS AND EXPERTISE INDICES SELECTION - UNCOMMENT TO RE-ENABLE
         <div>
           <p className="text-md text-slate-600 py-2">
             Market Focus (choose one or more)
@@ -593,6 +596,7 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
             })}
           </div>
         </div>
+        */}
 
         <div className="flex items-center gap-3">
           <button
