@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { FiArrowLeft, FiExternalLink, FiLock, FiBriefcase, FiUser } from "react-icons/fi";
+import { FiArrowLeft, FiExternalLink, FiLock, FiBriefcase } from "react-icons/fi";
 import {
   getApprovedBusinessRequirementByIdPublic,
   trackRequirementClickApi,
