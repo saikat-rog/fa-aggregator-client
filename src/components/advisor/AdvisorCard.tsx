@@ -317,9 +317,11 @@ export function AdvisorCard({ advisor }: AdvisorCardProps) {
                       Eng. Rate: {getDisplayEngagementRate(advisor.instagramEngagementRateScore)}
                     </span>
                   ) : null}
-                  <span className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-[11px] font-semibold">
-                    PPP: {getDisplayPpp(advisor.ppp)}
-                  </span>
+                  {typeof advisor.ppp === "number" ? (
+                    <span className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-[11px] font-semibold">
+                      PPP: {getDisplayPpp(advisor.ppp)}
+                    </span>
+                  ) : null}
                   <span className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-[11px] font-semibold">
                     Category: {getDisplayCategory(advisor.category)}
                   </span>

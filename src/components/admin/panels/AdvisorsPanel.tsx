@@ -187,14 +187,6 @@ export function AdvisorsPanel({ params, setParam }: Props) {
         : "-",
     },
     {
-      label: "PPP",
-      value: getDisplayPpp(
-        typeof profile.ppp === "number"
-          ? profile.ppp
-          : (detailsUser as Record<string, unknown> | null)?.ppp as number | null | undefined,
-      ),
-    },
-    {
       label: "Category",
       value: getDisplayCategory(
         typeof profile.category === "string"
@@ -589,7 +581,6 @@ export function AdvisorsPanel({ params, setParam }: Props) {
                       <FiUser /> Advisor
                     </span>
                   </th>
-                  <th className="px-4 py-3">PPP</th>
                   <th className="px-4 py-3">Category</th>
                   <th className="px-4 py-3 text-right">Action</th>
                 </tr>
@@ -635,9 +626,6 @@ export function AdvisorsPanel({ params, setParam }: Props) {
                             </p>
                           </div>
                         </div>
-                      </td>
-                      <td className="whitespace-nowrap px-4 py-3 text-xs font-medium text-slate-600 sm:text-sm">
-                        {getDisplayPpp(advisor.ppp)}
                       </td>
                       <td className="whitespace-nowrap px-4 py-3 text-xs font-medium text-slate-600 sm:text-sm">
                         {getDisplayCategory(advisor.category)}
@@ -784,9 +772,6 @@ export function AdvisorsPanel({ params, setParam }: Props) {
                             </p>
                           </div>
                           <div className="flex flex-wrap gap-2 text-xs font-semibold">
-                            <span className="rounded-xl border border-blue-200 bg-blue-50 px-3 py-1.5 text-blue-800">
-                              PPP: {getDisplayPpp(typeof profile.ppp === "number" ? profile.ppp : (detailsUser as any)?.ppp)}
-                            </span>
                             <span className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-emerald-800">
                               Category: {getDisplayCategory(typeof profile.category === "string" ? profile.category : (detailsUser as any)?.category)}
                             </span>

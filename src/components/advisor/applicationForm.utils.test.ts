@@ -23,7 +23,7 @@ test("normalizeCategory trims input", () => {
 test("getAdvisorApplicationFieldErrors validates required rules", () => {
   assert.deepEqual(
     getAdvisorApplicationFieldErrors({ pppValue: "", categoryValue: "x" }),
-    { pppError: "PPP is required.", categoryError: "" },
+    { pppError: "", categoryError: "" },
   );
   assert.deepEqual(
     getAdvisorApplicationFieldErrors({ pppValue: "-5", categoryValue: "x" }),

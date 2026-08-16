@@ -321,7 +321,6 @@ export function ApplicationsPanel({ params, setParam, setManyParams }: Props) {
                 <th className="px-3 py-2"><span className="inline-flex items-center gap-1"><FiList /> Sequence</span></th>
                 <th className="px-3 py-2"><span className="inline-flex items-center gap-1"><FiUser /> Username</span></th>
                 <th className="px-3 py-2"><span className="inline-flex items-center gap-1"><FiMapPin /> Location</span></th>
-                <th className="px-3 py-2"><span className="inline-flex items-center gap-1"><FiBarChart2 /> PPP</span></th>
                 <th className="px-3 py-2"><span className="inline-flex items-center gap-1"><FiTag /> Category</span></th>
                 <th className="px-3 py-2"><span className="inline-flex items-center gap-1"><FiTag /> Status</span></th>
                 <th className="px-3 py-2"><span className="inline-flex items-center gap-1"><FiFileText /> Date</span></th>
@@ -335,7 +334,6 @@ export function ApplicationsPanel({ params, setParam, setManyParams }: Props) {
                     <td className="px-3 py-2">{index + 1}</td>
                     <td className="px-3 py-2">{app.username || "-"}</td>
                     <td className="px-3 py-2">{[app.country, app.state].filter(Boolean).join(", ") || "-"}</td>
-                    <td className="px-3 py-2">{typeof app.ppp === "number" ? app.ppp : "N/A"}</td>
                     <td className="px-3 py-2">{app.category?.trim() ? app.category : "N/A"}</td>
                     <td className="px-3 py-2">{app.status}</td>
                     <td className="px-3 py-2">{formatDate(app.createdAt)}</td>
@@ -344,7 +342,7 @@ export function ApplicationsPanel({ params, setParam, setManyParams }: Props) {
 
                   {selectedApplication && form && selectedId === app._id ? (
                     <tr className="border-b border-slate-100 bg-slate-50/60">
-                      <td colSpan={8} className="p-4">
+                      <td colSpan={7} className="p-4">
                         <div className="rounded-2xl border border-slate-200 bg-slate-50/60 p-4">
                           <div className="mb-3 flex items-center justify-between gap-2">
                             <h4 className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-900"><FiEdit3 className="text-blue-700" /> Application Review</h4>
@@ -356,8 +354,7 @@ export function ApplicationsPanel({ params, setParam, setManyParams }: Props) {
                             <label className="relative"><FiAtSign className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-blue-700" /><input className={`${inputClassName} w-full pl-9`} placeholder="Email for contact" value={form.emailForContact} onChange={(e) => setField("emailForContact", e.target.value)} disabled={!isPending || isMutating} /></label>
                             <label className="relative"><FiMapPin className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-blue-700" /><select className={`${inputClassName} w-full pl-9`} value={form.country} onChange={(e) => { setField("country", e.target.value); setField("state", ""); }} disabled={!isPending || isMutating}><option value="">Country</option>{Object.keys(options?.locations ?? {}).map((c) => <option key={c} value={c}>{c}</option>)}</select></label>
                             <label className="relative"><FiMapPin className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-blue-700" /><select className={`${inputClassName} w-full pl-9`} value={form.state} onChange={(e) => setField("state", e.target.value)} disabled={!isPending || isMutating}><option value="">State</option>{stateOptions.map((s) => <option key={s} value={s}>{s}</option>)}</select></label>
-                            <label className="relative"><FiBarChart2 className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-blue-700" /><input className={`${inputClassName} w-full pl-9`} placeholder="PPP" type="number" min="0" value={form.ppp} onChange={(e) => setField("ppp", e.target.value)} disabled={!isPending || isMutating} /></label>
-                            <label className="relative"><FiTag className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-blue-700" /><input className={`${inputClassName} w-full pl-9`} placeholder="Category" value={form.category} onChange={(e) => setField("category", e.target.value)} disabled={!isPending || isMutating} /></label>
+                            <label className="relative sm:col-span-2"><FiTag className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-blue-700" /><input className={`${inputClassName} w-full pl-9`} placeholder="Category" value={form.category} onChange={(e) => setField("category", e.target.value)} disabled={!isPending || isMutating} /></label>
                             <div className="sm:col-span-2 rounded-xl border border-slate-200 bg-white p-3"><p className="mb-2 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-blue-700"><FiTrendingUp /> Market Focus</p><div className="flex flex-wrap gap-2">{marketOptions.map((market) => { const isSelected = form.marketFocus.includes(market); return <button key={market} type="button" onClick={() => toggleMarketFocus(market)} disabled={!isPending || isMutating} className={`rounded-full border px-3 py-1 text-xs font-medium transition disabled:opacity-50 ${isSelected ? "border-blue-700 bg-blue-700 text-white" : "border-slate-300 bg-slate-50 text-slate-700 hover:border-blue-200 hover:text-blue-700"}`}>{market}</button>; })}</div></div>
                             <div className="sm:col-span-2 rounded-xl border border-slate-200 bg-white p-3"><p className="mb-2 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-blue-700"><FiBarChart2 /> Expertise Indices</p><div className="flex flex-wrap gap-2">{expertiseOptions.map((indexItem) => { const isSelected = form.expertiseIndeces.includes(indexItem); return <button key={indexItem} type="button" onClick={() => toggleExpertiseIndex(indexItem)} disabled={!isPending || isMutating} className={`rounded-full border px-3 py-1 text-xs font-medium transition disabled:opacity-50 ${isSelected ? "border-blue-700 bg-blue-700 text-white" : "border-slate-300 bg-slate-50 text-slate-700 hover:border-blue-200 hover:text-blue-700"}`}>{indexItem}</button>; })}</div></div>
                             <label className="relative"><FiGlobe className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-blue-700" /><input className={`${inputClassName} w-full pl-9`} placeholder="Website" value={form.personalWebsite} onChange={(e) => setField("personalWebsite", e.target.value)} disabled={!isPending || isMutating} /></label>

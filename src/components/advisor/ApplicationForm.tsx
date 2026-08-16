@@ -143,14 +143,15 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
       setErrorMessage("");
       return;
     }
-    if (parsedPpp === null) {
+    if (pppValue.trim() && parsedPpp === null) {
+      setPppError("PPP must be a non-negative number.");
       return;
     }
 
     const payload: AdvisorApplicationPayload = {
       username: cleanedUsername,
       industry: selectedIndustry,
-      ppp: parsedPpp,
+      ...(typeof parsedPpp === "number" ? { ppp: parsedPpp } : {}),
       category: trimmedCategory,
       country: selectedCountryValue,
       state: String(formData.get("state") || "").trim(),
@@ -454,63 +455,42 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
           ))}
         </select>
 
-        <div className="grid gap-3 md:grid-cols-2">
-          <div>
+        <div>
+          {categoryOptions.length > 0 ? (
+            <select
+              required
+              name="category"
+              value={categoryValue}
+              onChange={(event) => {
+                setCategoryValue(event.target.value);
+                setCategoryError("");
+              }}
+              className="w-full rounded-xl border border-blue-100 px-4 py-3 outline-none focus:border-blue-400"
+            >
+              <option value="">Select category</option>
+              {categoryOptions.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
+          ) : (
             <input
               required
-              name="ppp"
-              type="number"
-              min={0}
-              step="any"
-              value={pppValue}
+              name="category"
+              type="text"
+              value={categoryValue}
               onChange={(event) => {
-                setPppValue(event.target.value);
-                setPppError("");
+                setCategoryValue(event.target.value);
+                setCategoryError("");
               }}
-              placeholder="PPP (non-negative number)"
+              placeholder="Category"
               className="w-full rounded-xl border border-blue-100 px-4 py-3 outline-none focus:border-blue-400"
             />
-            {pppError ? (
-              <p className="mt-1 text-xs text-rose-600">{pppError}</p>
-            ) : null}
-          </div>
-          <div>
-            {categoryOptions.length > 0 ? (
-              <select
-                required
-                name="category"
-                value={categoryValue}
-                onChange={(event) => {
-                  setCategoryValue(event.target.value);
-                  setCategoryError("");
-                }}
-                className="w-full rounded-xl border border-blue-100 px-4 py-3 outline-none focus:border-blue-400"
-              >
-                <option value="">Select category</option>
-                {categoryOptions.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <input
-                required
-                name="category"
-                type="text"
-                value={categoryValue}
-                onChange={(event) => {
-                  setCategoryValue(event.target.value);
-                  setCategoryError("");
-                }}
-                placeholder="Category"
-                className="w-full rounded-xl border border-blue-100 px-4 py-3 outline-none focus:border-blue-400"
-              />
-            )}
-            {categoryError ? (
-              <p className="mt-1 text-xs text-rose-600">{categoryError}</p>
-            ) : null}
-          </div>
+          )}
+          {categoryError ? (
+            <p className="mt-1 text-xs text-rose-600">{categoryError}</p>
+          ) : null}
         </div>
 
         <input

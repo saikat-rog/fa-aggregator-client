@@ -49,7 +49,7 @@ const markPersistedTrackedClick = (key: string) => {
 export interface AdvisorApplicationPayload {
   username: string;
   industry: string;
-  ppp: number;
+  ppp?: number;
   category: string;
   country: string;
   state: string;
