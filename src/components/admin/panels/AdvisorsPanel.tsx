@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   FaFacebook,
   FaInstagram,
@@ -9,6 +10,7 @@ import {
   FaYoutube,
 } from "react-icons/fa6";
 import {
+  FiArrowLeft,
   FiAtSign,
   FiCheckCircle,
   FiChevronRight,
@@ -23,6 +25,7 @@ import {
   FiTag,
   FiTrash2,
   FiUser,
+  FiX,
   FiXCircle,
 } from "react-icons/fi";
 import { useDebouncedValue } from "../../../hooks/useDebouncedValue";
@@ -368,6 +371,17 @@ export function AdvisorsPanel({ params, setParam }: Props) {
     return () => ctrl.abort();
   }, [selectedId]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && selectedId) {
+        setSelectedId("");
+        setDetails(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedId]);
+
   const toggleEnquiry = (id: string) => {
     setExpandedEnquiryIds((prev) => {
       const next = new Set(prev);
@@ -556,362 +570,483 @@ export function AdvisorsPanel({ params, setParam }: Props) {
         </p>
       ) : null}
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-[1.1fr_1.4fr]">
-        <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-3">
-          <p className="mb-2 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-blue-700">
-            <FiList /> Advisor List
-          </p>
-          <div className="max-h-135 space-y-2 overflow-auto pr-1">
-            {data?.advisors?.map((advisor) => (
-              <button
-                key={advisor.id}
-                onClick={() => setSelectedId(advisor.id)}
-                className={`flex w-full items-center gap-3 rounded-xl border p-3 text-left transition ${selectedId === advisor.id ? "border-blue-500 bg-linear-to-r from-blue-50 to-cyan-50 shadow-sm" : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"}`}
-              >
-                {advisor.profilePictureUrl && !brokenImages[advisor.id] ? (
-                  <img
-                    src={advisor.profilePictureUrl}
-                    alt={advisor.username || advisor.name || "advisor"}
-                    className="h-12 w-12 rounded-full border border-slate-200 object-cover"
-                    onError={() =>
-                      setBrokenImages((prev) => ({
-                        ...prev,
-                        [advisor.id]: true,
-                      }))
-                    }
-                  />
-                ) : (
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-sm font-semibold text-slate-700">
-                    {getInitials(advisor.name)}
-                  </div>
-                )}
-                <div className="min-w-0">
-                  <p className="truncate font-medium text-slate-800">
-                    {advisor.name || "Unnamed advisor"}
-                  </p>
-                  <p className="truncate text-xs text-blue-700">
-                    @{advisor.username || "no-username"}
-                  </p>
-                  <p className="truncate text-xs text-slate-500">
-                    PPP: {getDisplayPpp(advisor.ppp)} | Category: {getDisplayCategory(advisor.category)}
-                  </p>
-                  <p className="truncate text-xs text-slate-400">
-                    {advisor.id}
-                  </p>
-                </div>
-              </button>
-            ))}
+      <div className="mt-4">
+        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs">
+          <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/80 px-4 py-3">
+            <p className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-blue-700">
+              <FiList /> Advisor Directory Table
+            </p>
+            <span className="text-xs font-medium text-slate-500">
+              Click any row to view full page advisor details
+            </span>
+          </div>
+          <div className="max-h-160 overflow-auto">
+            <table className="min-w-full text-left text-xs sm:text-sm">
+              <thead className="sticky top-0 z-10 border-b border-slate-200 bg-slate-50/95 text-[11px] font-semibold uppercase tracking-wider text-blue-700 backdrop-blur-xs">
+                <tr>
+                  <th className="px-4 py-3">
+                    <span className="inline-flex items-center gap-1">
+                      <FiUser /> Advisor
+                    </span>
+                  </th>
+                  <th className="px-4 py-3">PPP</th>
+                  <th className="px-4 py-3">Category</th>
+                  <th className="px-4 py-3 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 bg-white">
+                {data?.advisors?.map((advisor) => {
+                  const isSelected = selectedId === advisor.id;
+                  return (
+                    <tr
+                      key={advisor.id}
+                      onClick={() => setSelectedId(advisor.id)}
+                      className={`cursor-pointer transition ${
+                        isSelected
+                          ? "bg-blue-50/90 font-medium text-slate-900"
+                          : "text-slate-700 hover:bg-slate-50/80"
+                      }`}
+                    >
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-3">
+                          {advisor.profilePictureUrl && !brokenImages[advisor.id] ? (
+                            <img
+                              src={advisor.profilePictureUrl}
+                              alt={advisor.username || advisor.name || "advisor"}
+                              className="h-10 w-10 shrink-0 rounded-full border border-slate-200 object-cover"
+                              onError={() =>
+                                setBrokenImages((prev) => ({
+                                  ...prev,
+                                  [advisor.id]: true,
+                                }))
+                              }
+                            />
+                          ) : (
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-sm font-semibold text-slate-700">
+                              {getInitials(advisor.name)}
+                            </div>
+                          )}
+                          <div className="min-w-0">
+                            <p className="truncate font-semibold text-slate-900">
+                              {advisor.name || "Unnamed advisor"}
+                            </p>
+                            <p className="truncate text-xs text-blue-700">
+                              @{advisor.username || "no-username"}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-3 text-xs font-medium text-slate-600 sm:text-sm">
+                        {getDisplayPpp(advisor.ppp)}
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-3 text-xs font-medium text-slate-600 sm:text-sm">
+                        {getDisplayCategory(advisor.category)}
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-3 text-right">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedId(advisor.id);
+                          }}
+                          className="inline-flex items-center gap-1 rounded-xl border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 transition hover:bg-blue-100 cursor-pointer"
+                        >
+                          View Full Details
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         </div>
-
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]">
-          <div className="mb-3 border-b border-slate-100 pb-3">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <h4 className="inline-flex items-center gap-1.5 font-semibold text-slate-900">
-                <FiShield className="text-blue-700" /> Advisor Details
-                <span
-                  className={`inline-flex h-5 w-5 items-center justify-center rounded-full ${isVerified ? "bg-green-700 text-white" : "bg-amber-100 text-amber-700"}`}
-                  title={isVerified ? "Verified" : "Unverified"}
-                >
-                  {isVerified ? (
-                    <FiCheckCircle className="h-3.5 w-3.5" />
-                  ) : (
-                    <FiXCircle className="h-3.5 w-3.5" />
-                  )}
-                </span>
-              </h4>
-              {details && hasAdvisorRole ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setRemoveError(null);
-                    setRemoveTarget({
-                      id: selectedId,
-                      name: detailsUser?.name || String(profile.username ?? ""),
-                    });
-                  }}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 transition hover:bg-red-100"
-                >
-                  <FiTrash2 />
-                  Remove Advisor Profile
-                </button>
-              ) : null}
-            </div>
-          </div>
-          {removeError && !removeTarget ? (
-            <p className={statusErrorClassName}>{removeError}</p>
-          ) : null}
-          {!selectedId ? (
-            <p className="text-sm text-blue-700">
-              Select an advisor from the list to view details.
-            </p>
-          ) : null}
-          {detailsLoading ? (
-            <p className="text-sm text-slate-600">Loading details...</p>
-          ) : null}
-          {details && !detailsLoading ? (
-            <div className="space-y-4">
-              <div className="grid gap-2 sm:grid-cols-2">
-                {identityItems.map((item) => (
-                  <div
-                    key={item.label}
-                    className="rounded-xl border border-slate-200 bg-slate-50 p-2.5"
-                  >
-                    <p className="text-[11px] uppercase tracking-wide text-blue-700">
-                      {item.label}
-                    </p>
-                    <p
-                      className={`mt-1 ${item.label === "Username" ? "inline-flex w-fit rounded-full bg-blue-700 px-2.5 py-0.5 text-sm font-semibold text-white" : "text-sm font-medium text-slate-800"}`}
+      </div>      {/* Full Screen Advisor Details Popup Modal */}
+      {selectedId && typeof document !== "undefined"
+        ? createPortal(
+            <div
+              className="fixed inset-0 z-9999 flex items-center justify-center bg-slate-950/70 p-3 sm:p-6 lg:p-8 backdrop-blur-md overflow-y-auto"
+              onClick={(e) => {
+                if (e.target === e.currentTarget) {
+                  setSelectedId("");
+                  setDetails(null);
+                }
+              }}
+            >
+              <div className="relative w-full max-w-5xl rounded-3xl border border-slate-200 bg-white shadow-2xl overflow-hidden my-auto flex flex-col max-h-[92vh]">
+                {/* Header Sticky Navigation Bar */}
+                <div className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-slate-50/95 px-6 py-4 backdrop-blur-md">
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedId("");
+                        setDetails(null);
+                      }}
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-xs transition hover:bg-slate-100 cursor-pointer"
                     >
-                      {item.value}
-                    </p>
+                      <FiArrowLeft className="h-4 w-4 text-blue-700" /> Back to Advisors
+                    </button>
+                    <h4 className="inline-flex items-center gap-2 text-lg font-bold text-slate-900">
+                      <FiShield className="text-blue-700" />
+                      {detailsUser?.name || profile.username || "Advisor Profile"}
+                      <span
+                        className={`inline-flex h-5 w-5 items-center justify-center rounded-full ${
+                          isVerified ? "bg-green-700 text-white" : "bg-amber-100 text-amber-700"
+                        }`}
+                        title={isVerified ? "Verified" : "Unverified"}
+                      >
+                        {isVerified ? (
+                          <FiCheckCircle className="h-3.5 w-3.5" />
+                        ) : (
+                          <FiXCircle className="h-3.5 w-3.5" />
+                        )}
+                      </span>
+                    </h4>
                   </div>
-                ))}
-              </div>
-              <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
-                <p className="mb-2 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-blue-700">
-                  <FiCompass /> Advisor Profile
-                </p>
-                <div className="grid gap-2 sm:grid-cols-2">
-                  {advisorItems.map((item) => (
-                    <div key={item.label}>
-                      <p className="text-xs text-blue-700">{item.label}</p>
-                      <p className="text-sm text-slate-800">
-                        {item.value || "-"}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
-                <p className="mb-2 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-blue-700">
-                  <FiGlobe /> Social Links
-                </p>
-                <div className="grid gap-2 sm:grid-cols-2">
-                  {socialItems.map((item) => (
-                    <div
-                      key={item.key}
-                      className={`rounded-xl border p-2.5 ${item.className}`}
+
+                  <div className="flex items-center gap-2">
+                    {details && hasAdvisorRole ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setRemoveError(null);
+                          setRemoveTarget({
+                            id: selectedId,
+                            name: detailsUser?.name || String(profile.username ?? ""),
+                          });
+                        }}
+                        className="inline-flex items-center gap-1.5 rounded-xl border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 transition hover:bg-red-100 cursor-pointer"
+                      >
+                        <FiTrash2 />
+                        Remove Advisor Profile
+                      </button>
+                    ) : null}
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedId("");
+                        setDetails(null);
+                      }}
+                      className="rounded-xl p-2 text-slate-400 hover:bg-slate-200 hover:text-slate-700 transition cursor-pointer"
+                      title="Close popup"
                     >
-                      <p className="inline-flex items-center gap-1.5 text-xs font-semibold">
-                        <item.icon /> {item.label}
-                      </p>
-                      {item.value ? (
-                        <div className="mt-1 flex flex-wrap items-center gap-2">
-                          <a
-                            href={getSocialProfileUrl(item.key, item.value)}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="truncate text-sm font-medium underline-offset-2 hover:underline"
-                            title={`Open ${item.label} profile`}
-                          >
-                            {item.value}
-                          </a>
-                          {formatCompactCount(item.count) ? (
-                            <span
-                              className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${item.badgeClassName}`}
-                            >
-                              {formatCompactCount(item.count)} {item.countLabel}
-                            </span>
-                          ) : null}
-                          <span className="inline-flex items-center gap-1 rounded-full bg-blue-700 px-2 py-0.5 text-[10px] font-bold text-white">
-                            <FaRegHandPointer className="h-2.5 w-2.5" />
-                            {item.clicks ?? 0} clicks
-                          </span>
-                        </div>
-                      ) : (
-                        <div className="mt-2">
-                          <span
-                            aria-label={`${item.label} unavailable`}
-                            title={`${item.label} unavailable`}
-                            className="inline-flex items-center rounded-full border border-red-200 bg-red-50 px-2 py-0.5 text-[10px] font-semibold text-red-700"
-                          >
-                            Not connected
-                          </span>
-                        </div>
-                      )}
+                      <FiX className="h-5 w-5" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Popup Body Content */}
+                <div className="p-6 space-y-6 flex-1 overflow-y-auto">
+                  {removeError && !removeTarget ? (
+                    <p className={statusErrorClassName}>{removeError}</p>
+                  ) : null}
+
+                  {detailsLoading ? (
+                    <div className="py-12 text-center text-sm font-semibold text-slate-600">
+                      Loading advisor details...
                     </div>
-                  ))}
-                </div>
-                <div className="mt-3 border-t border-slate-200/70 pt-2">
-                  <p className="text-[11px] font-semibold uppercase tracking-wide text-blue-700">
-                    Total Social Clicks:{" "}
-                    <span className="text-slate-900">
-                      {String(socialClicks.total ?? 0)}
-                    </span>
-                  </p>
-                </div>
-              </div>
-              <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
-                <p className="mb-2 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-blue-700">
-                  <FiSearch /> Analytics Snapshot
-                </p>
-                <div className="grid grid-cols-2 gap-2">
-                  {metricItems.map((item) => (
-                    <div
-                      key={item.label}
-                      className="rounded-lg bg-slate-50 p-2"
-                    >
-                      <p className="text-xs text-blue-700">{item.label}</p>
-                      <p className="text-sm font-semibold text-slate-900">
-                        {item.value}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
-                <div className="mb-2">
-                  <p className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-blue-700">
-                    <FiMessageCircle /> Enquiries
-                    <span className="rounded-full bg-blue-700 px-2 py-0.5 text-[11px] font-semibold text-white">
-                      {enquiriesTotal}
-                    </span>
-                  </p>
-                </div>
-                {enquiriesLoading ? (
-                  <p className="text-xs text-slate-600">Loading enquiries...</p>
-                ) : null}
-                {!enquiriesLoading && enquiries.length === 0 ? (
-                  <p className="text-xs text-slate-500">
-                    No enquiries for this advisor.
-                  </p>
-                ) : null}
-                {!enquiriesLoading && enquiries.length > 0 ? (
-                  <div className="space-y-1.5">
-                    {enquiries.map((item) => {
-                      const enquiry = item as {
-                        _id?: string;
-                        subject?: string;
-                        message?: string;
-                        category?: string;
-                        status?: string;
-                        createdAt?: string;
-                        submittedBy?:
-                          | { name?: string; email?: string }
-                          | string;
-                      };
-                      const id =
-                        enquiry._id ||
-                        `${enquiry.subject || "enquiry"}-${enquiry.createdAt || ""}`;
-                      const isOpen = expandedEnquiryIds.has(id);
-                      return (
-                        <div
-                          key={id}
-                          className="rounded-lg border border-slate-200 bg-white"
-                        >
-                          <button
-                            type="button"
-                            onClick={() => toggleEnquiry(id)}
-                            className="flex w-full items-center justify-between gap-2 px-2.5 py-2 text-left"
-                          >
-                            <div className="min-w-0">
-                              <p className="truncate text-sm font-medium text-slate-900">
-                                <span className="text-blue-700">Subject:</span>{" "}
-                                {enquiry.subject || "Untitled enquiry"}
-                              </p>
-                              <p className="text-[11px] text-slate-500">
-                                {formatDate(enquiry.createdAt)}
-                              </p>
-                            </div>
-                            <FiChevronRight
-                              className={`h-4 w-4 shrink-0 text-slate-500 transition ${isOpen ? "rotate-90" : ""}`}
+                  ) : null}
+
+                  {details && !detailsLoading ? (
+                    <>
+                      {/* Identity Header Card */}
+                      <div className="rounded-2xl border border-slate-200 bg-linear-to-r from-blue-50/70 via-slate-50 to-indigo-50/50 p-5 shadow-xs">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                          {profile.profilePictureUrl || (detailsUser as any)?.profilePictureUrl ? (
+                            <img
+                              src={String(profile.profilePictureUrl || (detailsUser as any)?.profilePictureUrl)}
+                              alt={detailsUser?.name || "Advisor"}
+                              className="h-20 w-20 rounded-2xl border-2 border-white object-cover shadow-md"
                             />
-                          </button>
-                          {isOpen ? (
-                            <div className="border-t border-slate-100 px-2.5 py-2">
-                              <p className="whitespace-pre-wrap text-xs text-slate-700">
-                                <span className="font-semibold text-blue-700">
-                                  Message:
-                                </span>{" "}
-                                {enquiry.message || "No message"}
-                              </p>
-                              <div className="mt-1 text-[11px] text-slate-500">
-                                <p>Category: {enquiry.category || "-"}</p>
-                                <p>Status: {enquiry.status || "-"}</p>
-                                <p>
-                                  Submitted By:{" "}
-                                  {typeof enquiry.submittedBy === "string"
-                                    ? enquiry.submittedBy
-                                    : `${enquiry.submittedBy?.name || "-"}${enquiry.submittedBy?.email ? ` (${enquiry.submittedBy.email})` : ""}`}
+                          ) : (
+                            <div className="flex h-20 w-20 items-center justify-center rounded-2xl border-2 border-white bg-blue-700 text-2xl font-bold text-white shadow-md">
+                              {getInitials(detailsUser?.name)}
+                            </div>
+                          )}
+                          <div className="min-w-0 flex-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <h3 className="text-xl font-bold text-slate-900">
+                                {detailsUser?.name || "Unnamed Advisor"}
+                              </h3>
+                              {profile.username || detailsUser?.username ? (
+                                <span className="rounded-full bg-blue-700 px-3 py-0.5 text-xs font-semibold text-white">
+                                  @{String(profile.username ?? detailsUser?.username)}
+                                </span>
+                              ) : null}
+                            </div>
+                            <p className="mt-1 text-sm text-slate-600">
+                              {detailsUser?.email || String(profile.emailForContact ?? "-")}
+                            </p>
+                            <p className="mt-0.5 text-xs text-slate-500">
+                              Location: {[profile.country, profile.state, detailsUser?.country, detailsUser?.state].filter(Boolean).slice(0, 2).join(", ") || "-"}
+                            </p>
+                          </div>
+                          <div className="flex flex-wrap gap-2 text-xs font-semibold">
+                            <span className="rounded-xl border border-blue-200 bg-blue-50 px-3 py-1.5 text-blue-800">
+                              PPP: {getDisplayPpp(typeof profile.ppp === "number" ? profile.ppp : (detailsUser as any)?.ppp)}
+                            </span>
+                            <span className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-emerald-800">
+                              Category: {getDisplayCategory(typeof profile.category === "string" ? profile.category : (detailsUser as any)?.category)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Grid layout for info cards */}
+                      <div className="grid gap-6 md:grid-cols-2">
+                        {/* Advisor Profile Card */}
+                        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
+                          <p className="mb-4 inline-flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-blue-700">
+                            <FiCompass className="h-4 w-4" /> Advisor Profile Information
+                          </p>
+                          <div className="grid gap-3 sm:grid-cols-2">
+                            {advisorItems.map((item) => (
+                              <div key={item.label} className="rounded-xl border border-slate-100 bg-slate-50/60 p-3">
+                                <p className="text-xs font-semibold text-blue-700">{item.label}</p>
+                                <p className="mt-1 text-sm font-medium text-slate-800">
+                                  {item.value || "-"}
                                 </p>
                               </div>
-                            </div>
-                          ) : null}
+                            ))}
+                          </div>
                         </div>
-                      );
-                    })}
-                  </div>
-                ) : null}
+
+                        {/* Analytics Snapshot */}
+                        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs flex flex-col justify-between">
+                          <div>
+                            <p className="mb-4 inline-flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-blue-700">
+                              <FiSearch className="h-4 w-4" /> Analytics Snapshot
+                            </p>
+                            <div className="grid grid-cols-2 gap-3">
+                              {metricItems.map((item) => (
+                                <div key={item.label} className="rounded-xl border border-slate-100 bg-slate-50/80 p-3.5">
+                                  <p className="text-xs font-semibold text-blue-700">{item.label}</p>
+                                  <p className="mt-1 text-xl font-bold text-slate-900">{item.value}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Social Links Section */}
+                      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
+                        <p className="mb-4 inline-flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-blue-700">
+                          <FiGlobe className="h-4 w-4" /> Social Media Links & Engagement
+                        </p>
+                        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                          {socialItems.map((item) => (
+                            <div
+                              key={item.key}
+                              className={`rounded-2xl border p-3.5 ${item.className}`}
+                            >
+                              <p className="inline-flex items-center gap-2 text-sm font-bold">
+                                <item.icon /> {item.label}
+                              </p>
+                              {item.value ? (
+                                <div className="mt-2 flex flex-col gap-2">
+                                  <a
+                                    href={getSocialProfileUrl(item.key, item.value)}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="truncate text-sm font-semibold underline-offset-2 hover:underline"
+                                    title={`Open ${item.label} profile`}
+                                  >
+                                    {item.value}
+                                  </a>
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    {formatCompactCount(item.count) ? (
+                                      <span
+                                        className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${item.badgeClassName}`}
+                                      >
+                                        {formatCompactCount(item.count)} {item.countLabel}
+                                      </span>
+                                    ) : null}
+                                    <span className="inline-flex items-center gap-1 rounded-full bg-blue-700 px-2.5 py-0.5 text-xs font-bold text-white">
+                                      <FaRegHandPointer className="h-2.5 w-2.5" />
+                                      {item.clicks ?? 0} clicks
+                                    </span>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="mt-3">
+                                  <span
+                                    className="inline-flex items-center rounded-full border border-red-200 bg-red-50 px-2.5 py-0.5 text-xs font-semibold text-red-700"
+                                  >
+                                    Not connected
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                        <div className="mt-4 border-t border-slate-100 pt-3 flex justify-between items-center text-xs font-semibold text-slate-700">
+                          <span>Total Social Clicks Recorded:</span>
+                          <span className="rounded-full bg-blue-700 px-3 py-1 text-sm font-bold text-white">
+                            {String(socialClicks.total ?? 0)}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Enquiries Section */}
+                      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
+                        <div className="mb-4 flex items-center justify-between">
+                          <p className="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-blue-700">
+                            <FiMessageCircle className="h-4 w-4" /> Received Enquiries
+                          </p>
+                          <span className="rounded-full bg-blue-700 px-3 py-0.5 text-xs font-bold text-white">
+                            {enquiriesTotal} total
+                          </span>
+                        </div>
+                        {enquiriesLoading ? (
+                          <p className="text-sm text-slate-600">Loading enquiries...</p>
+                        ) : null}
+                        {!enquiriesLoading && enquiries.length === 0 ? (
+                          <p className="text-sm text-slate-500">
+                            No enquiries recorded for this advisor.
+                          </p>
+                        ) : null}
+                        {!enquiriesLoading && enquiries.length > 0 ? (
+                          <div className="space-y-2">
+                            {enquiries.map((item) => {
+                              const enquiry = item as {
+                                _id?: string;
+                                subject?: string;
+                                message?: string;
+                                category?: string;
+                                status?: string;
+                                createdAt?: string;
+                                submittedBy?:
+                                  | { name?: string; email?: string }
+                                  | string;
+                              };
+                              const id =
+                                enquiry._id ||
+                                `${enquiry.subject || "enquiry"}-${enquiry.createdAt || ""}`;
+                              const isOpen = expandedEnquiryIds.has(id);
+                              return (
+                                <div
+                                  key={id}
+                                  className="rounded-xl border border-slate-200 bg-slate-50/50"
+                                >
+                                  <button
+                                    type="button"
+                                    onClick={() => toggleEnquiry(id)}
+                                    className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition hover:bg-slate-100/80 rounded-xl cursor-pointer"
+                                  >
+                                    <div className="min-w-0">
+                                      <p className="truncate text-sm font-semibold text-slate-900">
+                                        <span className="text-blue-700">Subject:</span>{" "}
+                                        {enquiry.subject || "Untitled enquiry"}
+                                      </p>
+                                      <p className="text-xs text-slate-500">
+                                        {formatDate(enquiry.createdAt)}
+                                      </p>
+                                    </div>
+                                    <FiChevronRight
+                                      className={`h-5 w-5 shrink-0 text-slate-400 transition ${
+                                        isOpen ? "rotate-90 text-blue-700" : ""
+                                      }`}
+                                    />
+                                  </button>
+                                  {isOpen ? (
+                                    <div className="border-t border-slate-200 px-4 py-3 bg-white rounded-b-xl">
+                                      <p className="whitespace-pre-wrap text-sm text-slate-800">
+                                        <span className="font-semibold text-blue-700">
+                                          Message:
+                                        </span>{" "}
+                                        {enquiry.message || "No message"}
+                                      </p>
+                                      <div className="mt-2 grid gap-1 text-xs text-slate-500 sm:grid-cols-3">
+                                        <p><span className="font-semibold">Category:</span> {enquiry.category || "-"}</p>
+                                        <p><span className="font-semibold">Status:</span> {enquiry.status || "-"}</p>
+                                        <p>
+                                          <span className="font-semibold">Submitted By:</span>{" "}
+                                          {typeof enquiry.submittedBy === "string"
+                                            ? enquiry.submittedBy
+                                            : `${enquiry.submittedBy?.name || "-"}${
+                                                enquiry.submittedBy?.email
+                                                  ? ` (${enquiry.submittedBy.email})`
+                                                  : ""
+                                              }`}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  ) : null}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ) : null}
+                      </div>
+                    </>
+                  ) : null}
+                </div>
               </div>
-            </div>
-          ) : null}
-        </div>
-      </div>
+            </div>,
+            document.body,
+          )
+        : null}
 
-      <PaginationControls
-        pagination={data?.pagination}
-        onPageChange={(v) => setParam("advisorsPage", String(v))}
-        onLimitChange={(v) => {
-          setParam("advisorsLimit", String(v));
-          setParam("advisorsPage", "1");
-        }}
-      />
+      {removeTarget && typeof document !== "undefined"
+        ? createPortal(
+            <div className="fixed inset-0 z-10000 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-xs">
+              <div className="w-full max-w-md rounded-2xl border border-red-100 bg-white p-5 shadow-2xl">
+                <div className="flex items-start gap-3">
+                  <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-700">
+                    <FiTrash2 />
+                  </span>
+                  <div>
+                    <h4 className="text-base font-semibold text-slate-900">
+                      Remove Advisor Profile
+                    </h4>
+                    <p className="mt-1 text-sm text-slate-600">
+                      This will remove the advisor profile and advisor access for
+                      this user. The user account will not be deleted.
+                    </p>
+                    {removeTarget.name ? (
+                      <p className="mt-2 text-xs font-medium text-slate-500">
+                        User: {removeTarget.name}
+                      </p>
+                    ) : null}
+                  </div>
+                </div>
 
-      {removeTarget ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4">
-          <div className="w-full max-w-md rounded-2xl border border-red-100 bg-white p-5 shadow-2xl">
-            <div className="flex items-start gap-3">
-              <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-700">
-                <FiTrash2 />
-              </span>
-              <div>
-                <h4 className="text-base font-semibold text-slate-900">
-                  Remove Advisor Profile
-                </h4>
-                <p className="mt-1 text-sm text-slate-600">
-                  This will remove the advisor profile and advisor access for
-                  this user. The user account will not be deleted.
-                </p>
-                {removeTarget.name ? (
-                  <p className="mt-2 text-xs font-medium text-slate-500">
-                    User: {removeTarget.name}
+                {removeError ? (
+                  <p className="mt-4 rounded-xl border border-red-100 bg-red-50 p-3 text-sm text-red-700">
+                    {removeError}
                   </p>
                 ) : null}
+
+                <div className="mt-5 flex flex-wrap justify-end gap-2">
+                  <button
+                    type="button"
+                    disabled={isRemovingProfile}
+                    onClick={() => {
+                      setRemoveTarget(null);
+                      setRemoveError(null);
+                    }}
+                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-60 cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    disabled={isRemovingProfile}
+                    onClick={confirmRemoveAdvisorProfile}
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-red-700 bg-red-700 px-3 py-2 text-sm font-semibold text-white transition hover:bg-red-800 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
+                  >
+                    <FiTrash2 />
+                    {isRemovingProfile ? "Removing..." : "Remove Advisor Profile"}
+                  </button>
+                </div>
               </div>
-            </div>
-
-            {removeError ? (
-              <p className="mt-4 rounded-xl border border-red-100 bg-red-50 p-3 text-sm text-red-700">
-                {removeError}
-              </p>
-            ) : null}
-
-            <div className="mt-5 flex flex-wrap justify-end gap-2">
-              <button
-                type="button"
-                disabled={isRemovingProfile}
-                onClick={() => {
-                  setRemoveTarget(null);
-                  setRemoveError(null);
-                }}
-                className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-60"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                disabled={isRemovingProfile}
-                onClick={confirmRemoveAdvisorProfile}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-red-700 bg-red-700 px-3 py-2 text-sm font-semibold text-white transition hover:bg-red-800 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                <FiTrash2 />
-                {isRemovingProfile ? "Removing..." : "Remove Advisor Profile"}
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
+            </div>,
+            document.body,
+          )
+        : null}
     </section>
   );
 }

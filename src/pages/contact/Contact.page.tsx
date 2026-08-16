@@ -164,12 +164,29 @@ export function ContactPage() {
       setSubmitAttempted(false);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (error: unknown) {
-      const msg =
-        error instanceof Error && error.message
-          ? error.message
-          : "Unable to submit requirements. Please try again.";
+      let msg = "";
+      if (
+        typeof error === "object" &&
+        error !== null &&
+        "response" in error &&
+        (error as { response?: { data?: { msg?: string; message?: string } } }).response?.data
+      ) {
+        const resData = (error as { response: { data: { msg?: string; message?: string } } }).response.data;
+        msg = resData.msg || resData.message || "";
+      }
+      if (!msg && error instanceof Error && error.message) {
+        msg = error.message;
+      }
+      if (!msg) {
+        msg = "Unable to submit requirements. Please try again.";
+      }
+
       setErrorMessage(msg);
-      if (msg.toLowerCase().includes("approved advisor")) {
+      if (
+        msg.toLowerCase().includes("approved") ||
+        msg.toLowerCase().includes("admin") ||
+        msg.toLowerCase().includes("advisor")
+      ) {
         setShowUnapprovedModal(true);
       }
     } finally {
