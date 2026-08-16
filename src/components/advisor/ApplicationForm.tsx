@@ -10,7 +10,6 @@ import {
 import {
   getAdvisorApplicationFieldErrors,
   normalizeCategory,
-  parsePpp,
 } from "./applicationForm.utils";
 
 type ApplicationFormProps = {
@@ -48,9 +47,7 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
   const [isUsernameAvailable, setIsUsernameAvailable] = useState<boolean | null>(
     null,
   );
-  const [pppValue, setPppValue] = useState("");
   const [categoryValue, setCategoryValue] = useState("");
-  const [pppError, setPppError] = useState("");
   const [categoryError, setCategoryError] = useState("");
 
   useEffect(() => {
@@ -84,13 +81,6 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
       .sort((a, b) => a.localeCompare(b));
   }, [options]);
 
-  const allIndices = useMemo(() => {
-    if (!options) return [];
-    return Array.from(
-      new Set(Object.values(options.marketIndicesByCountry).flat()),
-    ).sort((a, b) => a.localeCompare(b));
-  }, [options]);
-
   const industryOptions = useMemo(
     () => [...(options?.industries ?? [])].sort((a, b) => a.localeCompare(b)),
     [options],
@@ -116,7 +106,6 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
       facebook: handleOrUndefined(formData.get("facebook")),
       youtube: handleOrUndefined(formData.get("youtube")),
     };
-    const parsedPpp = parsePpp(pppValue);
     const trimmedCategory = normalizeCategory(categoryValue);
 
     const socialHandles = [
@@ -134,24 +123,18 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
       return;
     }
     const fieldErrors = getAdvisorApplicationFieldErrors({
-      pppValue,
+      pppValue: "",
       categoryValue,
     });
-    if (fieldErrors.pppError || fieldErrors.categoryError) {
-      setPppError(fieldErrors.pppError);
+    if (fieldErrors.categoryError) {
       setCategoryError(fieldErrors.categoryError);
       setErrorMessage("");
-      return;
-    }
-    if (pppValue.trim() && parsedPpp === null) {
-      setPppError("PPP must be a non-negative number.");
       return;
     }
 
     const payload: AdvisorApplicationPayload = {
       username: cleanedUsername,
       industry: selectedIndustry,
-      ...(typeof parsedPpp === "number" ? { ppp: parsedPpp } : {}),
       category: trimmedCategory,
       country: selectedCountryValue,
       state: String(formData.get("state") || "").trim(),
@@ -218,7 +201,6 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
       setErrorMessage("");
       setApplicationNote("");
       setUsernameError("");
-      setPppError("");
       setCategoryError("");
       setIsCheckingUsername(true);
 
@@ -251,7 +233,6 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
       setSelectedIndustry("");
       setSelectedMarkets([]);
       setSelectedIndices([]);
-      setPppValue("");
       setCategoryValue("");
       setIsUsernameAvailable(null);
     } catch (error: unknown) {
@@ -328,22 +309,6 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
       />
     </label>
   );
-
-  const toggleMarket = (market: string) => {
-    setSelectedMarkets((prev) =>
-      prev.includes(market)
-        ? prev.filter((item) => item !== market)
-        : [...prev, market],
-    );
-  };
-
-  const toggleIndex = (indexName: string) => {
-    setSelectedIndices((prev) =>
-      prev.includes(indexName)
-        ? prev.filter((item) => item !== indexName)
-        : [...prev, indexName],
-    );
-  };
 
   return (
     <article className="rounded-3xl border border-blue-100 bg-white p-5 shadow-sm">

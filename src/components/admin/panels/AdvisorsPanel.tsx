@@ -52,7 +52,7 @@ import {
   statusErrorClassName,
   statusInfoClassName,
 } from "../adminPage.shared";
-import { getDisplayCategory, getDisplayPpp } from "../../advisor/advisorDisplay.utils";
+import { getDisplayCategory } from "../../advisor/advisorDisplay.utils";
 
 interface Props {
   params: URLSearchParams;
@@ -128,33 +128,6 @@ export function AdvisorsPanel({ params, setParam }: Props) {
     unknown
   >;
 
-  const identityItems = [
-    { label: "Name", value: detailsUser?.name || "-" },
-    {
-      label: "Username",
-      value:
-        profile.username || detailsUser?.username
-          ? `@${String(profile.username ?? detailsUser?.username)}`
-          : "-",
-    },
-    {
-      label: "Email",
-      value: detailsUser?.email || String(profile.emailForContact ?? "-"),
-    },
-    {
-      label: "Location",
-      value:
-        [
-          profile.country,
-          profile.state,
-          detailsUser?.country,
-          detailsUser?.state,
-        ]
-          .filter(Boolean)
-          .slice(0, 2)
-          .join(", ") || "-",
-    },
-  ];
   const verificationState = String(
     profile.verificationStatus ?? detailsUser?.verificationStatus ?? "",
   ).toLowerCase();
@@ -649,7 +622,18 @@ export function AdvisorsPanel({ params, setParam }: Props) {
             </table>
           </div>
         </div>
-      </div>      {/* Full Screen Advisor Details Popup Modal */}
+      </div>
+
+      <PaginationControls
+        pagination={data?.pagination}
+        onPageChange={(v) => setParam("advisorsPage", String(v))}
+        onLimitChange={(v) => {
+          setParam("advisorsLimit", String(v));
+          setParam("advisorsPage", "1");
+        }}
+      />
+
+      {/* Full Screen Advisor Details Popup Modal */}
       {selectedId && typeof document !== "undefined"
         ? createPortal(
             <div
@@ -677,7 +661,7 @@ export function AdvisorsPanel({ params, setParam }: Props) {
                     </button>
                     <h4 className="inline-flex items-center gap-2 text-lg font-bold text-slate-900">
                       <FiShield className="text-blue-700" />
-                      {detailsUser?.name || profile.username || "Advisor Profile"}
+                      {detailsUser?.name || String(profile.username ?? "") || "Advisor Profile"}
                       <span
                         className={`inline-flex h-5 w-5 items-center justify-center rounded-full ${
                           isVerified ? "bg-green-700 text-white" : "bg-amber-100 text-amber-700"
