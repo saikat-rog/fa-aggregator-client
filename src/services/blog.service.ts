@@ -6,7 +6,6 @@ export type BlogStatus = "draft" | "published";
 export interface BlogSeo {
   metaTitle?: string;
   metaDescription?: string;
-  canonicalUrl?: string;
   ogImageUrl?: string;
   noIndex?: boolean;
 }

@@ -91,6 +91,33 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
     [options],
   );
 
+  const allIndices = useMemo(() => {
+    if (!options) return [];
+    if (options.expertiseIndices && options.expertiseIndices.length > 0) {
+      return options.expertiseIndices;
+    }
+    const indices = selectedCountry
+      ? (options.marketIndicesByCountry?.[selectedCountry] ?? [])
+      : Object.values(options.marketIndicesByCountry ?? {}).flat();
+    return [...new Set(indices)].sort((a, b) => a.localeCompare(b));
+  }, [options, selectedCountry]);
+
+  const toggleMarket = (market: string) => {
+    setSelectedMarkets((prev) =>
+      prev.includes(market)
+        ? prev.filter((m) => m !== market)
+        : [...prev, market],
+    );
+  };
+
+  const toggleIndex = (indexName: string) => {
+    setSelectedIndices((prev) =>
+      prev.includes(indexName)
+        ? prev.filter((i) => i !== indexName)
+        : [...prev, indexName],
+    );
+  };
+
   const submitListingApplication = async (
     event: React.FormEvent<HTMLFormElement>,
   ) => {
@@ -101,19 +128,15 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
     const cleanedUsername = username.trim();
     const socialLinks = {
       instagram: handleOrUndefined(formData.get("instagram")),
-      linkedin: handleOrUndefined(formData.get("linkedin")),
-      twitter: handleOrUndefined(formData.get("twitter")),
-      facebook: handleOrUndefined(formData.get("facebook")),
       youtube: handleOrUndefined(formData.get("youtube")),
+      telegram: handleOrUndefined(formData.get("telegram")),
     };
     const trimmedCategory = normalizeCategory(categoryValue);
 
     const socialHandles = [
       socialLinks.instagram,
-      socialLinks.linkedin,
-      socialLinks.twitter,
-      socialLinks.facebook,
       socialLinks.youtube,
+      socialLinks.telegram,
     ].filter(Boolean) as string[];
     const selectedCountryValue = String(formData.get("country") || "").trim();
 
@@ -476,12 +499,10 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
         <p className="text-md text-slate-600 py-2">
           At least one social handle is required
         </p>
-        <div className="grid gap-3 md:grid-cols-2">
+        <div className="grid gap-3 md:grid-cols-3">
           {handleField("instagram", "instagram handle")}
-          {handleField("linkedin", "linkedin handle")}
-          {handleField("twitter", "twitter/x handle")}
-          {handleField("facebook", "facebook handle")}
-          {handleField("youtube", "youtube handle")}
+          {handleField("youtube", "youtube handle/channel")}
+          {handleField("telegram", "telegram handle/channel")}
         </div>
 
         <textarea
@@ -491,7 +512,7 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
           className="w-full rounded-xl border border-blue-100 px-4 py-3 outline-none focus:border-blue-400"
         />
 
-        {/* TEMPORARILY DISABLED MARKET FOCUS AND EXPERTISE INDICES SELECTION - UNCOMMENT TO RE-ENABLE
+        {/* MARKET FOCUS AND EXPERTISE INDICES SELECTION */}
         <div>
           <p className="text-md text-slate-600 py-2">
             Market Focus (choose one or more)
@@ -522,7 +543,7 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
             Expertise indices (choose one or more)
           </p>
           <div className="mt-2 flex flex-wrap gap-1.5">
-            {allIndices.map((indexName) => {
+            {allIndices.map((indexName: string) => {
               const isSelected = selectedIndices.includes(indexName);
               return (
                 <button
@@ -541,7 +562,6 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
             })}
           </div>
         </div>
-        */}
 
         <div className="flex items-center gap-3">
           <button

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { FiExternalLink, FiLock, FiEye } from "react-icons/fi";
+import { FaInstagram, FaYoutube, FaTelegram } from "react-icons/fa6";
 import { Link } from "react-router-dom";
 import {
   getApprovedBusinessRequirements,
@@ -123,10 +124,53 @@ export function ResourcesPage() {
                       </span>
                     </div>
                   ) : null}
-                  <p className="mt-3 text-sm text-slate-600"><span className="font-semibold text-slate-700">Objective:</span> {item.campaignObjective}</p>
-                  <p className="mt-1 text-sm text-slate-600"><span className="font-semibold text-slate-700">Scope:</span> {item.desiredInfluencerScope}</p>
+                  {item.businessEmail ? (
+                    <p className="mt-3 text-sm text-slate-600">
+                      <span className="font-semibold text-slate-700">Business Email:</span>{" "}
+                      <a href={`mailto:${item.businessEmail}`} className="text-blue-700 hover:underline">
+                        {item.businessEmail}
+                      </a>
+                    </p>
+                  ) : null}
+
+                  {item.socialLinks && (item.socialLinks.instagram || item.socialLinks.youtube || item.socialLinks.telegram) ? (
+                    <div className="mt-3 flex flex-wrap gap-2 items-center">
+                      <span className="text-xs font-semibold text-slate-500">Social Links:</span>
+                      {item.socialLinks.instagram ? (
+                        <a
+                          href={`https://instagram.com/${item.socialLinks.instagram}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1 rounded-full border border-pink-200 bg-pink-50 px-2.5 py-0.5 text-xs font-semibold text-pink-800 hover:bg-pink-100"
+                        >
+                          <FaInstagram /> Instagram
+                        </a>
+                      ) : null}
+                      {item.socialLinks.youtube ? (
+                        <a
+                          href={`https://youtube.com/${item.socialLinks.youtube.startsWith("@") ? item.socialLinks.youtube : `@${item.socialLinks.youtube}`}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1 rounded-full border border-red-200 bg-red-50 px-2.5 py-0.5 text-xs font-semibold text-red-800 hover:bg-red-100"
+                        >
+                          <FaYoutube /> YouTube
+                        </a>
+                      ) : null}
+                      {item.socialLinks.telegram ? (
+                        <a
+                          href={`https://t.me/${item.socialLinks.telegram.replace(/^@/, "")}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1 rounded-full border border-sky-200 bg-sky-50 px-2.5 py-0.5 text-xs font-semibold text-sky-800 hover:bg-sky-100"
+                        >
+                          <FaTelegram /> Telegram
+                        </a>
+                      ) : null}
+                    </div>
+                  ) : null}
+
                   {item.detailedRequirements ? (
-                    <p className="mt-3 text-sm text-slate-600 line-clamp-3"><span className="font-semibold text-slate-700">Details:</span> {item.detailedRequirements}</p>
+                    <p className="mt-3 text-sm text-slate-600 line-clamp-3"><span className="font-semibold text-slate-700">Detailed Requirements:</span> {item.detailedRequirements}</p>
                   ) : null}
                 </div>
 

@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { FiAlignLeft, FiEdit3, FiGlobe, FiHash, FiImage, FiLink, FiSearch, FiTag } from "react-icons/fi";
+import { FiAlignLeft, FiEdit3, FiHash, FiImage, FiLink, FiSearch, FiTag } from "react-icons/fi";
 import type { BlogPayload, BlogSeo, BlogStatus } from "../../services/blog.service";
 
 export interface BlogFormValues {
@@ -31,7 +31,6 @@ const defaultValues: BlogFormValues = {
   seo: {
     metaTitle: "",
     metaDescription: "",
-    canonicalUrl: "",
     ogImageUrl: "",
     noIndex: false,
   },
@@ -77,7 +76,6 @@ export function BlogForm({ initialValues, loading, onSubmit, submitLabel }: Prop
     if (values.coverImageUrl.trim() && !isValidHttpUrl(values.coverImageUrl.trim())) return setError("Cover image URL must be valid http/https URL.");
     if (values.seo.metaTitle && values.seo.metaTitle.length > 60) return setError("SEO meta title max length is 60.");
     if (values.seo.metaDescription && values.seo.metaDescription.length > 160) return setError("SEO meta description max length is 160.");
-    if (values.seo.canonicalUrl && !isValidHttpUrl(values.seo.canonicalUrl)) return setError("Canonical URL must be valid.");
     if (values.seo.ogImageUrl && !isValidHttpUrl(values.seo.ogImageUrl)) return setError("OG image URL must be valid.");
 
     await onSubmit({
@@ -91,7 +89,6 @@ export function BlogForm({ initialValues, loading, onSubmit, submitLabel }: Prop
       seo: {
         metaTitle: values.seo.metaTitle?.trim() || undefined,
         metaDescription: values.seo.metaDescription?.trim() || undefined,
-        canonicalUrl: values.seo.canonicalUrl?.trim() || undefined,
         ogImageUrl: values.seo.ogImageUrl?.trim() || undefined,
         noIndex: !!values.seo.noIndex,
       },
@@ -145,10 +142,7 @@ export function BlogForm({ initialValues, loading, onSubmit, submitLabel }: Prop
         <div className="space-y-2">
           <input className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm" placeholder="Meta Title (max 60)" value={values.seo.metaTitle || ""} onChange={(e) => updateSeo("metaTitle", e.target.value)} />
           <textarea className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm" placeholder="Meta Description (max 160)" value={values.seo.metaDescription || ""} onChange={(e) => updateSeo("metaDescription", e.target.value)} rows={2} />
-          <div className="relative">
-            <FiGlobe className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-700" />
-            <input className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 pl-9 text-sm" placeholder="Canonical URL" value={values.seo.canonicalUrl || ""} onChange={(e) => updateSeo("canonicalUrl", e.target.value)} />
-          </div>
+
           <div className="relative">
             <FiImage className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-700" />
             <input className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 pl-9 text-sm" placeholder="OG Image URL" value={values.seo.ogImageUrl || ""} onChange={(e) => updateSeo("ogImageUrl", e.target.value)} />

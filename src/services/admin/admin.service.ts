@@ -78,11 +78,8 @@ export interface AdvisorsQuery {
   marketFocus?: string[];
   expertiseIndeces?: string[];
   instagram?: string;
-  tiktok?: string;
-  linkedin?: string;
-  twitter?: string;
-  facebook?: string;
   youtube?: string;
+  telegram?: string;
   instagramFollowersGt?: number;
   instagramFollowersGte?: number;
   instagramFollowersLt?: number;
@@ -91,22 +88,10 @@ export interface AdvisorsQuery {
   youtubeSubscribersGte?: number;
   youtubeSubscribersLt?: number;
   youtubeSubscribersLte?: number;
-  tiktokFollowersGt?: number;
-  tiktokFollowersGte?: number;
-  tiktokFollowersLt?: number;
-  tiktokFollowersLte?: number;
-  linkedinFollowersGt?: number;
-  linkedinFollowersGte?: number;
-  linkedinFollowersLt?: number;
-  linkedinFollowersLte?: number;
-  facebookFollowersGt?: number;
-  facebookFollowersGte?: number;
-  facebookFollowersLt?: number;
-  facebookFollowersLte?: number;
-  twitterFollowersGt?: number;
-  twitterFollowersGte?: number;
-  twitterFollowersLt?: number;
-  twitterFollowersLte?: number;
+  telegramFollowersGt?: number;
+  telegramFollowersGte?: number;
+  telegramFollowersLt?: number;
+  telegramFollowersLte?: number;
 }
 
 export interface AdvisorsListResponse {
@@ -163,14 +148,12 @@ export interface AdvisorApplication {
   personalWebsite?: string;
   socialLinks?: {
     instagram?: string;
-    tiktok?: string;
-    linkedin?: string;
-    twitter?: string;
-    facebook?: string;
     youtube?: string;
+    telegram?: string;
   };
   instagramFollowers?: number;
   youtubeSubscribers?: number;
+  telegramFollowers?: number;
   tiktokFollowers?: number;
   linkedinFollowers?: number;
   facebookFollowers?: number;
@@ -212,11 +195,8 @@ export interface UpdateAdvisorApplicationPayload {
   state?: string;
   socialLinks?: {
     instagram?: string;
-    tiktok?: string;
-    linkedin?: string;
-    twitter?: string;
-    facebook?: string;
     youtube?: string;
+    telegram?: string;
   };
   about?: string;
   marketFocus?: string[];
@@ -263,5 +243,47 @@ export async function getAdminCategories(signal?: AbortSignal): Promise<Categori
 
 export async function createAdminCategory(name: string) {
   const response = await adminApi.post("/admin/categories", { name });
+  return response.data?.data ?? response.data;
+}
+
+
+export interface MarketItem {
+  _id?: string;
+  name: string;
+  marketCode?: string;
+}
+
+export interface MarketsResponse {
+  markets: Array<string | MarketItem>;
+}
+
+export async function getAdminMarkets(signal?: AbortSignal): Promise<MarketsResponse> {
+  const response = await adminApi.get("/admin/markets", { signal });
+  return (response.data?.data ?? response.data) as MarketsResponse;
+}
+
+export async function createAdminMarket(name: string) {
+  const response = await adminApi.post("/admin/markets", { name });
+  return response.data?.data ?? response.data;
+}
+
+export interface ExpertiseIndexItem {
+  _id?: string;
+  name: string;
+  indexCode?: string;
+  country?: string;
+}
+
+export interface ExpertiseIndicesResponse {
+  expertiseIndices: Array<string | ExpertiseIndexItem>;
+}
+
+export async function getAdminExpertiseIndices(signal?: AbortSignal): Promise<ExpertiseIndicesResponse> {
+  const response = await adminApi.get("/admin/expertise-indices", { signal });
+  return (response.data?.data ?? response.data) as ExpertiseIndicesResponse;
+}
+
+export async function createAdminExpertiseIndex(name: string, country?: string) {
+  const response = await adminApi.post("/admin/expertise-indices", { name, country });
   return response.data?.data ?? response.data;
 }

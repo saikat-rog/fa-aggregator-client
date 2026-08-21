@@ -5,10 +5,10 @@ export type BusinessRequirementPayload = {
   companyName: string;
   businessEmail: string;
   url: string;
-  currentMonthlySales: string;
-  goalMonthlySales: string;
-  desiredInfluencerScope: string;
-  campaignObjective: string;
+  currentMonthlySales?: string;
+  goalMonthlySales?: string;
+  desiredInfluencerScope?: string;
+  campaignObjective?: string;
   detailedRequirements: string;
 };
 
@@ -19,6 +19,11 @@ export type BusinessRequirementItem = Omit<BusinessRequirementPayload, "url"> & 
   advisorId?: string;
   postedByAdvisorName?: string;
   postedByAdvisorUsername?: string;
+  socialLinks?: {
+    instagram?: string;
+    youtube?: string;
+    telegram?: string;
+  };
   instagramProfilePictureUrl?: string | null;
   status: "pending" | "approved";
   approvedAt: string | null;
@@ -36,7 +41,7 @@ export type BusinessRequirementsAdminList = {
   };
 };
 
-export type ApprovedBusinessRequirementItem = Omit<BusinessRequirementItem, "businessEmail">;
+export type ApprovedBusinessRequirementItem = BusinessRequirementItem;
 export type ApprovedBusinessRequirementsList = Omit<BusinessRequirementsAdminList, "requirements"> & {
   requirements: ApprovedBusinessRequirementItem[];
 };

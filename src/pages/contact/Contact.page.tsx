@@ -5,42 +5,18 @@ import {
   FiBriefcase,
   FiFileText,
   FiMail,
-  FiMessageSquare,
-  FiTarget,
-  FiTrendingUp,
-  FiUsers,
   FiGlobe,
   FiLock,
   FiUserCheck,
   FiX,
+  FiCheckCircle,
+  FiShare2,
 } from "react-icons/fi";
-
-const influencerScopeOptions = [
-  "Local Hybrid (City/Region)",
-  "National",
-  "Regional (Multi-state)",
-  "Global",
-  "Niche Community",
-] as const;
-
-const campaignObjectiveOptions = [
-  "Direct Company Enquiry",
-  "Brand Awareness",
-  "Website Traffic",
-  "Lead Generation",
-  "Product Sales",
-  "App Installs",
-  "Community Growth",
-] as const;
 
 type FormState = {
   companyName: string;
   businessEmail: string;
   url: string;
-  currentMonthlySales: string;
-  goalMonthlySales: string;
-  desiredInfluencerScope: string;
-  campaignObjective: string;
   detailedRequirements: string;
 };
 
@@ -48,10 +24,6 @@ const initialState: FormState = {
   companyName: "",
   businessEmail: "",
   url: "",
-  currentMonthlySales: "",
-  goalMonthlySales: "",
-  desiredInfluencerScope: "",
-  campaignObjective: "",
   detailedRequirements: "",
 };
 
@@ -91,361 +63,310 @@ export function ContactPage() {
       companyName: "",
       businessEmail: "",
       url: "",
-      currentMonthlySales: "",
-      goalMonthlySales: "",
-      desiredInfluencerScope: "",
-      campaignObjective: "",
       detailedRequirements: "",
     };
 
-    if (!form.companyName.trim()) errors.companyName = "Company name is required.";
+    if (!form.companyName.trim()) {
+      errors.companyName = "Company name is required.";
+    }
+
     if (!form.businessEmail.trim()) {
       errors.businessEmail = "Business email is required.";
     } else if (!isValidEmail(form.businessEmail.trim())) {
-      errors.businessEmail = "Enter a valid email address.";
+      errors.businessEmail = "Please enter a valid business email address.";
     }
 
     if (!form.url.trim()) {
-      errors.url = "Website or Landing Page URL is required.";
+      errors.url = "Website URL is required.";
     } else if (!isValidUrl(form.url.trim())) {
-      errors.url = "Enter a valid website or landing page link (e.g. www.example.com or https://example.com).";
+      errors.url = "Please enter a valid web address (e.g. www.example.com).";
     }
 
-    if (!form.currentMonthlySales.trim()) errors.currentMonthlySales = "Current monthly sales is required.";
-    if (!form.goalMonthlySales.trim()) errors.goalMonthlySales = "Goal monthly sales is required.";
-    if (!form.desiredInfluencerScope.trim()) errors.desiredInfluencerScope = "Select an influencer scope.";
-    if (!form.campaignObjective.trim()) errors.campaignObjective = "Select a campaign objective.";
-    if (!form.detailedRequirements.trim()) errors.detailedRequirements = "Detailed requirements are required.";
+    if (!form.detailedRequirements.trim()) {
+      errors.detailedRequirements = "Detailed requirements are required.";
+    }
 
     return errors;
   }, [form]);
 
-  const isFormValid = useMemo(
-    () => Object.values(fieldErrors).every((value) => !value),
-    [fieldErrors],
-  );
+  const isFormValid = useMemo(() => {
+    return !Object.values(fieldErrors).some((err) => Boolean(err));
+  }, [fieldErrors]);
 
-  const setField = (key: keyof FormState, value: string) => {
-    setForm((prev) => ({ ...prev, [key]: value }));
+  const handleChange = (
+    field: keyof FormState,
+    value: string,
+  ) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+    if (errorMessage) setErrorMessage("");
+    if (successMessage) setSuccessMessage("");
   };
 
-  const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setSubmitAttempted(true);
     setErrorMessage("");
     setSuccessMessage("");
 
-    if (!isFormValid) {
-      setErrorMessage("Please correct the highlighted fields.");
-      return;
-    }
-
-    const token = localStorage.getItem("token");
-    const role = localStorage.getItem("role");
-    if (!token || role !== "advisor") {
-      setShowAdvisorModal(true);
-      return;
-    }
+    if (!isFormValid) return;
 
     try {
       setIsSubmitting(true);
-      const response = await submitBusinessRequirement({
+      await submitBusinessRequirement({
         companyName: form.companyName.trim(),
-        businessEmail: form.businessEmail.trim(),
-        url: normalizeUrl(form.url.trim()),
-        currentMonthlySales: form.currentMonthlySales.trim(),
-        goalMonthlySales: form.goalMonthlySales.trim(),
-        desiredInfluencerScope: form.desiredInfluencerScope.trim(),
-        campaignObjective: form.campaignObjective.trim(),
+        businessEmail: form.businessEmail.trim().toLowerCase(),
+        url: normalizeUrl(form.url),
         detailedRequirements: form.detailedRequirements.trim(),
       });
-      setSuccessMessage(`${response.msg || "Business requirements received."} Your submission is awaiting admin approval.`);
+
+      setSuccessMessage(
+        "Your requirement submission was created and sent for Admin review!",
+      );
       setForm(initialState);
       setSubmitAttempted(false);
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    } catch (error: unknown) {
-      let msg = "";
-      if (
-        typeof error === "object" &&
-        error !== null &&
-        "response" in error &&
-        (error as { response?: { data?: { msg?: string; message?: string } } }).response?.data
-      ) {
-        const resData = (error as { response: { data: { msg?: string; message?: string } } }).response.data;
-        msg = resData.msg || resData.message || "";
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to submit business requirement.";
+      const status = typeof err === "object" && err !== null && "status" in err ? (err as any).status : null;
+
+      if (status === 401) {
+        setShowAdvisorModal(true);
+        return;
       }
-      if (!msg && error instanceof Error && error.message) {
-        msg = error.message;
-      }
-      if (!msg) {
-        msg = "Unable to submit requirements. Please try again.";
+
+      if (status === 403 && (msg.includes("approved by Admin") || msg.includes("advisor"))) {
+        setShowUnapprovedModal(true);
+        return;
       }
 
       setErrorMessage(msg);
-      if (
-        msg.toLowerCase().includes("approved") ||
-        msg.toLowerCase().includes("admin") ||
-        msg.toLowerCase().includes("advisor")
-      ) {
-        setShowUnapprovedModal(true);
-      }
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="space-y-6">
-      <section className="rounded-3xl bg-linear-to-br from-blue-700 to-blue-900 px-6 py-12 text-white">
-        <h1 className="text-3xl font-bold lg:text-5xl">Business Requirements</h1>
-        <p className="mt-3 max-w-3xl text-blue-100">
-          Share your business goals and campaign requirements. Our team will align you with
-          relevant influencer opportunities.
+    <div className="mx-auto max-w-4xl space-y-8 py-6">
+      {/* Header Banner */}
+      <section className="relative overflow-hidden rounded-3xl bg-linear-to-br from-blue-900 via-blue-700 to-blue-800 px-6 py-12 text-center text-white lg:px-10">
+        <div className="pointer-events-none absolute -left-16 -top-20 h-56 w-56 rounded-full bg-blue-400/20 blur-3xl" />
+        <div className="pointer-events-none absolute -right-12 bottom-0 h-52 w-52 rounded-full bg-blue-600/30 blur-3xl" />
+        <h1 className="relative text-3xl font-bold lg:text-5xl">Submit Business Requirement</h1>
+        <p className="relative mx-auto mt-3 max-w-xl text-base text-blue-100">
+          Share your campaign goals & contact info. Approved requirements will be listed in the Resources section.
         </p>
       </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8">
-        <h2 className="text-2xl font-bold text-slate-900">Post Business Requirements</h2>
-        <p className="mt-1 text-sm text-slate-600">
-          Complete the form below to submit campaign requirements for approval.
-        </p>
-
+      {/* Main Form Card */}
+      <div className="rounded-3xl border border-slate-200 bg-white p-6 md:p-10 shadow-sm">
         {successMessage ? (
-          <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-800">
-            {successMessage}
+          <div className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-emerald-800">
+            <div className="flex items-center gap-3">
+              <FiCheckCircle className="h-6 w-6 text-emerald-600 shrink-0" />
+              <div>
+                <p className="font-bold">{successMessage}</p>
+                <p className="text-sm mt-0.5">Once approved by an admin, it will appear live under the Resources tab.</p>
+              </div>
+            </div>
           </div>
         ) : null}
 
         {errorMessage ? (
-          <div className="mt-4 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm font-semibold text-rose-800">
+          <div className="mb-6 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-rose-800 text-sm font-medium">
             {errorMessage}
           </div>
         ) : null}
 
-        <form onSubmit={onSubmit} className="mt-6 grid gap-4 md:grid-cols-2">
-          <label className="space-y-2 text-sm font-medium text-slate-700">
-            <span className="mb-1 block">Company Name</span>
-            <div className="relative">
-              <FiBriefcase className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-blue-700" />
-              <input
-                type="text"
-                value={form.companyName}
-                onChange={(e) => setField("companyName", e.target.value)}
-                className="w-full rounded-xl border border-slate-300 py-2 pl-9 pr-3 outline-none focus:border-blue-400"
-              />
-            </div>
-            {submitAttempted && fieldErrors.companyName ? <span className="text-xs text-rose-600">{fieldErrors.companyName}</span> : null}
-          </label>
+        {/* Auto-populated social info notice */}
+        <div className="mb-6 flex items-center gap-3 rounded-2xl border border-sky-200 bg-sky-50/80 p-4 text-xs font-semibold text-sky-900">
+          <FiShare2 className="h-5 w-5 text-sky-600 shrink-0" />
+          <span>
+            <strong>Note:</strong> Your social media profile links (Instagram, YouTube, Telegram) and profile picture will be automatically attached from your database profile.
+          </span>
+        </div>
 
-          <label className="space-y-2 text-sm font-medium text-slate-700">
-            <span className="mb-1 block">Business Email</span>
-            <div className="relative">
-              <FiMail className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-blue-700" />
-              <input
-                type="email"
-                value={form.businessEmail}
-                onChange={(e) => setField("businessEmail", e.target.value)}
-                className="w-full rounded-xl border border-slate-300 py-2 pl-9 pr-3 outline-none focus:border-blue-400"
-              />
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid gap-6 md:grid-cols-2">
+            {/* Company Name */}
+            <div>
+              <label htmlFor="companyName" className="block text-sm font-bold text-slate-700">
+                Company Name <span className="text-rose-500">*</span>
+              </label>
+              <div className="relative mt-1.5">
+                <FiBriefcase className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  id="companyName"
+                  type="text"
+                  value={form.companyName}
+                  onChange={(e) => handleChange("companyName", e.target.value)}
+                  placeholder="e.g. Acme Corporation"
+                  className={`w-full rounded-xl border ${
+                    submitAttempted && fieldErrors.companyName
+                      ? "border-rose-400 bg-rose-50/30"
+                      : "border-slate-300 bg-white"
+                  } pl-10 pr-4 py-3 text-sm text-slate-900 focus:border-blue-600 focus:outline-hidden` }
+                />
+              </div>
+              {submitAttempted && fieldErrors.companyName ? (
+                <p className="mt-1 text-xs font-medium text-rose-600">{fieldErrors.companyName}</p>
+              ) : null}
             </div>
-            {submitAttempted && fieldErrors.businessEmail ? <span className="text-xs text-rose-600">{fieldErrors.businessEmail}</span> : null}
-          </label>
 
-          <label className="space-y-2 text-sm font-medium text-slate-700 md:col-span-2">
-            <span className="mb-1 block">Website / Landing Page URL</span>
-            <div className="relative">
-              <FiGlobe className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-blue-700" />
+            {/* Business Email */}
+            <div>
+              <label htmlFor="businessEmail" className="block text-sm font-bold text-slate-700">
+                Business Email <span className="text-rose-500">*</span>
+              </label>
+              <div className="relative mt-1.5">
+                <FiMail className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  id="businessEmail"
+                  type="email"
+                  value={form.businessEmail}
+                  onChange={(e) => handleChange("businessEmail", e.target.value)}
+                  placeholder="contact@company.com"
+                  className={`w-full rounded-xl border ${
+                    submitAttempted && fieldErrors.businessEmail
+                      ? "border-rose-400 bg-rose-50/30"
+                      : "border-slate-300 bg-white"
+                  } pl-10 pr-4 py-3 text-sm text-slate-900 focus:border-blue-600 focus:outline-hidden` }
+                />
+              </div>
+              {submitAttempted && fieldErrors.businessEmail ? (
+                <p className="mt-1 text-xs font-medium text-rose-600">{fieldErrors.businessEmail}</p>
+              ) : null}
+            </div>
+          </div>
+
+          {/* Website URL */}
+          <div>
+            <label htmlFor="url" className="block text-sm font-bold text-slate-700">
+              Website <span className="text-rose-500">*</span>
+            </label>
+            <div className="relative mt-1.5">
+              <FiGlobe className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
+                id="url"
                 type="text"
                 value={form.url}
-                onChange={(e) => setField("url", e.target.value)}
-                placeholder="e.g. www.example.com or https://example.com"
-                className="w-full rounded-xl border border-slate-300 py-2 pl-9 pr-3 outline-none focus:border-blue-400"
+                onChange={(e) => handleChange("url", e.target.value)}
+                placeholder="https://company.com"
+                className={`w-full rounded-xl border ${
+                  submitAttempted && fieldErrors.url
+                    ? "border-rose-400 bg-rose-50/30"
+                    : "border-slate-300 bg-white"
+                } pl-10 pr-4 py-3 text-sm text-slate-900 focus:border-blue-600 focus:outline-hidden` }
               />
             </div>
-            {submitAttempted && fieldErrors.url ? <span className="text-xs text-rose-600">{fieldErrors.url}</span> : null}
-          </label>
+            {submitAttempted && fieldErrors.url ? (
+              <p className="mt-1 text-xs font-medium text-rose-600">{fieldErrors.url}</p>
+            ) : null}
+          </div>
 
-          <label className="space-y-2 text-sm font-medium text-slate-700">
-            <span className="mb-1 block">Current Monthly Sales</span>
-            <div className="relative">
-              <FiTrendingUp className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-blue-700" />
-              <input
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                value={form.currentMonthlySales}
-                onChange={(e) => setField("currentMonthlySales", e.target.value.replace(/\D/g, ""))}
-                placeholder="e.g. 50000"
-                className="w-full rounded-xl border border-slate-300 py-2 pl-9 pr-3 outline-none focus:border-blue-400"
-              />
-            </div>
-            {submitAttempted && fieldErrors.currentMonthlySales ? <span className="text-xs text-rose-600">{fieldErrors.currentMonthlySales}</span> : null}
-          </label>
-
-          <label className="space-y-2 text-sm font-medium text-slate-700">
-            <span className="mb-1 block">Goal Monthly Sales</span>
-            <div className="relative">
-              <FiTarget className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-blue-700" />
-              <input
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                value={form.goalMonthlySales}
-                onChange={(e) => setField("goalMonthlySales", e.target.value.replace(/\D/g, ""))}
-                placeholder="e.g. 200000"
-                className="w-full rounded-xl border border-slate-300 py-2 pl-9 pr-3 outline-none focus:border-blue-400"
-              />
-            </div>
-            {submitAttempted && fieldErrors.goalMonthlySales ? <span className="text-xs text-rose-600">{fieldErrors.goalMonthlySales}</span> : null}
-          </label>
-
-          <label className="space-y-2 text-sm font-medium text-slate-700">
-            <span className="mb-1 block">Desired Influencer Scope</span>
-            <div className="relative">
-              <FiUsers className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-blue-700" />
-              <select
-                value={form.desiredInfluencerScope}
-                onChange={(e) => setField("desiredInfluencerScope", e.target.value)}
-                className="w-full rounded-xl border border-slate-300 py-2 pl-9 pr-3 outline-none focus:border-blue-400"
-              >
-                <option value="">Select scope</option>
-                {influencerScopeOptions.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
-            </div>
-            {submitAttempted && fieldErrors.desiredInfluencerScope ? <span className="text-xs text-rose-600">{fieldErrors.desiredInfluencerScope}</span> : null}
-          </label>
-
-          <label className="space-y-2 text-sm font-medium text-slate-700">
-            <span className="mb-1 block">Campaign Objective</span>
-            <div className="relative">
-              <FiFileText className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-blue-700" />
-              <select
-                value={form.campaignObjective}
-                onChange={(e) => setField("campaignObjective", e.target.value)}
-                className="w-full rounded-xl border border-slate-300 py-2 pl-9 pr-3 outline-none focus:border-blue-400"
-              >
-                <option value="">Select objective</option>
-                {campaignObjectiveOptions.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
-            </div>
-            {submitAttempted && fieldErrors.campaignObjective ? <span className="text-xs text-rose-600">{fieldErrors.campaignObjective}</span> : null}
-          </label>
-
-          <label className="space-y-2 text-sm font-medium text-slate-700 md:col-span-2">
-            <span className="mb-1 block">Detailed Requirements</span>
-            <div className="relative">
-              <FiMessageSquare className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-blue-700" />
+          {/* Detailed Requirements */}
+          <div>
+            <label htmlFor="detailedRequirements" className="block text-sm font-bold text-slate-700">
+              Detailed Requirements <span className="text-rose-500">*</span>
+            </label>
+            <div className="relative mt-1.5">
+              <FiFileText className="pointer-events-none absolute left-3.5 top-3.5 text-slate-400" />
               <textarea
-                value={form.detailedRequirements}
-                onChange={(e) => setField("detailedRequirements", e.target.value)}
+                id="detailedRequirements"
                 rows={5}
-                className="w-full rounded-xl border border-slate-300 py-2 pl-9 pr-3 outline-none focus:border-blue-400"
+                value={form.detailedRequirements}
+                onChange={(e) => handleChange("detailedRequirements", e.target.value)}
+                placeholder="Describe your business background, campaign goals, target audience, and key requirements..."
+                className={`w-full rounded-xl border ${
+                  submitAttempted && fieldErrors.detailedRequirements
+                    ? "border-rose-400 bg-rose-50/30"
+                    : "border-slate-300 bg-white"
+                } pl-10 pr-4 py-3 text-sm text-slate-900 focus:border-blue-600 focus:outline-hidden` }
               />
             </div>
-            <div className="flex items-center justify-between">
-              {submitAttempted && fieldErrors.detailedRequirements ? (
-                <span className="text-xs text-rose-600">{fieldErrors.detailedRequirements}</span>
-              ) : (
-                <span />
-              )}
-              <span className="text-xs text-slate-500">{form.detailedRequirements.length} chars</span>
-            </div>
-          </label>
+            {submitAttempted && fieldErrors.detailedRequirements ? (
+              <p className="mt-1 text-xs font-medium text-rose-600">{fieldErrors.detailedRequirements}</p>
+            ) : null}
+          </div>
 
-          <div className="md:col-span-2">
+          {/* Submit Button */}
+          <div className="pt-2">
             <button
               type="submit"
               disabled={isSubmitting}
-              className="rounded-xl bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
+              className="w-full rounded-xl bg-blue-700 py-3.5 text-base font-bold text-white shadow-md transition hover:bg-blue-800 disabled:opacity-60 cursor-pointer"
             >
-              {isSubmitting ? "Submitting..." : "Post Requirements"}
+              {isSubmitting ? "Submitting Requirement..." : "Submit Business Requirement"}
             </button>
           </div>
         </form>
-      </section>
+      </div>
 
-      {/* Advisor Login Required Modal */}
+      {/* Modal 1: Not logged in */}
       {showAdvisorModal ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs">
-          <div className="relative w-full max-w-md overflow-hidden rounded-3xl border border-blue-100 bg-white p-6 shadow-2xl">
-            <button
-              type="button"
-              onClick={() => setShowAdvisorModal(false)}
-              className="absolute right-4 top-4 rounded-full p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-            >
-              <FiX className="h-5 w-5" />
-            </button>
-
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-700">
-              <FiLock className="h-6 w-6" />
-            </div>
-
-            <h3 className="mt-4 text-xl font-bold text-slate-900">Advisor Login Required</h3>
-            <p className="mt-2 text-sm leading-relaxed text-slate-600">
-              Posting business requirements is exclusively available to registered <span className="font-semibold text-slate-800">Advisors</span> on Folksmint. Please log in with your Advisor account to submit your campaign requirement.
-            </p>
-
-            <div className="mt-6 flex flex-col gap-2.5 sm:flex-row sm:justify-end">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-xs">
+          <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 shadow-xl">
+            <div className="flex justify-between items-start">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-100 text-blue-700">
+                <FiLock className="h-6 w-6" />
+              </div>
               <button
                 type="button"
                 onClick={() => setShowAdvisorModal(false)}
-                className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition"
+                className="text-slate-400 hover:text-slate-600"
+              >
+                <FiX className="h-5 w-5" />
+              </button>
+            </div>
+            <h3 className="mt-4 text-xl font-bold text-slate-900">Advisor Account Required</h3>
+            <p className="mt-2 text-sm text-slate-600">
+              Only logged in advisors can post business requirements. Please log in to your advisor account.
+            </p>
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setShowAdvisorModal(false)}
+                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
               >
                 Cancel
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  setShowAdvisorModal(false);
-                  navigate("/auth?role=advisor");
-                }}
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-blue-500/20 hover:bg-blue-800 transition"
+                onClick={() => navigate("/auth")}
+                className="rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800"
               >
-                <FiUserCheck className="h-4 w-4" />
-                Log In as Advisor
+                Log In
               </button>
             </div>
           </div>
         </div>
       ) : null}
 
-      {/* Advisor Approval Required Modal */}
+      {/* Modal 2: Unapproved advisor */}
       {showUnapprovedModal ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs">
-          <div className="relative w-full max-w-md overflow-hidden rounded-3xl border border-amber-100 bg-white p-6 shadow-2xl">
-            <button
-              type="button"
-              onClick={() => setShowUnapprovedModal(false)}
-              className="absolute right-4 top-4 rounded-full p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-            >
-              <FiX className="h-5 w-5" />
-            </button>
-
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-amber-700">
-              <FiLock className="h-6 w-6" />
-            </div>
-
-            <h3 className="mt-4 text-xl font-bold text-slate-900">Approved Advisor Required</h3>
-            <p className="mt-2 text-sm leading-relaxed text-slate-600">
-              Posting business requirements is exclusively allowed for <span className="font-semibold text-slate-800">Approved Advisors</span>. Your advisor profile must be reviewed and approved by an admin before you can post business requirements.
-            </p>
-
-            <div className="mt-6 flex flex-col gap-2.5 sm:flex-row sm:justify-end">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-xs">
+          <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 shadow-xl">
+            <div className="flex justify-between items-start">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-700">
+                <FiUserCheck className="h-6 w-6" />
+              </div>
               <button
                 type="button"
                 onClick={() => setShowUnapprovedModal(false)}
-                className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                className="text-slate-400 hover:text-slate-600"
               >
-                Close
+                <FiX className="h-5 w-5" />
+              </button>
+            </div>
+            <h3 className="mt-4 text-xl font-bold text-slate-900">Approval Required</h3>
+            <p className="mt-2 text-sm text-slate-600">
+              Your advisor application must be approved by Admin before you can submit business requirements.
+            </p>
+            <div className="mt-6 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setShowUnapprovedModal(false)}
+                className="rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800"
+              >
+                Understood
               </button>
             </div>
           </div>

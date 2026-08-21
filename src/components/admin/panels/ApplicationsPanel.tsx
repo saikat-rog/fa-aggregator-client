@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { FaFacebook, FaInstagram, FaLinkedin, FaTiktok, FaXTwitter, FaYoutube } from "react-icons/fa6";
+import { FaInstagram, FaTelegram, FaYoutube } from "react-icons/fa6";
 import { FiAtSign, FiBarChart2, FiCheckCircle, FiEdit3, FiFileText, FiGlobe, FiList, FiMapPin, FiTag, FiTrendingUp, FiUser, FiXCircle } from "react-icons/fi";
 import { advisorFormOptionsApi, type AdvisorFormOptionsResponseData } from "../../../services/advisor.service";
 import { approveAdvisorApplication, getAdvisorApplications, rejectAdvisorApplication, updateAdvisorApplication, type AdvisorApplication, type UpdateAdvisorApplicationPayload } from "../../../services/admin/admin.service";
@@ -23,11 +23,8 @@ type EditFormState = {
   emailForContact: string;
   personalWebsite: string;
   instagram: string;
-  tiktok: string;
-  linkedin: string;
-  twitter: string;
-  facebook: string;
   youtube: string;
+  telegram: string;
   ppp: string;
   category: string;
 };
@@ -54,11 +51,8 @@ const createFormState = (app: AdvisorApplication): EditFormState => ({
   emailForContact: app.emailForContact ?? "",
   personalWebsite: app.personalWebsite ?? "",
   instagram: app.socialLinks?.instagram ?? "",
-  tiktok: app.socialLinks?.tiktok ?? "",
-  linkedin: app.socialLinks?.linkedin ?? "",
-  twitter: app.socialLinks?.twitter ?? "",
-  facebook: app.socialLinks?.facebook ?? "",
   youtube: app.socialLinks?.youtube ?? "",
+  telegram: app.socialLinks?.telegram ?? "",
   ppp: typeof app.ppp === "number" ? String(app.ppp) : "",
   category: app.category ?? "",
 });
@@ -219,11 +213,8 @@ export function ApplicationsPanel({ params, setParam, setManyParams }: Props) {
       state: form.state || undefined,
       socialLinks: {
         instagram: normalizeHandle(form.instagram),
-        tiktok: normalizeHandle(form.tiktok),
-        linkedin: normalizeHandle(form.linkedin),
-        twitter: normalizeHandle(form.twitter),
-        facebook: normalizeHandle(form.facebook),
         youtube: normalizeHandle(form.youtube),
+        telegram: normalizeHandle(form.telegram),
       },
       about: form.about.trim() || undefined,
       marketFocus: form.marketFocus,
@@ -359,11 +350,8 @@ export function ApplicationsPanel({ params, setParam, setManyParams }: Props) {
                             <div className="sm:col-span-2 rounded-xl border border-slate-200 bg-white p-3"><p className="mb-2 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-blue-700"><FiBarChart2 /> Expertise Indices</p><div className="flex flex-wrap gap-2">{expertiseOptions.map((indexItem) => { const isSelected = form.expertiseIndeces.includes(indexItem); return <button key={indexItem} type="button" onClick={() => toggleExpertiseIndex(indexItem)} disabled={!isPending || isMutating} className={`rounded-full border px-3 py-1 text-xs font-medium transition disabled:opacity-50 ${isSelected ? "border-blue-700 bg-blue-700 text-white" : "border-slate-300 bg-slate-50 text-slate-700 hover:border-blue-200 hover:text-blue-700"}`}>{indexItem}</button>; })}</div></div>
                             <label className="relative"><FiGlobe className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-blue-700" /><input className={`${inputClassName} w-full pl-9`} placeholder="Website" value={form.personalWebsite} onChange={(e) => setField("personalWebsite", e.target.value)} disabled={!isPending || isMutating} /></label>
                             <label className="relative"><FaInstagram className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-blue-700" /><span className="pointer-events-none absolute left-8 top-1/2 -translate-y-1/2 text-sm font-semibold text-blue-700">@</span><input className={`${inputClassName} w-full pl-14`} placeholder="instagram" value={form.instagram} onChange={(e) => setField("instagram", e.target.value)} disabled={!isPending || isMutating} /></label>
-                            <label className="relative"><FaTiktok className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-blue-700" /><span className="pointer-events-none absolute left-8 top-1/2 -translate-y-1/2 text-sm font-semibold text-blue-700">@</span><input className={`${inputClassName} w-full pl-14`} placeholder="tiktok" value={form.tiktok} onChange={(e) => setField("tiktok", e.target.value)} disabled={!isPending || isMutating} /></label>
-                            <label className="relative"><FaLinkedin className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-blue-700" /><span className="pointer-events-none absolute left-8 top-1/2 -translate-y-1/2 text-sm font-semibold text-blue-700">@</span><input className={`${inputClassName} w-full pl-14`} placeholder="linkedin" value={form.linkedin} onChange={(e) => setField("linkedin", e.target.value)} disabled={!isPending || isMutating} /></label>
-                            <label className="relative"><FaXTwitter className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-blue-700" /><span className="pointer-events-none absolute left-8 top-1/2 -translate-y-1/2 text-sm font-semibold text-blue-700">@</span><input className={`${inputClassName} w-full pl-14`} placeholder="twitter" value={form.twitter} onChange={(e) => setField("twitter", e.target.value)} disabled={!isPending || isMutating} /></label>
-                            <label className="relative"><FaFacebook className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-blue-700" /><span className="pointer-events-none absolute left-8 top-1/2 -translate-y-1/2 text-sm font-semibold text-blue-700">@</span><input className={`${inputClassName} w-full pl-14`} placeholder="facebook" value={form.facebook} onChange={(e) => setField("facebook", e.target.value)} disabled={!isPending || isMutating} /></label>
-                            <label className="relative"><FaYoutube className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-blue-700" /><span className="pointer-events-none absolute left-8 top-1/2 -translate-y-1/2 text-sm font-semibold text-blue-700">@</span><input className={`${inputClassName} w-full pl-14`} placeholder="youtube" value={form.youtube} onChange={(e) => setField("youtube", e.target.value)} disabled={!isPending || isMutating} /></label>
+                             <label className="relative"><FaYoutube className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-blue-700" /><span className="pointer-events-none absolute left-8 top-1/2 -translate-y-1/2 text-sm font-semibold text-blue-700">@</span><input className={`${inputClassName} w-full pl-14`} placeholder="youtube" value={form.youtube} onChange={(e) => setField("youtube", e.target.value)} disabled={!isPending || isMutating} /></label>
+                             <label className="relative"><FaTelegram className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-blue-700" /><span className="pointer-events-none absolute left-8 top-1/2 -translate-y-1/2 text-sm font-semibold text-blue-700">@</span><input className={`${inputClassName} w-full pl-14`} placeholder="telegram" value={form.telegram} onChange={(e) => setField("telegram", e.target.value)} disabled={!isPending || isMutating} /></label>
                             <label className="relative sm:col-span-2"><FiFileText className="pointer-events-none absolute left-3 top-3.5 text-blue-700" /><textarea className={`${inputClassName} w-full pl-9`} placeholder="About" value={form.about} onChange={(e) => setField("about", e.target.value)} disabled={!isPending || isMutating} /></label>
                             <div className="sm:col-span-2 rounded-xl border border-slate-200 bg-white p-3"><p className="mb-2 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-blue-700"><FiTag /> Industries</p><div className="flex flex-wrap gap-2">{industryOptions.map((industry) => { const isSelected = form.industries.includes(industry); return <button key={industry} type="button" onClick={() => toggleIndustry(industry)} disabled={!isPending || isMutating} className={`rounded-full border px-3 py-1 text-xs font-medium transition disabled:opacity-50 ${isSelected ? "border-blue-700 bg-blue-700 text-white" : "border-slate-300 bg-slate-50 text-slate-700 hover:border-blue-200 hover:text-blue-700"}`}>{industry}</button>; })}</div></div>
                           </div>

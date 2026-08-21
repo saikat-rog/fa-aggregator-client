@@ -87,12 +87,8 @@ export function SavedAdvisorsSection({
               instagramFollowers: advisor.instagramFollowers,
               followersCount:
                 (advisor.instagramFollowers || 0) +
-                (advisor.linkedinFollowers || 0) +
-                (advisor.twitterFollowers || 0) +
-                (advisor.facebookFollowers || 0) +
                 (advisor.youtubeSubscribers || 0) +
-                (advisor.tiktokFollowers || 0) ||
-                advisor.instagramFollowers ||
+                (advisor.telegramFollowers || 0) ||
                 null,
               instagramEngagementRateScore: advisor.instagramEngagementRateScore,
             };

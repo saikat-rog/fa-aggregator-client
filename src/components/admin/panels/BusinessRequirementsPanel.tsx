@@ -23,18 +23,6 @@ type Props = {
   setManyParams?: (updates: Record<string, string | undefined>) => void;
 };
 
-const formatSalesValue = (value?: string | number) => {
-  if (value === undefined || value === null || value === "") return "—";
-  const parsed = Number(value);
-  if (Number.isFinite(parsed) && !Number.isNaN(parsed)) {
-    return new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
-      maximumFractionDigits: 0,
-    }).format(parsed);
-  }
-  return String(value);
-};
 
 const formatDate = (value?: string) =>
   value
@@ -284,12 +272,9 @@ export function BusinessRequirementsPanel({ params, setParam, setManyParams }: P
               <tr className="border-b border-slate-200 text-xs uppercase tracking-wide text-blue-700">
                 <th className="px-4 py-3">Company Name</th>
                 <th className="px-4 py-3">Business Email</th>
-                <th className="px-4 py-3">Current Monthly Sales</th>
-                <th className="px-4 py-3">Goal Monthly Sales</th>
-                <th className="px-4 py-3">Desired Influencer Scope</th>
-                <th className="px-4 py-3">Campaign Objective</th>
+                <th className="px-4 py-3">Website</th>
+                <th className="px-4 py-3">Posted By Advisor</th>
                 <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3">Approved At</th>
                 <th className="px-4 py-3">Submitted At</th>
                 <th className="px-4 py-3">Action</th>
               </tr>
@@ -299,12 +284,17 @@ export function BusinessRequirementsPanel({ params, setParam, setManyParams }: P
                 <tr key={item._id} className="border-b border-slate-100 transition hover:bg-slate-50/80">
                   <td className="px-4 py-3 font-medium text-slate-800">{item.companyName || "—"}</td>
                   <td className="px-4 py-3 text-slate-600">{item.businessEmail || "—"}</td>
-                  <td className="px-4 py-3 text-slate-600">{formatSalesValue(item.currentMonthlySales)}</td>
-                  <td className="px-4 py-3 text-slate-600">{formatSalesValue(item.goalMonthlySales)}</td>
-                  <td className="px-4 py-3 text-slate-600">{item.desiredInfluencerScope || "—"}</td>
-                  <td className="px-4 py-3 text-slate-600">{item.campaignObjective || "—"}</td>
+                  <td className="px-4 py-3 text-slate-600">
+                    {item.url ? (
+                      <a href={item.url} target="_blank" rel="noreferrer" className="text-blue-700 underline">
+                        Website Link
+                      </a>
+                    ) : "—"}
+                  </td>
+                  <td className="px-4 py-3 text-slate-600">
+                    {item.postedByAdvisorName || "—"} {item.postedByAdvisorUsername ? `(@${item.postedByAdvisorUsername})` : ""}
+                  </td>
                   <td className="px-4 py-3 capitalize text-slate-600">{item.status || "—"}</td>
-                  <td className="px-4 py-3 text-slate-600">{formatDate(item.approvedAt ?? undefined)}</td>
                   <td className="px-4 py-3 text-slate-600">{formatDate(item.createdAt)}</td>
                   <td className="px-4 py-3">
                     <button
@@ -402,10 +392,7 @@ export function BusinessRequirementsPanel({ params, setParam, setManyParams }: P
               <p><span className="font-semibold text-slate-900">URL:</span> {detail.url ? <a href={detail.url} target="_blank" rel="noopener noreferrer" className="text-blue-700 underline">{detail.url}</a> : "—"}</p>
               <p><span className="font-semibold text-slate-900">Status:</span> <span className="capitalize">{detail.status || "—"}</span></p>
               <p><span className="font-semibold text-slate-900">Approved At:</span> {formatDate(detail.approvedAt ?? undefined)}</p>
-              <p><span className="font-semibold text-slate-900">Current Monthly Sales:</span> {formatSalesValue(detail.currentMonthlySales)}</p>
-              <p><span className="font-semibold text-slate-900">Goal Monthly Sales:</span> {formatSalesValue(detail.goalMonthlySales)}</p>
-              <p><span className="font-semibold text-slate-900">Desired Influencer Scope:</span> {detail.desiredInfluencerScope || "—"}</p>
-              <p><span className="font-semibold text-slate-900">Campaign Objective:</span> {detail.campaignObjective || "—"}</p>
+              <p><span className="font-semibold text-slate-900">Posted By Advisor:</span> {detail.postedByAdvisorName || "—"} {detail.postedByAdvisorUsername ? `(@${detail.postedByAdvisorUsername})` : ""}</p>
               <p className="md:col-span-2"><span className="font-semibold text-slate-900">Detailed Requirements:</span></p>
               <p className="md:col-span-2 whitespace-pre-wrap rounded-xl border border-slate-200 bg-white p-3 text-slate-700">
                 {detail.detailedRequirements || "—"}

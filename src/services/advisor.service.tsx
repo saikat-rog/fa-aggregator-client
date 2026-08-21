@@ -60,17 +60,8 @@ export interface AdvisorApplicationPayload {
   expertiseIndeces: string[];
   socialLinks?: {
     instagram?: string;
-    linkedin?: string;
-    twitter?: string;
-    facebook?: string;
     youtube?: string;
-    tiktok?: string;
-    instagramFollowers?: number;
-    linkedinFollowers?: number;
-    twitterFollowers?: number;
-    facebookFollowers?: number;
-    youtubeSubscribers?: number;
-    tiktokFollowers?: number;
+    telegram?: string;
   };
 }
 
@@ -113,6 +104,7 @@ export interface AdvisorFormOptionsResponseData {
   industries: string[];
   categories?: string[];
   markets: string[];
+  expertiseIndices?: string[];
   marketIndicesByCountry: Record<string, string[]>;
 }
 
@@ -140,6 +132,7 @@ export type SavedAdvisor = {
   personalWebsite?: string;
   instagramFollowers?: number;
   youtubeSubscribers?: number;
+  telegramFollowers?: number;
   tiktokFollowers?: number;
   linkedinFollowers?: number;
   facebookFollowers?: number;

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { FiArrowLeft, FiExternalLink, FiLock, FiBriefcase } from "react-icons/fi";
+import { FaInstagram, FaYoutube, FaTelegram } from "react-icons/fa6";
 import {
   getApprovedBusinessRequirementByIdPublic,
   trackRequirementClickApi,
@@ -138,16 +139,53 @@ export function ResourceDetailPage() {
           </div>
 
 
-          <div className="grid gap-6 md:grid-cols-2">
-            <div className="rounded-2xl border border-slate-100 bg-slate-50/70 p-4">
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Campaign Objective</p>
-              <p className="mt-1 text-base font-medium text-slate-900">{requirement.campaignObjective || "—"}</p>
-            </div>
+          <div className="rounded-2xl border border-slate-100 bg-slate-50/70 p-5 space-y-4">
+            {requirement.businessEmail ? (
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Business Email</p>
+                <a href={`mailto:${requirement.businessEmail}`} className="mt-1 inline-block text-base font-semibold text-blue-700 hover:underline">
+                  {requirement.businessEmail}
+                </a>
+              </div>
+            ) : null}
 
-            <div className="rounded-2xl border border-slate-100 bg-slate-50/70 p-4">
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Desired Influencer Scope</p>
-              <p className="mt-1 text-base font-medium text-slate-900">{requirement.desiredInfluencerScope || "—"}</p>
-            </div>
+            {requirement.socialLinks && (requirement.socialLinks.instagram || requirement.socialLinks.youtube || requirement.socialLinks.telegram) ? (
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Advisor Social Links (from Profile)</p>
+                <div className="flex flex-wrap gap-2.5">
+                  {requirement.socialLinks.instagram ? (
+                    <a
+                      href={`https://instagram.com/${requirement.socialLinks.instagram}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-pink-200 bg-pink-50 px-3 py-1 text-xs font-semibold text-pink-800 hover:bg-pink-100"
+                    >
+                      <FaInstagram /> Instagram (@{requirement.socialLinks.instagram})
+                    </a>
+                  ) : null}
+                  {requirement.socialLinks.youtube ? (
+                    <a
+                      href={`https://youtube.com/${requirement.socialLinks.youtube.startsWith("@") ? requirement.socialLinks.youtube : `@${requirement.socialLinks.youtube}`}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-semibold text-red-800 hover:bg-red-100"
+                    >
+                      <FaYoutube /> YouTube ({requirement.socialLinks.youtube})
+                    </a>
+                  ) : null}
+                  {requirement.socialLinks.telegram ? (
+                    <a
+                      href={`https://t.me/${requirement.socialLinks.telegram.replace(/^@/, "")}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-800 hover:bg-sky-100"
+                    >
+                      <FaTelegram /> Telegram (@{requirement.socialLinks.telegram})
+                    </a>
+                  ) : null}
+                </div>
+              </div>
+            ) : null}
           </div>
 
           {requirement.detailedRequirements ? (

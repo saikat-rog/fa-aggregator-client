@@ -1,6 +1,6 @@
-import { FiBookOpen, FiBriefcase, FiGrid, FiLayers, FiList, FiUser, FiUsers } from "react-icons/fi";
+import { FiActivity, FiBookOpen, FiBriefcase, FiGrid, FiLayers, FiList, FiTrendingUp, FiUser, FiUsers } from "react-icons/fi";
 
-export const views = ["users", "advisors", "applications", "industries", "categories", "blogs", "requirements"] as const;
+export const views = ["users", "advisors", "applications", "industries", "categories", "markets", "expertise-indices", "blogs", "requirements"] as const;
 export type AdminView = (typeof views)[number];
 
 export const viewIcons: Record<AdminView, React.ComponentType<{ className?: string }>> = {
@@ -9,6 +9,8 @@ export const viewIcons: Record<AdminView, React.ComponentType<{ className?: stri
   applications: FiList,
   industries: FiGrid,
   categories: FiLayers,
+  markets: FiTrendingUp,
+  "expertise-indices": FiActivity,
   blogs: FiBookOpen,
   requirements: FiBriefcase,
 };
@@ -35,19 +37,14 @@ export const formatCompactCount = (value?: number) =>
     : null;
 
 export const getSocialProfileUrl = (platform: string, handle: string) => {
+  const clean = (handle || "").trim().replace(/^@/, "");
   switch (platform) {
     case "instagram":
-      return `https://instagram.com/${handle}`;
-    case "linkedin":
-      return `https://linkedin.com/in/${handle}`;
-    case "twitter":
-      return `https://x.com/${handle}`;
-    case "facebook":
-      return `https://facebook.com/${handle}`;
+      return `https://instagram.com/${clean}`;
     case "youtube":
-      return `https://youtube.com/${handle}`;
-    case "tiktok":
-      return `https://tiktok.com/@${handle}`;
+      return `https://youtube.com/${clean.startsWith("@") ? clean : `@${clean}`}`;
+    case "telegram":
+      return `https://t.me/${clean}`;
     default:
       return handle;
   }

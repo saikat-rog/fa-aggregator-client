@@ -65,7 +65,6 @@ export function BlogDetailPage() {
         <meta property="og:description" content={description} />
         <meta property="og:type" content="article" />
         {ogImage ? <meta property="og:image" content={ogImage} /> : null}
-        {blog?.seo?.canonicalUrl ? <link rel="canonical" href={blog.seo.canonicalUrl} /> : null}
       </Helmet>
       {loading ? <p className="rounded border border-blue-100 bg-blue-50 p-2 text-sm text-blue-700">Loading blog...</p> : null}
       {!loading && isNotFound ? <BlogNotFound /> : null}

@@ -6,16 +6,12 @@ import {
   FaChartLine,
   FaCircleCheck,
   FaEnvelope,
-  FaFacebook,
   FaGlobe,
   FaInstagram,
-  FaLinkedin,
   FaLocationDot,
-  FaTiktok,
+  FaTelegram,
   FaYoutube,
-  FaXTwitter,
 } from "react-icons/fa6";
-import type { AdvisorApiItem } from "../../pages/home/Home.page";
 import { useSavedAdvisors } from "../../context/SavedAdvisorsContext";
 import {
   ADVISOR_CLICK_TYPES,
@@ -27,7 +23,6 @@ import {
   getDisplayCategory,
   getDisplayEngagementRate,
   getDisplayFollowers,
-  getDisplayPpp,
 } from "./advisorDisplay.utils";
 
 export interface AdvisorCardData {
@@ -43,7 +38,11 @@ export interface AdvisorCardData {
   profilePictureUrl?: string;
   personalWebsite?: string;
   emailForContact?: string;
-  socialLinks?: AdvisorApiItem["socialLinks"];
+  socialLinks?: {
+    instagram?: string;
+    youtube?: string;
+    telegram?: string;
+  };
   ppp?: number | null;
   category?: string | null;
   instagramFollowers?: number | null;
@@ -51,6 +50,7 @@ export interface AdvisorCardData {
   twitterFollowers?: number | null;
   facebookFollowers?: number | null;
   youtubeSubscribers?: number | null;
+  telegramFollowers?: number | null;
   tiktokFollowers?: number | null;
   followersCount?: number | null;
   instagramEngagementRateScore?: number | null;
@@ -317,11 +317,7 @@ export function AdvisorCard({ advisor }: AdvisorCardProps) {
                       Eng. Rate: {getDisplayEngagementRate(advisor.instagramEngagementRateScore)}
                     </span>
                   ) : null}
-                  {typeof advisor.ppp === "number" ? (
-                    <span className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-[11px] font-semibold">
-                      PPP: {getDisplayPpp(advisor.ppp)}
-                    </span>
-                  ) : null}
+                  
                   <span className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-[11px] font-semibold">
                     Category: {getDisplayCategory(advisor.category)}
                   </span>
@@ -361,55 +357,13 @@ export function AdvisorCard({ advisor }: AdvisorCardProps) {
                       <FaInstagram /> Instagram{advisor.instagramFollowers && advisor.instagramFollowers > 0 ? ` (${getDisplayFollowers(advisor.instagramFollowers)})` : ""}
                     </button>
                   ) : null}
-                  {socialLinks.linkedin ? (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        openAction(
-                          "social",
-                          `https://linkedin.com/in/${socialLinks.linkedin}`,
-                        )
-                      }
-                      className={socialButtonClassName}
-                    >
-                      <FaLinkedin /> LinkedIn{advisor.linkedinFollowers && advisor.linkedinFollowers > 0 ? ` (${getDisplayFollowers(advisor.linkedinFollowers)})` : ""}
-                    </button>
-                  ) : null}
-                  {socialLinks.twitter ? (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        openAction(
-                          "social",
-                          `https://x.com/${socialLinks.twitter}`,
-                        )
-                      }
-                      className={socialButtonClassName}
-                    >
-                      <FaXTwitter /> Twitter{advisor.twitterFollowers && advisor.twitterFollowers > 0 ? ` (${getDisplayFollowers(advisor.twitterFollowers)})` : ""}
-                    </button>
-                  ) : null}
-                  {socialLinks.facebook ? (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        openAction(
-                          "social",
-                          `https://facebook.com/${socialLinks.facebook}`,
-                        )
-                      }
-                      className={socialButtonClassName}
-                    >
-                      <FaFacebook /> Facebook{advisor.facebookFollowers && advisor.facebookFollowers > 0 ? ` (${getDisplayFollowers(advisor.facebookFollowers)})` : ""}
-                    </button>
-                  ) : null}
                   {socialLinks.youtube ? (
                     <button
                       type="button"
                       onClick={() =>
                         openAction(
                           "social",
-                          `https://youtube.com/${socialLinks.youtube}`,
+                          `https://youtube.com/${socialLinks.youtube?.startsWith("@") ? socialLinks.youtube : `@${socialLinks.youtube}`}`,
                         )
                       }
                       className={socialButtonClassName}
@@ -417,18 +371,18 @@ export function AdvisorCard({ advisor }: AdvisorCardProps) {
                       <FaYoutube /> YouTube{advisor.youtubeSubscribers && advisor.youtubeSubscribers > 0 ? ` (${getDisplayFollowers(advisor.youtubeSubscribers)})` : ""}
                     </button>
                   ) : null}
-                  {socialLinks.tiktok ? (
+                  {socialLinks.telegram ? (
                     <button
                       type="button"
                       onClick={() =>
                         openAction(
                           "social",
-                          `https://tiktok.com/@${socialLinks.tiktok}`,
+                          `https://t.me/${socialLinks.telegram?.replace(/^@/, "")}`,
                         )
                       }
                       className={socialButtonClassName}
                     >
-                      <FaTiktok /> TikTok{advisor.tiktokFollowers && advisor.tiktokFollowers > 0 ? ` (${getDisplayFollowers(advisor.tiktokFollowers)})` : ""}
+                      <FaTelegram /> Telegram{advisor.telegramFollowers && advisor.telegramFollowers > 0 ? ` (${getDisplayFollowers(advisor.telegramFollowers)})` : ""}
                     </button>
                   ) : null}
                 </div>

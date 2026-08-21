@@ -47,7 +47,6 @@ export function AdvisorProfilePage() {
                 state={advisorData.state || "-"}
                 country={advisorData.country || "-"}
                 industry={advisorData.industries?.join(", ")}
-                ppp={advisorData.ppp}
                 category={advisorData.category}
                 instagramEngagementRateScore={
                   advisorData.instagramEngagementRateScore

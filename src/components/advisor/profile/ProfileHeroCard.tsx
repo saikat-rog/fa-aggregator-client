@@ -15,7 +15,6 @@ import {
 } from "react-icons/fa6";
 import {
   getDisplayCategory,
-  getDisplayPpp,
 } from "../advisorDisplay.utils";
 
 type SocialLinks = {
@@ -39,7 +38,6 @@ type ProfileHeroCardProps = {
   state: string;
   country: string;
   industry?: string;
-  ppp?: number | null;
   category?: string | null;
   instagramEngagementRateScore?: number | null;
   profilePictureUrl?: string;
@@ -91,7 +89,6 @@ export function ProfileHeroCard({
   state,
   country,
   industry,
-  ppp,
   category,
   instagramEngagementRateScore,
   profilePictureUrl,
@@ -191,9 +188,6 @@ export function ProfileHeroCard({
               Industry: {industry}
             </p>
           ) : null}
-          <p className="inline-flex items-center rounded-full bg-slate-700 px-3 py-1 text-xs font-semibold tracking-wide text-white">
-            PPP: {getDisplayPpp(ppp)}
-          </p>
           <p className="inline-flex items-center rounded-full bg-cyan-700 px-3 py-1 text-xs font-semibold tracking-wide text-white">
             Category: {getDisplayCategory(category)}
           </p>
