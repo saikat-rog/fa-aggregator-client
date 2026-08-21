@@ -1,6 +1,16 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { FiArrowLeft, FiExternalLink, FiLock, FiBriefcase } from "react-icons/fi";
+import {
+  FiArrowLeft,
+  FiExternalLink,
+  FiLock,
+  FiUser,
+  FiMail,
+  FiFileText,
+  FiChevronDown,
+  FiChevronUp,
+  FiZap,
+} from "react-icons/fi";
 import { FaInstagram, FaYoutube, FaTelegram } from "react-icons/fa6";
 import {
   getApprovedBusinessRequirementByIdPublic,
@@ -18,6 +28,7 @@ export function ResourceDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [tracking, setTracking] = useState(false);
+  const [showRequirementsDetail, setShowRequirementsDetail] = useState(false);
 
   const isAuthenticated = Boolean(localStorage.getItem("token"));
 
@@ -66,167 +77,269 @@ export function ResourceDetailPage() {
   const shareUrl = typeof window !== "undefined" ? window.location.href : "";
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6 py-6">
-      <Link
-        to="/resources"
-        className="inline-flex items-center gap-2 text-sm font-semibold text-blue-700 hover:text-blue-900 transition"
-      >
-        <FiArrowLeft className="h-4 w-4" />
-        Back to All Approved Resources
-      </Link>
-
-      {isLoading ? (
-        <div className="rounded-3xl border border-slate-200 bg-white p-8 text-center text-slate-600">
-          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-blue-200 border-t-blue-700" />
-          <p className="mt-3 text-sm font-medium">Loading resource details...</p>
-        </div>
-      ) : null}
-
-      {error ? (
-        <div className="rounded-3xl border border-rose-200 bg-rose-50 p-6 text-center text-rose-700">
-          <p className="text-base font-semibold">{error}</p>
+    <div className="min-h-screen bg-[#F4F4F6] py-6 px-4 flex flex-col items-center justify-between font-sans">
+      <div className="w-full max-w-md space-y-6 mx-auto">
+        {/* Top Header Bar */}
+        <div className="flex items-center justify-between px-2">
           <Link
             to="/resources"
-            className="mt-4 inline-block rounded-xl bg-rose-700 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-800"
+            className="flex items-center justify-center h-10 w-10 rounded-full bg-white text-slate-700 shadow-sm hover:bg-slate-100 transition border border-slate-200/60"
+            title="Back to All Resources"
           >
-            Explore Resources
+            <FiArrowLeft className="h-5 w-5" />
           </Link>
+          {requirement?.postedByAdvisorUsername ? (
+            <Link
+              to={`/${requirement.postedByAdvisorUsername}`}
+              className="flex items-center justify-center h-10 w-10 rounded-full bg-white text-slate-700 shadow-sm hover:bg-slate-100 transition border border-slate-200/60"
+              title="Advisor Profile"
+            >
+              <FiUser className="h-5 w-5" />
+            </Link>
+          ) : (
+            <div className="h-10 w-10" />
+          )}
         </div>
-      ) : null}
 
-      {!isLoading && !error && requirement ? (
-        <article className="overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 md:p-8 shadow-sm space-y-6">
-          <div className="flex flex-wrap items-start justify-between gap-4 border-b border-slate-100 pb-6">
-            <div>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
-                <FiBriefcase className="h-3.5 w-3.5" />
-                Verified Business Requirement
-              </span>
-              <h1 className="mt-3 text-3xl font-bold text-slate-900">{requirement.companyName}</h1>
-              {requirement.postedByAdvisorName ? (
-                <div className="mt-4 flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50/80 p-3">
-                  {requirement.instagramProfilePictureUrl ? (
-                    <img
-                      src={getProxiedImageUrl(requirement.instagramProfilePictureUrl)}
-                      alt={requirement.postedByAdvisorName}
-                      className="h-12 w-12 rounded-full object-cover border border-slate-200 shadow-xs shrink-0"
-                      onError={(e) => {
-                        (e.target as HTMLElement).style.display = "none";
-                      }}
-                    />
-                  ) : (
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-700 font-bold border border-blue-200">
-                      {requirement.postedByAdvisorName.charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                  <div>
-                    <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Posted by Advisor</span>
-                    {requirement.postedByAdvisorUsername ? (
-                      <Link
-                        to={`/${requirement.postedByAdvisorUsername}`}
-                        className="block text-base font-bold text-slate-900 hover:text-blue-700 transition"
-                      >
-                        {requirement.postedByAdvisorName}{" "}
-                        <span className="text-xs font-normal text-slate-500">(@{requirement.postedByAdvisorUsername})</span>
-                      </Link>
-                    ) : (
-                      <p className="text-base font-bold text-slate-900">{requirement.postedByAdvisorName}</p>
-                    )}
-                  </div>
-                </div>
-              ) : null}
-            </div>
+        {isLoading ? (
+          <div className="rounded-3xl border border-slate-200 bg-white p-10 text-center text-slate-600 shadow-xs">
+            <div className="mx-auto h-9 w-9 animate-spin rounded-full border-4 border-blue-200 border-t-blue-700" />
+            <p className="mt-4 text-sm font-semibold text-slate-700">Loading resource details...</p>
           </div>
+        ) : null}
 
+        {error ? (
+          <div className="rounded-3xl border border-rose-200 bg-rose-50 p-8 text-center text-rose-700 shadow-xs">
+            <p className="text-base font-semibold">{error}</p>
+            <Link
+              to="/resources"
+              className="mt-4 inline-block rounded-full bg-rose-600 px-6 py-2.5 text-sm font-bold text-white shadow-xs hover:bg-rose-700 transition"
+            >
+              Explore All Resources
+            </Link>
+          </div>
+        ) : null}
 
-          <div className="rounded-2xl border border-slate-100 bg-slate-50/70 p-5 space-y-4">
-            {requirement.businessEmail ? (
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Business Email</p>
-                <a href={`mailto:${requirement.businessEmail}`} className="mt-1 inline-block text-base font-semibold text-blue-700 hover:underline">
-                  {requirement.businessEmail}
-                </a>
+        {!isLoading && !error && requirement ? (
+          <main className="space-y-6">
+            {/* Bio Profile Section */}
+            <div className="text-center space-y-3">
+              {/* Profile Image with Yellow Accent Ring */}
+              <div className="relative mx-auto h-28 w-28 sm:h-32 sm:w-32 rounded-full p-1 bg-[#FFCC00] shadow-md flex items-center justify-center">
+                {requirement.instagramProfilePictureUrl ? (
+                  <img
+                    src={getProxiedImageUrl(requirement.instagramProfilePictureUrl)}
+                    alt={requirement.postedByAdvisorName || requirement.companyName}
+                    className="h-full w-full rounded-full object-cover border-2 border-white bg-slate-100"
+                    onError={(e) => {
+                      (e.target as HTMLElement).style.display = "none";
+                    }}
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center rounded-full bg-slate-900 text-3xl font-extrabold text-white border-2 border-white">
+                    {(requirement.postedByAdvisorName || requirement.companyName).charAt(0).toUpperCase()}
+                  </div>
+                )}
               </div>
-            ) : null}
 
-            {requirement.socialLinks && (requirement.socialLinks.instagram || requirement.socialLinks.youtube || requirement.socialLinks.telegram) ? (
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Advisor Social Links (from Profile)</p>
-                <div className="flex flex-wrap gap-2.5">
-                  {requirement.socialLinks.instagram ? (
-                    <a
-                      href={`https://instagram.com/${requirement.socialLinks.instagram}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-1.5 rounded-full border border-pink-200 bg-pink-50 px-3 py-1 text-xs font-semibold text-pink-800 hover:bg-pink-100"
-                    >
-                      <FaInstagram /> Instagram (@{requirement.socialLinks.instagram})
-                    </a>
-                  ) : null}
+              {/* Title & Tagline */}
+              <div className="space-y-1">
+                <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                  {requirement.postedByAdvisorName || requirement.companyName}
+                </h1>
+                <p className="text-sm sm:text-base font-medium text-slate-600 px-2 leading-snug">
+                  {requirement.companyName ? `Campaign Requirement for ${requirement.companyName}` : "Tap links below to access official details"}
+                </p>
+              </div>
+
+              {/* Advisor Social Action Icons Row */}
+              {requirement.socialLinks && (requirement.socialLinks.instagram || requirement.socialLinks.youtube || requirement.socialLinks.telegram) ? (
+                <div className="flex items-center justify-center gap-3 pt-2">
                   {requirement.socialLinks.youtube ? (
                     <a
                       href={`https://youtube.com/${requirement.socialLinks.youtube.startsWith("@") ? requirement.socialLinks.youtube : `@${requirement.socialLinks.youtube}`}`}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-1.5 rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-semibold text-red-800 hover:bg-red-100"
+                      className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200/80 bg-white text-xl text-red-600 shadow-xs transition hover:scale-105 hover:bg-slate-50"
+                      title="YouTube Channel"
                     >
-                      <FaYoutube /> YouTube ({requirement.socialLinks.youtube})
+                      <FaYoutube />
                     </a>
                   ) : null}
+
                   {requirement.socialLinks.telegram ? (
                     <a
                       href={`https://t.me/${requirement.socialLinks.telegram.replace(/^@/, "")}`}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-1.5 rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-800 hover:bg-sky-100"
+                      className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200/80 bg-white text-xl text-sky-500 shadow-xs transition hover:scale-105 hover:bg-slate-50"
+                      title="Telegram Channel"
                     >
-                      <FaTelegram /> Telegram (@{requirement.socialLinks.telegram})
+                      <FaTelegram />
+                    </a>
+                  ) : null}
+
+                  {requirement.socialLinks.instagram ? (
+                    <a
+                      href={`https://instagram.com/${requirement.socialLinks.instagram}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200/80 bg-white text-xl text-pink-600 shadow-xs transition hover:scale-105 hover:bg-slate-50"
+                      title="Instagram Profile"
+                    >
+                      <FaInstagram />
                     </a>
                   ) : null}
                 </div>
-              </div>
-            ) : null}
-          </div>
-
-          {requirement.detailedRequirements ? (
-            <div className="space-y-2">
-              <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-500">Detailed Requirements</h3>
-              <p className="whitespace-pre-wrap rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700 leading-relaxed">
-                {requirement.detailedRequirements}
-              </p>
+              ) : null}
             </div>
-          ) : null}
 
-          <div className="pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-4">
-            <div>
+            {/* Link Pills List Stack */}
+            <div className="space-y-3.5 pt-2">
+              {/* Pill 1: Primary Resource Link */}
               {isAuthenticated && requirement.url ? (
                 <button
                   type="button"
                   disabled={tracking}
                   onClick={() => void onOpenResourceLink()}
-                  className="inline-flex items-center gap-2 rounded-xl bg-blue-700 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 disabled:opacity-60 cursor-pointer"
+                  className="group w-full rounded-full bg-[#EBEBEF] hover:bg-[#E0E0E6] border border-slate-200/70 p-2 sm:p-2.5 pr-6 flex items-center justify-between shadow-xs transition-all duration-200 active:scale-[0.98] cursor-pointer"
                 >
-                  {tracking ? "Opening..." : "View Official Resource Link"}
-                  <FiExternalLink className="h-4 w-4" />
+                  <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white shadow-xs font-bold">
+                    {requirement.instagramProfilePictureUrl ? (
+                      <img
+                        src={getProxiedImageUrl(requirement.instagramProfilePictureUrl)}
+                        alt={requirement.companyName}
+                        className="h-full w-full rounded-full object-cover"
+                        onError={(e) => {
+                          (e.target as HTMLElement).style.display = "none";
+                        }}
+                      />
+                    ) : (
+                      <FiExternalLink className="h-5 w-5" />
+                    )}
+                  </div>
+                  <span className="flex-1 text-center font-bold text-slate-900 text-base sm:text-lg px-2">
+                    {tracking ? "Opening Link..." : `View ${requirement.companyName} Link`}
+                  </span>
+                  <FiExternalLink className="h-5 w-5 text-slate-600 group-hover:text-blue-700 transition" />
                 </button>
               ) : !isAuthenticated ? (
                 <Link
                   to="/auth"
-                  className="inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-5 py-2.5 text-sm font-semibold text-blue-700 hover:bg-blue-100"
+                  className="group w-full rounded-full bg-[#EBEBEF] hover:bg-[#E0E0E6] border border-slate-200/70 p-2 sm:p-2.5 pr-6 flex items-center justify-between shadow-xs transition-all duration-200 active:scale-[0.98]"
                 >
-                  <FiLock className="h-4 w-4 text-blue-600" />
-                  Log in to Access Official Resource Link
+                  <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white shadow-xs font-bold">
+                    <FiLock className="h-5 w-5" />
+                  </div>
+                  <span className="flex-1 text-center font-bold text-slate-900 text-base sm:text-lg px-2">
+                    Log in to Access Official Link
+                  </span>
+                  <FiLock className="h-5 w-5 text-slate-600 group-hover:text-blue-700 transition" />
                 </Link>
+              ) : null}
+
+              {/* Pill 2: Business Email / Contact */}
+              {requirement.businessEmail ? (
+                <a
+                  href={`mailto:${requirement.businessEmail}`}
+                  className="group w-full rounded-full bg-[#EBEBEF] hover:bg-[#E0E0E6] border border-slate-200/70 p-2 sm:p-2.5 pr-6 flex items-center justify-between shadow-xs transition-all duration-200 active:scale-[0.98]"
+                >
+                  <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-full bg-slate-900 text-white shadow-xs">
+                    <FiMail className="h-5 w-5" />
+                  </div>
+                  <span className="flex-1 text-center font-bold text-slate-900 text-base sm:text-lg px-2 truncate">
+                    Contact {requirement.companyName}
+                  </span>
+                  <FiMail className="h-5 w-5 text-slate-600 group-hover:text-slate-900 transition" />
+                </a>
+              ) : null}
+
+              {/* Pill 3: Telegram Specific Link Pill (if present in social links) */}
+              {requirement.socialLinks?.telegram ? (
+                <a
+                  href={`https://t.me/${requirement.socialLinks.telegram.replace(/^@/, "")}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="group w-full rounded-full bg-[#EBEBEF] hover:bg-[#E0E0E6] border border-slate-200/70 p-2 sm:p-2.5 pr-6 flex items-center justify-between shadow-xs transition-all duration-200 active:scale-[0.98]"
+                >
+                  <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-full bg-sky-500 text-white shadow-xs text-xl">
+                    <FaTelegram />
+                  </div>
+                  <span className="flex-1 text-center font-bold text-slate-900 text-base sm:text-lg px-2">
+                    Join Telegram Group
+                  </span>
+                  <FaTelegram className="h-5 w-5 text-slate-600 group-hover:text-sky-500 transition" />
+                </a>
+              ) : null}
+
+              {/* Pill 4: Advisor Profile Link */}
+              {requirement.postedByAdvisorUsername ? (
+                <Link
+                  to={`/${requirement.postedByAdvisorUsername}`}
+                  className="group w-full rounded-full bg-[#EBEBEF] hover:bg-[#E0E0E6] border border-slate-200/70 p-2 sm:p-2.5 pr-6 flex items-center justify-between shadow-xs transition-all duration-200 active:scale-[0.98]"
+                >
+                  <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-full bg-amber-400 text-slate-900 font-bold shadow-xs text-lg">
+                    {requirement.postedByAdvisorName ? requirement.postedByAdvisorName.charAt(0).toUpperCase() : "A"}
+                  </div>
+                  <span className="flex-1 text-center font-bold text-slate-900 text-base sm:text-lg px-2">
+                    Advisor Profile (@{requirement.postedByAdvisorUsername})
+                  </span>
+                  <FiUser className="h-5 w-5 text-slate-600 group-hover:text-slate-900 transition" />
+                </Link>
+              ) : null}
+
+              {/* Pill 5: Detailed Requirements Accordion / Expandable Pill */}
+              {requirement.detailedRequirements ? (
+                <div className="rounded-3xl bg-[#EBEBEF] border border-slate-200/70 overflow-hidden shadow-xs transition-all">
+                  <button
+                    type="button"
+                    onClick={() => setShowRequirementsDetail(!showRequirementsDetail)}
+                    className="w-full p-2 sm:p-2.5 pr-6 flex items-center justify-between active:scale-[0.99] cursor-pointer"
+                  >
+                    <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-full bg-slate-800 text-white shadow-xs">
+                      <FiFileText className="h-5 w-5" />
+                    </div>
+                    <span className="flex-1 text-center font-bold text-slate-900 text-base sm:text-lg px-2">
+                      Detailed Requirements
+                    </span>
+                    {showRequirementsDetail ? (
+                      <FiChevronUp className="h-5 w-5 text-slate-600" />
+                    ) : (
+                      <FiChevronDown className="h-5 w-5 text-slate-600" />
+                    )}
+                  </button>
+
+                  {showRequirementsDetail ? (
+                    <div className="p-5 border-t border-slate-200/80 bg-white text-slate-700 text-sm leading-relaxed whitespace-pre-wrap rounded-b-3xl">
+                      {requirement.detailedRequirements}
+                    </div>
+                  ) : null}
+                </div>
               ) : null}
             </div>
 
-            <SocialShareButtons
-              url={shareUrl}
-              title={`Requirement details for ${requirement.companyName}`}
-            />
-          </div>
-        </article>
-      ) : null}
+            {/* Social Share & Copy Link Section */}
+            <div className="pt-4 flex flex-col items-center justify-center space-y-3">
+              <SocialShareButtons
+                url={shareUrl}
+                title={`Check out resource details for ${requirement.companyName}`}
+              />
+            </div>
+          </main>
+        ) : null}
+      </div>
+
+      {/* SuperProfile / Folksmint Footer Badge */}
+      <footer className="pt-8 pb-2 text-center text-xs font-semibold text-slate-600">
+        <div className="inline-flex items-center gap-2">
+          <span>Start your store with</span>
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/80 bg-white px-3 py-1 text-xs font-bold text-slate-900 shadow-xs">
+            <FiZap className="h-3.5 w-3.5 fill-blue-600 text-blue-600" />
+            Folksmint
+          </span>
+        </div>
+      </footer>
     </div>
   );
 }
+
