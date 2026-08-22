@@ -82,7 +82,7 @@ export function ResourceDetailPage() {
         {/* Top Header Bar */}
         <div className="flex items-center justify-between px-2">
           <Link
-            to="/resources"
+            to="/store"
             className="flex items-center justify-center h-10 w-10 rounded-full bg-white text-slate-700 shadow-sm hover:bg-slate-100 transition border border-slate-200/60"
             title="Back to All Resources"
           >
@@ -112,7 +112,7 @@ export function ResourceDetailPage() {
           <div className="rounded-3xl border border-rose-200 bg-rose-50 p-8 text-center text-rose-700 shadow-xs">
             <p className="text-base font-semibold">{error}</p>
             <Link
-              to="/resources"
+              to="/store"
               className="mt-4 inline-block rounded-full bg-rose-600 px-6 py-2.5 text-sm font-bold text-white shadow-xs hover:bg-rose-700 transition"
             >
               Explore All Resources

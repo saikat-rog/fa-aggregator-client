@@ -20,6 +20,11 @@ import { ResourcesPage } from "./pages/resources/Resources.page";
 import { ResourceDetailPage } from "./pages/resources/ResourceDetail.page";
 import { ContactPage } from "./pages/contact/Contact.page";
 
+function ResourceDetailRedirect() {
+  const { id } = useParams<{ id: string }>();
+  return <Navigate to={`/store/${id || ""}`} replace />;
+}
+
 function SlugRouteResolver() {
   const { slug } = useParams<{ slug: string }>();
   if (slug && seoLandings[slug]) {
@@ -70,8 +75,10 @@ function App() {
             element={<AdminPage />}
           />
           <Route path="/lol" element={<Navigate to="/admin" replace />} />
-          <Route path="/resources" element={<ResourcesPage />} />
-          <Route path="/resources/:id" element={<ResourceDetailPage />} />
+          <Route path="/store" element={<ResourcesPage />} />
+          <Route path="/store/:id" element={<ResourceDetailPage />} />
+          <Route path="/resources" element={<Navigate to="/store" replace />} />
+          <Route path="/resources/:id" element={<ResourceDetailRedirect />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/:slug" element={<SlugRouteResolver />} />
           <Route path="/blogs" element={<BlogListPage />} />
