@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { submitBusinessRequirement } from "../../services/businessRequirements.service";
+import { getMyRequirementApi, submitBusinessRequirement, updateMyRequirementApi, type BusinessRequirementItem } from "../../services/businessRequirements.service";
+import { useEffect } from "react";
 import {
   FiBriefcase,
   FiFileText,
@@ -57,6 +58,30 @@ export function ContactPage() {
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const [showAdvisorModal, setShowAdvisorModal] = useState(false);
   const [showUnapprovedModal, setShowUnapprovedModal] = useState(false);
+  const [existingRequirement, setExistingRequirement] = useState<BusinessRequirementItem | null>(null);
+
+
+  useEffect(() => {
+    const loadMyReq = async () => {
+      try {
+
+        const req = await getMyRequirementApi();
+        if (req) {
+          setExistingRequirement(req);
+          const activeFields = req.pendingEdit ? { ...req, ...req.pendingEdit } : req;
+          setForm({
+            companyName: activeFields.companyName || "",
+            businessEmail: activeFields.businessEmail || "",
+            url: activeFields.url || "",
+            detailedRequirements: activeFields.detailedRequirements || "",
+          });
+        }
+      } catch {
+        // ignore load errors for guests/users
+      }
+    };
+    void loadMyReq();
+  }, []);
 
   const fieldErrors = useMemo(() => {
     const errors: Record<keyof FormState, string> = {
@@ -112,17 +137,24 @@ export function ContactPage() {
 
     try {
       setIsSubmitting(true);
-      await submitBusinessRequirement({
+      const payload = {
         companyName: form.companyName.trim(),
         businessEmail: form.businessEmail.trim().toLowerCase(),
         url: normalizeUrl(form.url),
         detailedRequirements: form.detailedRequirements.trim(),
-      });
+      };
 
-      setSuccessMessage(
-        "Your requirement submission was created and sent for Admin review!",
-      );
-      setForm(initialState);
+      if (existingRequirement) {
+        const res = await updateMyRequirementApi(payload);
+        setSuccessMessage(res.msg || "Your requirement updates have been submitted for Admin approval!");
+        const updated = await getMyRequirementApi();
+        if (updated) setExistingRequirement(updated);
+      } else {
+        const res = await submitBusinessRequirement(payload);
+        setSuccessMessage(res.msg || "Your requirement submission was created and sent for Admin review!");
+        const created = await getMyRequirementApi();
+        if (created) setExistingRequirement(created);
+      }
       setSubmitAttempted(false);
     } catch (err: any) {
       const status = err?.response?.status || (typeof err === "object" && err !== null && "status" in err ? err.status : null);
@@ -159,7 +191,7 @@ export function ContactPage() {
       <section className="relative overflow-hidden rounded-3xl bg-linear-to-br from-blue-900 via-blue-700 to-blue-800 px-6 py-12 text-center text-white lg:px-10">
         <div className="pointer-events-none absolute -left-16 -top-20 h-56 w-56 rounded-full bg-blue-400/20 blur-3xl" />
         <div className="pointer-events-none absolute -right-12 bottom-0 h-52 w-52 rounded-full bg-blue-600/30 blur-3xl" />
-        <h1 className="relative text-3xl font-bold lg:text-5xl">Submit Business Requirement</h1>
+        <h1 className="relative text-3xl font-bold lg:text-5xl">{existingRequirement ? "Manage Business Requirement" : "Submit Business Requirement"}</h1>
         <p className="relative mx-auto mt-3 max-w-xl text-base text-blue-100">
           Share your campaign goals & contact info. Approved requirements will be listed in the Resources section.
         </p>
@@ -298,7 +330,22 @@ export function ContactPage() {
 
           {/* Submit Button */}
           <div className="pt-2">
-            <button
+            {existingRequirement ? (
+          <div className="mb-6 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-blue-900 text-sm font-medium flex items-center justify-between">
+            <div>
+              <p className="font-bold">Requirement Status: <span className="uppercase text-blue-700">{existingRequirement.status}</span></p>
+              {existingRequirement.editStatus === "pending" ? (
+                <p className="text-xs text-amber-700 mt-1 font-semibold">⏳ You have proposed updates currently pending Admin approval.</p>
+              ) : existingRequirement.status === "approved" ? (
+                <p className="text-xs text-emerald-700 mt-1 font-semibold">✓ Your requirement is live on the site. You can submit updates below.</p>
+              ) : (
+                <p className="text-xs text-slate-600 mt-1">Your requirement is under initial Admin review.</p>
+              )}
+            </div>
+          </div>
+        ) : null}
+
+        <button
               type="submit"
               disabled={isSubmitting}
               className="w-full rounded-xl bg-blue-700 py-3.5 text-base font-bold text-white shadow-md transition hover:bg-blue-800 disabled:opacity-60 cursor-pointer"

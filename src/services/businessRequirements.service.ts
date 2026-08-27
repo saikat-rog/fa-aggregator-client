@@ -12,6 +12,10 @@ export type BusinessRequirementPayload = {
   detailedRequirements: string;
 };
 
+export type PendingEditData = Partial<BusinessRequirementPayload> & {
+  submittedAt?: string;
+};
+
 export type BusinessRequirementItem = Omit<BusinessRequirementPayload, "url"> & {
   _id: string;
   url?: string;
@@ -27,6 +31,8 @@ export type BusinessRequirementItem = Omit<BusinessRequirementPayload, "url"> & 
   instagramProfilePictureUrl?: string | null;
   status: "pending" | "approved";
   approvedAt: string | null;
+  editStatus?: "none" | "pending" | "approved" | "rejected";
+  pendingEdit?: PendingEditData | null;
   createdAt?: string;
   updatedAt?: string;
 };
@@ -114,7 +120,7 @@ export async function submitBusinessRequirement(payload: BusinessRequirementPayl
 export async function getBusinessRequirementsAdmin(params: {
   page: number;
   limit: number;
-  status?: "pending" | "approved";
+  status?: "pending" | "approved" | "pending_edit";
 }) {
   const response = await adminApi.get("/admin/business-requirements", { params });
   return unwrapData<BusinessRequirementsAdminList>(response.data);
@@ -155,3 +161,31 @@ export async function getApprovedBusinessRequirementByIdPublic(id: string) {
   return unwrapRequirement(response.data);
 }
 
+
+export async function getMyRequirementApi() {
+  const response = await api.get("/business-requirements/my-requirement");
+  const data = response.data?.data?.requirement ?? response.data?.requirement ?? null;
+  return data ? (data as BusinessRequirementItem) : null;
+}
+
+export async function updateMyRequirementApi(payload: BusinessRequirementPayload) {
+  const response = await api.put("/business-requirements/my-requirement", payload);
+  const data = unwrapRequirement(response.data);
+  const msg = (response.data as { msg?: string })?.msg || "Requirement updated successfully.";
+  return { data, msg };
+}
+
+export async function approveRequirementEditAdmin(id: string) {
+  const response = await adminApi.patch(`/admin/business-requirements/${id}/approve-edit`);
+  return unwrapRequirement(response.data);
+}
+
+export async function rejectRequirementEditAdmin(id: string) {
+  const response = await adminApi.patch(`/admin/business-requirements/${id}/reject-edit`);
+  return unwrapRequirement(response.data);
+}
+
+export async function deleteBusinessRequirementAdmin(id: string) {
+  const response = await adminApi.delete(`/admin/business-requirements/${id}`);
+  return unwrapData<{ msg: string }>(response.data);
+}

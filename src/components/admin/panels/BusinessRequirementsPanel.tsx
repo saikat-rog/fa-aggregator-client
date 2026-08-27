@@ -5,6 +5,9 @@ import {
   getBusinessRequirementsAdmin,
   getRequirementClicksAdmin,
   approveBusinessRequirementAdmin,
+  approveRequirementEditAdmin,
+  rejectRequirementEditAdmin,
+  deleteBusinessRequirementAdmin,
   type BusinessRequirementItem,
   type RequirementClickItem,
 } from "../../../services/businessRequirements.service";
@@ -52,7 +55,7 @@ export function BusinessRequirementsPanel({ params, setParam, setManyParams }: P
   const limit = getNum(params.get("requirementsLimit"), 10);
   const selectedId = params.get("requirementsId") ?? "";
   const statusParam = params.get("requirementsStatus");
-  const status = statusParam === "pending" || statusParam === "approved" ? statusParam : undefined;
+  const status = statusParam === "pending" || statusParam === "approved" || statusParam === "pending_edit" ? statusParam : undefined;
 
   const [rows, setRows] = useState<BusinessRequirementItem[]>([]);
   const [clickRows, setClickRows] = useState<RequirementClickItem[]>([]);
@@ -65,6 +68,7 @@ export function BusinessRequirementsPanel({ params, setParam, setManyParams }: P
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [approvingId, setApprovingId] = useState("");
+  const [actionLoadingId, setActionLoadingId] = useState("");
   const [notice, setNotice] = useState("");
 
   const [detail, setDetail] = useState<BusinessRequirementItem | null>(null);
@@ -94,6 +98,59 @@ export function BusinessRequirementsPanel({ params, setParam, setManyParams }: P
 
     void loadData();
   }, [activeTab, page, limit, status]);
+
+
+  const onApproveEdit = async (id: string) => {
+    if (actionLoadingId) return;
+    try {
+      setActionLoadingId(id);
+      setError("");
+      setNotice("");
+      const updated = await approveRequirementEditAdmin(id);
+      setRows((current) => current.map((item) => (item._id === id ? updated : item)));
+      setDetail((current) => (current?._id === id ? updated : current));
+      setNotice("Proposed requirement updates approved and applied live successfully.");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to approve requirement edit.");
+    } finally {
+      setActionLoadingId("");
+    }
+  };
+
+  const onRejectEdit = async (id: string) => {
+    if (actionLoadingId) return;
+    try {
+      setActionLoadingId(id);
+      setError("");
+      setNotice("");
+      const updated = await rejectRequirementEditAdmin(id);
+      setRows((current) => current.map((item) => (item._id === id ? updated : item)));
+      setDetail((current) => (current?._id === id ? updated : current));
+      setNotice("Proposed requirement updates rejected.");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to reject requirement edit.");
+    } finally {
+      setActionLoadingId("");
+    }
+  };
+
+  const onDelete = async (id: string) => {
+    if (!window.confirm("Are you sure you want to permanently delete this business requirement?")) return;
+    if (actionLoadingId) return;
+    try {
+      setActionLoadingId(id);
+      setError("");
+      setNotice("");
+      await deleteBusinessRequirementAdmin(id);
+      setRows((current) => current.filter((item) => item._id !== id));
+      if (selectedId === id) setParam("requirementsId", undefined);
+      setNotice("Business requirement deleted successfully.");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to delete business requirement.");
+    } finally {
+      setActionLoadingId("");
+    }
+  };
 
   const onApprove = async (id: string) => {
     if (approvingId) return;
@@ -235,7 +292,7 @@ export function BusinessRequirementsPanel({ params, setParam, setManyParams }: P
 
       {activeTab === "submissions" ? (
         <div className="mt-3 flex flex-wrap gap-2" aria-label="Filter business requirements by status">
-          {(["all", "pending", "approved"] as const).map((value) => (
+          {(["all", "pending", "pending_edit", "approved"] as const).map((value) => (
             <button
               key={value}
               type="button"
@@ -294,7 +351,15 @@ export function BusinessRequirementsPanel({ params, setParam, setManyParams }: P
                   <td className="px-4 py-3 text-slate-600">
                     {item.postedByAdvisorName || "—"} {item.postedByAdvisorUsername ? `(@${item.postedByAdvisorUsername})` : ""}
                   </td>
-                  <td className="px-4 py-3 capitalize text-slate-600">{item.status || "—"}</td>
+                  <td className="px-4 py-3 text-slate-600">
+                    {item.editStatus === "pending" ? (
+                      <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-800">Pending Edit</span>
+                    ) : item.status === "approved" ? (
+                      <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800">Approved</span>
+                    ) : (
+                      <span className="rounded-full bg-yellow-100 px-2.5 py-1 text-xs font-semibold text-yellow-800">Pending</span>
+                    )}
+                  </td>
                   <td className="px-4 py-3 text-slate-600">{formatDate(item.createdAt)}</td>
                   <td className="px-4 py-3">
                     <button
@@ -310,6 +375,14 @@ export function BusinessRequirementsPanel({ params, setParam, setManyParams }: P
                         {approvingId === item._id ? "Approving..." : "Approve"}
                       </button>
                     ) : null}
+                    {item.editStatus === "pending" ? (
+                      <button type="button" disabled={Boolean(actionLoadingId)} onClick={() => void onApproveEdit(item._id)} className="ml-2 rounded-lg bg-amber-600 px-2.5 py-1.5 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60">
+                        Approve Edit
+                      </button>
+                    ) : null}
+                    <button type="button" disabled={Boolean(actionLoadingId)} onClick={() => void onDelete(item._id)} className="ml-2 rounded-lg border border-rose-200 bg-rose-50 px-2.5 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-100 disabled:opacity-60">
+                      Delete
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -386,19 +459,61 @@ export function BusinessRequirementsPanel({ params, setParam, setManyParams }: P
           {detailError ? <p className={statusErrorClassName}>{detailError}</p> : null}
 
           {detail && !detailLoading ? (
-            <div className="grid gap-3 text-sm text-slate-700 md:grid-cols-2">
-              <p><span className="font-semibold text-slate-900">Company Name:</span> {detail.companyName || "—"}</p>
-              <p><span className="font-semibold text-slate-900">Business Email:</span> {detail.businessEmail || "—"}</p>
-              <p><span className="font-semibold text-slate-900">URL:</span> {detail.url ? <a href={detail.url} target="_blank" rel="noopener noreferrer" className="text-blue-700 underline">{detail.url}</a> : "—"}</p>
-              <p><span className="font-semibold text-slate-900">Status:</span> <span className="capitalize">{detail.status || "—"}</span></p>
-              <p><span className="font-semibold text-slate-900">Approved At:</span> {formatDate(detail.approvedAt ?? undefined)}</p>
-              <p><span className="font-semibold text-slate-900">Posted By Advisor:</span> {detail.postedByAdvisorName || "—"} {detail.postedByAdvisorUsername ? `(@${detail.postedByAdvisorUsername})` : ""}</p>
-              <p className="md:col-span-2"><span className="font-semibold text-slate-900">Detailed Requirements:</span></p>
-              <p className="md:col-span-2 whitespace-pre-wrap rounded-xl border border-slate-200 bg-white p-3 text-slate-700">
-                {detail.detailedRequirements || "—"}
-              </p>
-              <p><span className="font-semibold text-slate-900">Created At:</span> {formatDate(detail.createdAt)}</p>
-              <p><span className="font-semibold text-slate-900">Updated At:</span> {formatDate(detail.updatedAt)}</p>
+            <div className="space-y-4">
+              {detail.editStatus === "pending" && detail.pendingEdit ? (
+                <div className="rounded-2xl border border-amber-300 bg-amber-50 p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h5 className="font-bold text-amber-900 text-sm">Proposed Edit Comparison (Review Required)</h5>
+                    <div className="flex gap-2">
+                      <button type="button" disabled={Boolean(actionLoadingId)} onClick={() => void onApproveEdit(detail._id)} className="rounded-lg bg-amber-700 px-3 py-1 text-xs font-semibold text-white hover:bg-amber-800">
+                        Approve Edit
+                      </button>
+                      <button type="button" disabled={Boolean(actionLoadingId)} onClick={() => void onRejectEdit(detail._id)} className="rounded-lg border border-amber-300 bg-white px-3 py-1 text-xs font-semibold text-amber-900 hover:bg-amber-100">
+                        Reject Edit
+                      </button>
+                    </div>
+                  </div>
+                  <div className="grid gap-4 md:grid-cols-2 text-xs">
+                    <div className="rounded-xl border border-slate-200 bg-white p-3 space-y-2">
+                      <p className="font-bold text-slate-800 uppercase border-b pb-1">Current Published Version</p>
+                      <p><span className="font-semibold">Company:</span> {detail.companyName}</p>
+                      <p><span className="font-semibold">Email:</span> {detail.businessEmail}</p>
+                      <p><span className="font-semibold">URL:</span> {detail.url}</p>
+                      <p className="font-semibold mt-1">Requirements:</p>
+                      <p className="whitespace-pre-wrap text-slate-600">{detail.detailedRequirements}</p>
+                    </div>
+                    <div className="rounded-xl border border-amber-200 bg-amber-100/50 p-3 space-y-2">
+                      <p className="font-bold text-amber-900 uppercase border-b border-amber-200 pb-1">Proposed Updates</p>
+                      <p><span className="font-semibold">Company:</span> <span className={detail.pendingEdit.companyName !== detail.companyName ? "bg-amber-200 px-1 rounded font-bold" : ""}>{detail.pendingEdit.companyName || "—"}</span></p>
+                      <p><span className="font-semibold">Email:</span> <span className={detail.pendingEdit.businessEmail !== detail.businessEmail ? "bg-amber-200 px-1 rounded font-bold" : ""}>{detail.pendingEdit.businessEmail || "—"}</span></p>
+                      <p><span className="font-semibold">URL:</span> <span className={detail.pendingEdit.url !== detail.url ? "bg-amber-200 px-1 rounded font-bold" : ""}>{detail.pendingEdit.url || "—"}</span></p>
+                      <p className="font-semibold mt-1">Requirements:</p>
+                      <p className={`whitespace-pre-wrap text-slate-800 ${detail.pendingEdit.detailedRequirements !== detail.detailedRequirements ? "bg-amber-200 p-1 rounded font-medium" : ""}`}>{detail.pendingEdit.detailedRequirements || "—"}</p>
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+
+              <div className="grid gap-3 text-sm text-slate-700 md:grid-cols-2">
+                <p><span className="font-semibold text-slate-900">Company Name:</span> {detail.companyName || "—"}</p>
+                <p><span className="font-semibold text-slate-900">Business Email:</span> {detail.businessEmail || "—"}</p>
+                <p><span className="font-semibold text-slate-900">URL:</span> {detail.url ? <a href={detail.url} target="_blank" rel="noopener noreferrer" className="text-blue-700 underline">{detail.url}</a> : "—"}</p>
+                <p><span className="font-semibold text-slate-900">Status:</span> <span className="capitalize">{detail.status || "—"}</span></p>
+                <p><span className="font-semibold text-slate-900">Approved At:</span> {formatDate(detail.approvedAt ?? undefined)}</p>
+                <p><span className="font-semibold text-slate-900">Posted By Advisor:</span> {detail.postedByAdvisorName || "—"} {detail.postedByAdvisorUsername ? `(@${detail.postedByAdvisorUsername})` : ""}</p>
+                <p className="md:col-span-2"><span className="font-semibold text-slate-900">Detailed Requirements:</span></p>
+                <p className="md:col-span-2 whitespace-pre-wrap rounded-xl border border-slate-200 bg-white p-3 text-slate-700">
+                  {detail.detailedRequirements || "—"}
+                </p>
+                <p><span className="font-semibold text-slate-900">Created At:</span> {formatDate(detail.createdAt)}</p>
+                <p><span className="font-semibold text-slate-900">Updated At:</span> {formatDate(detail.updatedAt)}</p>
+              </div>
+
+              <div className="pt-2 flex justify-end">
+                <button type="button" disabled={Boolean(actionLoadingId)} onClick={() => void onDelete(detail._id)} className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-xs font-bold text-rose-700 hover:bg-rose-100">
+                  Delete Requirement
+                </button>
+              </div>
             </div>
           ) : null}
         </div>
