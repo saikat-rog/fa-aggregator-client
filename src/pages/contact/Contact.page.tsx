@@ -124,21 +124,30 @@ export function ContactPage() {
       );
       setForm(initialState);
       setSubmitAttempted(false);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Failed to submit business requirement.";
-      const status = typeof err === "object" && err !== null && "status" in err ? (err as any).status : null;
+    } catch (err: any) {
+      const status = err?.response?.status || (typeof err === "object" && err !== null && "status" in err ? err.status : null);
+      const serverMsg = err?.response?.data?.msg || err?.response?.data?.message || err?.response?.data?.error || (err instanceof Error ? err.message : "");
+      
+      const displayMsg = (serverMsg && !serverMsg.startsWith("Request failed with status code"))
+        ? serverMsg
+        : "You must be an approved advisor to submit business requirements.";
 
       if (status === 401) {
         setShowAdvisorModal(true);
         return;
       }
 
-      if (status === 403 && (msg.includes("approved by Admin") || msg.includes("advisor"))) {
+      if (
+        status === 403 ||
+        serverMsg.toLowerCase().includes("approved by admin") ||
+        serverMsg.toLowerCase().includes("approved by an admin") ||
+        serverMsg.toLowerCase().includes("have to be approved")
+      ) {
         setShowUnapprovedModal(true);
         return;
       }
 
-      setErrorMessage(msg);
+      setErrorMessage(displayMsg);
     } finally {
       setIsSubmitting(false);
     }

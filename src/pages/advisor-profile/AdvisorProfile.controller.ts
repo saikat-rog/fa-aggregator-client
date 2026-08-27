@@ -284,10 +284,11 @@ export function useAdvisorProfileController() {
           text: response.msg || "Failed to submit query",
         });
       }
-    } catch (err) {
+    } catch (err: any) {
+      const serverMsg = err?.response?.data?.msg || err?.response?.data?.message || (err instanceof Error ? err.message : "An error occurred");
       setFormMessage({
         type: "error",
-        text: err instanceof Error ? err.message : "An error occurred",
+        text: serverMsg,
       });
     } finally {
       setFormSubmitting(false);
