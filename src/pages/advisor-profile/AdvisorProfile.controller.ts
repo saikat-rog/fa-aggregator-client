@@ -172,13 +172,15 @@ export function useAdvisorProfileController() {
     }
   };
 
-  const executeLinkAction = (
+  const executeLinkAction = async (
     type: "website" | "email" | "social",
     url: string,
   ) => {
     if (type === "email") {
       setEmailVisible(true);
-      if (advisor?.id) void trackAdvisorClick(advisor.id, ADVISOR_CLICK_TYPES.EMAIL);
+      if (advisor?.id) {
+        await trackAdvisorClick(advisor.id, ADVISOR_CLICK_TYPES.EMAIL);
+      }
       window.location.href = url;
       return;
     }
@@ -193,13 +195,22 @@ export function useAdvisorProfileController() {
   };
 
   const openAction = (type: "website" | "email" | "social", url: string) => {
+    const clickType =
+      type === "social"
+        ? ADVISOR_CLICK_TYPES.SOCIAL
+        : type === "email"
+          ? ADVISOR_CLICK_TYPES.EMAIL
+          : ADVISOR_CLICK_TYPES.WEBSITE;
+    if (advisor?.id) {
+      void trackAdvisorClick(advisor.id, clickType);
+    }
     if (userCanOpenLinks) {
       if (!isPincodeCollected()) {
         setPendingTargetAction({ kind: "link", type, url });
         setPincodeDialogOpen(true);
         return;
       }
-      executeLinkAction(type, url);
+      void executeLinkAction(type, url);
       return;
     }
     setPendingActionType(type);

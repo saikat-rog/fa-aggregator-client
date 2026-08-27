@@ -124,7 +124,23 @@ export function AdvisorCard({ advisor }: AdvisorCardProps) {
   const socialButtonClassName =
     "inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-2 text-xs font-semibold text-white transition hover:bg-white/20";
 
-  const executeLinkAction = (type: "website" | "email" | "social", url: string) => {
+  const executeLinkAction = async (type: "website" | "email" | "social", url: string) => {
+    const clickType =
+      type === "social"
+        ? ADVISOR_CLICK_TYPES.SOCIAL
+        : type === "email"
+          ? ADVISOR_CLICK_TYPES.EMAIL
+          : ADVISOR_CLICK_TYPES.WEBSITE;
+    if (type === "email") {
+      await trackAdvisorClick(advisor.id, clickType);
+      window.location.href = url;
+      return;
+    }
+    void trackAdvisorClick(advisor.id, clickType);
+    window.open(url, "_blank", "noreferrer");
+  };
+
+  const openAction = (type: "website" | "email" | "social", url: string) => {
     const clickType =
       type === "social"
         ? ADVISOR_CLICK_TYPES.SOCIAL
@@ -132,22 +148,14 @@ export function AdvisorCard({ advisor }: AdvisorCardProps) {
           ? ADVISOR_CLICK_TYPES.EMAIL
           : ADVISOR_CLICK_TYPES.WEBSITE;
     void trackAdvisorClick(advisor.id, clickType);
-    if (type === "email") {
-      window.location.href = url;
-      return;
-    }
 
-    window.open(url, "_blank", "noreferrer");
-  };
-
-  const openAction = (type: "website" | "email" | "social", url: string) => {
     if (userCanOpenLinks) {
       if (!isPincodeCollected()) {
         setPendingTargetAction({ kind: "link", type, url });
         setPincodeDialogOpen(true);
         return;
       }
-      executeLinkAction(type, url);
+      void executeLinkAction(type, url);
       return;
     }
 

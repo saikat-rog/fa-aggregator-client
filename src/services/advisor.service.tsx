@@ -17,34 +17,7 @@ export const updateUserPincode = async (pincode: string) => {
 };
 
 const recentAdvisorClicks = new Map<string, number>();
-const ADVISOR_CLICK_DEDUPE_MS = 500;
-const TRACKED_CLICKS_STORAGE_KEY = "trackedAdvisorClicksV1";
-
-const getPersistedTrackedClicks = (): Record<string, true> => {
-  if (typeof window === "undefined") return {};
-  try {
-    const raw = window.localStorage.getItem(TRACKED_CLICKS_STORAGE_KEY);
-    if (!raw) return {};
-    const parsed = JSON.parse(raw) as Record<string, true>;
-    return parsed && typeof parsed === "object" ? parsed : {};
-  } catch {
-    return {};
-  }
-};
-
-const markPersistedTrackedClick = (key: string) => {
-  if (typeof window === "undefined") return;
-  const tracked = getPersistedTrackedClicks();
-  tracked[key] = true;
-  try {
-    window.localStorage.setItem(
-      TRACKED_CLICKS_STORAGE_KEY,
-      JSON.stringify(tracked),
-    );
-  } catch {
-    // ignore storage write failures
-  }
-};
+const ADVISOR_CLICK_DEDUPE_MS = 3000;
 
 export interface AdvisorApplicationPayload {
   username: string;
@@ -299,10 +272,6 @@ export const trackAdvisorClick = async (
   if (!advisorId) return;
 
   const key = `${advisorId}:${clickType}`;
-  const persistedTracked = getPersistedTrackedClicks();
-  if (persistedTracked[key]) {
-    return;
-  }
 
   const now = Date.now();
   const lastClickAt = recentAdvisorClicks.get(key);
@@ -313,7 +282,6 @@ export const trackAdvisorClick = async (
 
   try {
     await api.post(`/advisor/${advisorId}/track-click`, { clickType });
-    markPersistedTrackedClick(key);
   } catch (error) {
     if (import.meta.env.DEV) {
       console.warn("Advisor click tracking failed", {
