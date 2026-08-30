@@ -69,7 +69,7 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
   }, []);
 
   const statesForCountry = useMemo(() => {
-    if (!options || !selectedCountry) return [];
+    if (!options || !selectedCountry || selectedCountry === "India") return [];
     return options.locations[selectedCountry]?.states ?? [];
   }, [options, selectedCountry]);
 
@@ -205,7 +205,7 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
       return;
     }
 
-    if (statesForCountry.length > 0 && !payload.state) {
+    if (selectedCountryValue !== "India" && statesForCountry.length > 0 && !payload.state) {
       setErrorMessage("Please select a state.");
       return;
     }
