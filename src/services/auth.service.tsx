@@ -8,6 +8,8 @@ export type AuthSuccessPayload = {
   roles?: AuthRole[];
   hasPhone?: boolean;
   phone?: string | null;
+  hasPincode?: boolean;
+  pincode?: string | null;
 };
 
 export async function registerApi(

@@ -26,6 +26,12 @@ const persistAuthSession = (authResponse: AuthSuccessPayload) => {
     JSON.stringify(Array.isArray(authResponse.roles) ? authResponse.roles : [authResponse.role]),
   );
   localStorage.setItem("googleLinked", "true");
+  if (authResponse.hasPincode || authResponse.pincode) {
+    localStorage.setItem("pincodeCollected", "true");
+    if (authResponse.pincode) {
+      localStorage.setItem("userPincode", authResponse.pincode);
+    }
+  }
 };
 
 const navigateByRole = (navigate: ReturnType<typeof useNavigate>, role: AuthRole) => {

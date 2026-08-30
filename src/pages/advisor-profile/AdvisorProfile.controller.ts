@@ -112,7 +112,11 @@ export function useAdvisorProfileController() {
 
   const isPincodeCollected = () => {
     if (typeof window === "undefined") return false;
-    return sessionStorage.getItem("pincodeCollected") === "true";
+    return (
+      sessionStorage.getItem("pincodeCollected") === "true" ||
+      localStorage.getItem("pincodeCollected") === "true" ||
+      Boolean(localStorage.getItem("userPincode"))
+    );
   };
 
   const socialLinks = useMemo(() => {

@@ -31,6 +31,8 @@ export function PincodePromptDialog({
       setError("");
       await updateUserPincode(normalized);
       sessionStorage.setItem("pincodeCollected", "true");
+      localStorage.setItem("pincodeCollected", "true");
+      localStorage.setItem("userPincode", normalized);
       onSuccess();
     } catch (err: unknown) {
       const msg =

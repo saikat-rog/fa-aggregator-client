@@ -106,6 +106,13 @@ export function AdvisorsPanel({ params, setParam }: Props) {
     email?: string;
     country?: string;
     state?: string;
+    pincode?: string;
+    approxLocation?: {
+      country?: string;
+      state?: string;
+      pincode?: string;
+      city?: string;
+    };
     role?: string;
     roles?: string[];
     verificationStatus?: string;
@@ -116,6 +123,12 @@ export function AdvisorsPanel({ params, setParam }: Props) {
     string,
     unknown
   >;
+  const pincode = String(
+    profile.pincode ??
+      detailsUser?.pincode ??
+      detailsUser?.approxLocation?.pincode ??
+      "",
+  ).trim();
   const socialLinks = (profile.socialLinks ??
     detailsUser?.socialLinks ??
     {}) as Record<string, unknown>;
@@ -142,6 +155,7 @@ export function AdvisorsPanel({ params, setParam }: Props) {
   const advisorItems = [
     { label: "Contact Email", value: String(profile.emailForContact ?? "-") },
     { label: "Website", value: String(profile.personalWebsite ?? "-") },
+    { label: "Pincode", value: pincode || "-" },
     {
       label: "Industries",
       value: Array.isArray(profile.industries)
@@ -764,7 +778,15 @@ export function AdvisorsPanel({ params, setParam }: Props) {
                               {detailsUser?.email || String(profile.emailForContact ?? "-")}
                             </p>
                             <p className="mt-0.5 text-xs text-slate-500">
-                              Location: {[profile.country, profile.state, detailsUser?.country, detailsUser?.state].filter(Boolean).slice(0, 2).join(", ") || "-"}
+                              Location: {
+                                (() => {
+                                  const country = String(profile.country ?? detailsUser?.country ?? "").trim();
+                                  const state = String(profile.state ?? detailsUser?.state ?? "").trim();
+                                  const loc = [country, state].filter(Boolean).join(", ");
+                                  const pinStr = pincode ? `PIN: ${pincode}` : "";
+                                  return [loc, pinStr].filter(Boolean).join(" - ") || "-";
+                                })()
+                              }
                             </p>
                           </div>
                           <div className="flex flex-wrap gap-2 text-xs font-semibold">
