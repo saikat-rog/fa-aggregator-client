@@ -133,6 +133,7 @@ export async function getAdminAdvisorEnquiries(advisorId: string, params: { page
 
 export interface AdvisorApplication {
   _id: string;
+  pincode?: string;
   status: "pending" | "approved" | "rejected";
   rejectionReason?: string;
   createdAt?: string;
@@ -190,6 +191,7 @@ export async function rejectAdvisorApplication(id: string, rejectionReason: stri
 
 export interface UpdateAdvisorApplicationPayload {
   username?: string;
+  pincode?: string;
   industries?: string[];
   country?: string;
   state?: string;

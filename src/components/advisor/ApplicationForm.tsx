@@ -42,6 +42,8 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
   const [selectedMarkets, setSelectedMarkets] = useState<string[]>([]);
   const [selectedIndices, setSelectedIndices] = useState<string[]>([]);
   const [username, setUsername] = useState("");
+  const [pincode, setPincode] = useState("");
+  const [pincodeError, setPincodeError] = useState("");
   const [usernameError, setUsernameError] = useState("");
   const [isCheckingUsername, setIsCheckingUsername] = useState(false);
   const [isUsernameAvailable, setIsUsernameAvailable] = useState<boolean | null>(
@@ -155,8 +157,21 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
       return;
     }
 
+    const cleanedPincode = pincode.trim();
+    if (!cleanedPincode) {
+      setErrorMessage("");
+      setPincodeError("Pincode is required.");
+      return;
+    }
+    if (!/^[1-9]\d{5}$/.test(cleanedPincode)) {
+      setErrorMessage("");
+      setPincodeError("Please enter a valid 6-digit pincode.");
+      return;
+    }
+
     const payload: AdvisorApplicationPayload = {
       username: cleanedUsername,
+      pincode: cleanedPincode,
       industry: selectedIndustry,
       category: trimmedCategory,
       country: selectedCountryValue,
@@ -251,6 +266,8 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
       onSubmitted?.();
       formElement.reset();
       setUsername("");
+      setPincode("");
+      setPincodeError("");
       setSelectedCountry("");
       setSelectedState("");
       setSelectedIndustry("");
@@ -388,6 +405,31 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
               ) : null}
               {usernameError}
             </p>
+          ) : null}
+        </div>
+
+        <div>
+          <input
+            required
+            name="pincode"
+            type="text"
+            value={pincode}
+            onChange={(event) => {
+              setPincode(event.target.value);
+              setPincodeError("");
+            }}
+            onBlur={() => {
+              if (pincode.trim() && !/^[1-9]\d{5}$/.test(pincode.trim())) {
+                setPincodeError("Please enter a valid 6-digit pincode.");
+              } else {
+                setPincodeError("");
+              }
+            }}
+            placeholder="enter 6-digit pincode"
+            className="w-full rounded-xl border border-blue-100 px-4 py-3 outline-none focus:border-blue-400"
+          />
+          {pincodeError ? (
+            <p className="mt-1 text-xs text-rose-600">{pincodeError}</p>
           ) : null}
         </div>
 

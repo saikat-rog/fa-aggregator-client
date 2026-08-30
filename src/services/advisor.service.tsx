@@ -21,6 +21,7 @@ const ADVISOR_CLICK_DEDUPE_MS = 3000;
 
 export interface AdvisorApplicationPayload {
   username: string;
+  pincode?: string;
   industry: string;
   ppp?: number;
   category: string;
@@ -94,6 +95,7 @@ export type SavedAdvisor = {
   id: string;
   name: string | null;
   username: string | null;
+  pincode?: string;
   industries: string[];
   country?: string;
   state?: string;

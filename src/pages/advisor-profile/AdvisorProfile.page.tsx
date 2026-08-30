@@ -44,6 +44,7 @@ export function AdvisorProfilePage() {
               <ProfileHeroCard
                 name={advisorData.name || "Advisor"}
                 username={advisorData.username || "advisor"}
+                pincode={advisorData.pincode}
                 state={advisorData.state || "-"}
                 country={advisorData.country || "-"}
                 industry={advisorData.industries?.join(", ")}

@@ -29,6 +29,7 @@ export interface AdvisorCardData {
   id: string;
   name: string;
   username: string;
+  pincode?: string;
   industries?: string[];
   country: string;
   state: string;
@@ -291,9 +292,12 @@ export function AdvisorCard({ advisor }: AdvisorCardProps) {
                       {(() => {
                         const isUnknownState = !advisor.state || advisor.state === "Unknown state";
                         const isUnknownCountry = !advisor.country || advisor.country === "Unknown country";
-                        const displayLocation = !isUnknownState
-                          ? (!isUnknownCountry ? `${advisor.state}, ${advisor.country}` : advisor.state)
-                          : (!isUnknownCountry ? advisor.country : "");
+                        const parts = [
+                          !isUnknownState ? advisor.state : null,
+                          !isUnknownCountry ? advisor.country : null,
+                          advisor.pincode ? `PIN: ${advisor.pincode}` : null,
+                        ].filter(Boolean);
+                        const displayLocation = parts.join(", ");
                         return displayLocation ? (
                           <p className="flex items-center gap-1.5 text-sm text-blue-100">
                             <FaLocationDot className="text-blue-100" />

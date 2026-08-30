@@ -35,6 +35,7 @@ type SocialLinks = {
 type ProfileHeroCardProps = {
   name: string;
   username: string;
+  pincode?: string;
   state: string;
   country: string;
   industry?: string;
@@ -86,6 +87,7 @@ const tiktokCountBadgeClassName =
 export function ProfileHeroCard({
   name,
   username,
+  pincode,
   state,
   country,
   industry,
@@ -200,9 +202,12 @@ export function ProfileHeroCard({
         {(() => {
           const isUnknownState = !state || state === "Unknown state" || state === "-";
           const isUnknownCountry = !country || country === "Unknown country" || country === "-";
-          const displayLocation = !isUnknownState
-            ? (!isUnknownCountry ? `${state}, ${country}` : state)
-            : (!isUnknownCountry ? country : "");
+          const parts = [
+            !isUnknownState ? state : null,
+            !isUnknownCountry ? country : null,
+            pincode ? `PIN: ${pincode}` : null,
+          ].filter(Boolean);
+          const displayLocation = parts.join(", ");
           return displayLocation ? (
             <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-slate-50 px-3 py-1 text-xs text-slate-600">
               <FaLocationDot className="text-blue-600" />

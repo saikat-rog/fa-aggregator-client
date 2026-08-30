@@ -14,6 +14,7 @@ interface Props {
 
 type EditFormState = {
   username: string;
+  pincode: string;
   industries: string[];
   country: string;
   state: string;
@@ -42,6 +43,7 @@ const formatDate = (value: string | null | undefined) =>
 
 const createFormState = (app: AdvisorApplication): EditFormState => ({
   username: app.username ?? "",
+  pincode: app.pincode ?? "",
   industries: app.industries ?? [],
   country: app.country ?? "",
   state: app.state ?? "",
@@ -208,6 +210,7 @@ export function ApplicationsPanel({ params, setParam, setManyParams }: Props) {
       form.ppp.trim() === "" ? undefined : Number(form.ppp.trim());
     const payload: UpdateAdvisorApplicationPayload = {
       username: form.username.trim() || undefined,
+      pincode: form.pincode.trim() || undefined,
       industries: form.industries,
       country: form.country || undefined,
       state: form.state || undefined,
@@ -342,6 +345,7 @@ export function ApplicationsPanel({ params, setParam, setManyParams }: Props) {
 
                           <div className="grid gap-2 sm:grid-cols-2">
                             <label className="relative"><FiAtSign className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-blue-700" /><input className={`${inputClassName} w-full pl-9`} placeholder="Username" value={form.username} onChange={(e) => setField("username", e.target.value)} disabled={!isPending || isMutating} /></label>
+                            <label className="relative"><FiMapPin className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-blue-700" /><input className={`${inputClassName} w-full pl-9`} placeholder="Pincode" value={form.pincode} onChange={(e) => setField("pincode", e.target.value)} disabled={!isPending || isMutating} /></label>
                             <label className="relative"><FiAtSign className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-blue-700" /><input className={`${inputClassName} w-full pl-9`} placeholder="Email for contact" value={form.emailForContact} onChange={(e) => setField("emailForContact", e.target.value)} disabled={!isPending || isMutating} /></label>
                             <label className="relative"><FiMapPin className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-blue-700" /><select className={`${inputClassName} w-full pl-9`} value={form.country} onChange={(e) => { setField("country", e.target.value); setField("state", ""); }} disabled={!isPending || isMutating}><option value="">Country</option>{Object.keys(options?.locations ?? {}).map((c) => <option key={c} value={c}>{c}</option>)}</select></label>
                             <label className="relative"><FiMapPin className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-blue-700" /><select className={`${inputClassName} w-full pl-9`} value={form.state} onChange={(e) => setField("state", e.target.value)} disabled={!isPending || isMutating}><option value="">State</option>{stateOptions.map((s) => <option key={s} value={s}>{s}</option>)}</select></label>

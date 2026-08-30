@@ -3,6 +3,7 @@ export type { AdvisorCardData };
 
 export interface AdvisorApiItem {
   id: string;
+  pincode?: string;
   profilePictureUrl?: string | null;
   name?: string;
   country?: string;

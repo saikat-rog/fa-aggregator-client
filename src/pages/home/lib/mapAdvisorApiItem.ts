@@ -18,6 +18,7 @@ export function mapAdvisorApiItem(item: AdvisorApiItem): AdvisorCardData {
     id: item.id,
     name: item.name?.trim() || "Verified Advisor",
     username: item.username || "Anonymous",
+    pincode: item.pincode?.trim() || "",
     industries: item.industries ?? [],
     country: item.country?.trim() || "",
     state: item.state?.trim() || "",
