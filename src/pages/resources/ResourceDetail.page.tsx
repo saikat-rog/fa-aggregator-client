@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import {
   FiArrowLeft,
   FiExternalLink,
@@ -23,7 +23,9 @@ const getProxiedImageUrl = (url: string) =>
   `https://images.weserv.nl/?url=${encodeURIComponent(url)}`;
 
 export function ResourceDetailPage() {
-  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { id, storeUsername } = useParams<{ id?: string; storeUsername?: string }>();
+  const identifier = storeUsername || id;
   const [requirement, setRequirement] = useState<ApprovedBusinessRequirementItem | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
@@ -33,15 +35,18 @@ export function ResourceDetailPage() {
   const isAuthenticated = Boolean(localStorage.getItem("token"));
 
   useEffect(() => {
-    if (!id) return;
+    if (!identifier) return;
     let active = true;
     const load = async () => {
       try {
         setIsLoading(true);
         setError("");
-        const item = await getApprovedBusinessRequirementByIdPublic(id);
+        const item = await getApprovedBusinessRequirementByIdPublic(identifier);
         if (!active) return;
         setRequirement(item);
+        if (item?.storeUsername && storeUsername !== item.storeUsername) {
+          navigate(`/campaign/${item.storeUsername}`, { replace: true });
+        }
       } catch (err: unknown) {
         if (active) {
           setError(err instanceof Error ? err.message : "Resource not found or failed to load.");
@@ -57,10 +62,11 @@ export function ResourceDetailPage() {
   }, [id]);
 
   const onOpenResourceLink = async () => {
-    if (!id || !requirement) return;
+    const targetId = requirement?._id || identifier;
+    if (!targetId || !requirement) return;
     try {
       setTracking(true);
-      const res = await trackRequirementClickApi(id);
+      const res = await trackRequirementClickApi(targetId);
       const targetUrl = res.url || requirement.url;
       if (targetUrl) {
         window.open(targetUrl, "_blank", "noopener,noreferrer");
@@ -74,7 +80,8 @@ export function ResourceDetailPage() {
     }
   };
 
-  const shareUrl = typeof window !== "undefined" ? window.location.href : "";
+  const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
+  const shareUrl = requirement ? `${baseUrl}/campaign/${requirement.storeUsername || requirement._id}` : (typeof window !== "undefined" ? window.location.href : "");
 
   return (
     <div className="min-h-screen bg-[#F4F4F6] py-6 px-4 flex flex-col items-center justify-between font-sans">
@@ -82,7 +89,7 @@ export function ResourceDetailPage() {
         {/* Top Header Bar */}
         <div className="flex items-center justify-between px-2">
           <Link
-            to="/store"
+            to="/campaign"
             className="flex items-center justify-center h-10 w-10 rounded-full bg-white text-slate-700 shadow-sm hover:bg-slate-100 transition border border-slate-200/60"
             title="Back to All Resources"
           >
@@ -112,7 +119,7 @@ export function ResourceDetailPage() {
           <div className="rounded-3xl border border-rose-200 bg-rose-50 p-8 text-center text-rose-700 shadow-xs">
             <p className="text-base font-semibold">{error}</p>
             <Link
-              to="/store"
+              to="/campaign"
               className="mt-4 inline-block rounded-full bg-rose-600 px-6 py-2.5 text-sm font-bold text-white shadow-xs hover:bg-rose-700 transition"
             >
               Explore All Resources

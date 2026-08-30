@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getMyRequirementApi, submitBusinessRequirement, updateMyRequirementApi, type BusinessRequirementItem } from "../../services/businessRequirements.service";
+import { duplicateStoreUsernameCheckApi, getMyRequirementApi, submitBusinessRequirement, updateMyRequirementApi, type BusinessRequirementItem } from "../../services/businessRequirements.service";
 import { useEffect } from "react";
 import {
   FiBriefcase,
@@ -12,10 +12,13 @@ import {
   FiX,
   FiCheckCircle,
   FiShare2,
+  FiAtSign,
 } from "react-icons/fi";
+import { FaCircleCheck, FaCircleXmark } from "react-icons/fa6";
 
 type FormState = {
   companyName: string;
+  storeUsername: string;
   businessEmail: string;
   url: string;
   detailedRequirements: string;
@@ -23,6 +26,7 @@ type FormState = {
 
 const initialState: FormState = {
   companyName: "",
+  storeUsername: "",
   businessEmail: "",
   url: "",
   detailedRequirements: "",
@@ -36,6 +40,9 @@ const normalizeUrl = (value: string) => {
   }
   return `https://${trimmed}`;
 };
+
+const STORE_USERNAME_REGEX = /^[a-zA-Z0-9._]{3,30}$/;
+const isValidStoreUsername = (value: string) => STORE_USERNAME_REGEX.test(value);
 
 const isValidEmail = (email: string) => /^\S+@\S+\.\S+$/.test(email);
 const isValidUrl = (value: string) => {
@@ -59,6 +66,9 @@ export function ContactPage() {
   const [showAdvisorModal, setShowAdvisorModal] = useState(false);
   const [showUnapprovedModal, setShowUnapprovedModal] = useState(false);
   const [existingRequirement, setExistingRequirement] = useState<BusinessRequirementItem | null>(null);
+  const [storeUsernameError, setStoreUsernameError] = useState("");
+  const [isCheckingStoreUsername, setIsCheckingStoreUsername] = useState(false);
+  const [isStoreUsernameAvailable, setIsStoreUsernameAvailable] = useState<boolean | null>(null);
 
 
   useEffect(() => {
@@ -71,6 +81,7 @@ export function ContactPage() {
           const activeFields = req.pendingEdit ? { ...req, ...req.pendingEdit } : req;
           setForm({
             companyName: activeFields.companyName || "",
+            storeUsername: activeFields.storeUsername || "",
             businessEmail: activeFields.businessEmail || "",
             url: activeFields.url || "",
             detailedRequirements: activeFields.detailedRequirements || "",
@@ -86,6 +97,7 @@ export function ContactPage() {
   const fieldErrors = useMemo(() => {
     const errors: Record<keyof FormState, string> = {
       companyName: "",
+      storeUsername: "",
       businessEmail: "",
       url: "",
       detailedRequirements: "",
@@ -93,6 +105,12 @@ export function ContactPage() {
 
     if (!form.companyName.trim()) {
       errors.companyName = "Company name is required.";
+    }
+
+    if (!form.storeUsername.trim()) {
+      errors.storeUsername = "Store username is required.";
+    } else if (!isValidStoreUsername(form.storeUsername.trim())) {
+      errors.storeUsername = "Invalid username. Use 3-30 chars: letters, numbers, . or _";
     }
 
     if (!form.businessEmail.trim()) {
@@ -123,8 +141,59 @@ export function ContactPage() {
     value: string,
   ) => {
     setForm((prev) => ({ ...prev, [field]: value }));
+    if (field === "storeUsername") {
+      setStoreUsernameError("");
+      setIsStoreUsernameAvailable(null);
+    }
     if (errorMessage) setErrorMessage("");
     if (successMessage) setSuccessMessage("");
+  };
+
+
+  const checkStoreUsernameAvailability = async (input: string) => {
+    const cleaned = input.trim().toLowerCase();
+    if (!cleaned) {
+      setIsStoreUsernameAvailable(null);
+      setStoreUsernameError("");
+      return;
+    }
+
+    if (!isValidStoreUsername(cleaned)) {
+      setIsStoreUsernameAvailable(null);
+      setStoreUsernameError("Invalid username. Use 3-30 chars: letters, numbers, . or _");
+      return;
+    }
+
+    if (existingRequirement && (existingRequirement.storeUsername?.toLowerCase() === cleaned || existingRequirement.pendingEdit?.storeUsername?.toLowerCase() === cleaned)) {
+      setIsStoreUsernameAvailable(true);
+      setStoreUsernameError("");
+      return;
+    }
+
+    try {
+      setIsCheckingStoreUsername(true);
+      setStoreUsernameError("");
+      const availabilityResponse = await duplicateStoreUsernameCheckApi(cleaned);
+      const isTaken =
+        availabilityResponse?.isTaken === true ||
+        availabilityResponse?.exists === true ||
+        availabilityResponse?.available === false ||
+        availabilityResponse?.isAvailable === false;
+
+      if (isTaken) {
+        setIsStoreUsernameAvailable(false);
+        setStoreUsernameError("This store username is already taken.");
+        return;
+      }
+
+      setIsStoreUsernameAvailable(true);
+      setStoreUsernameError("");
+    } catch {
+      setIsStoreUsernameAvailable(null);
+      setStoreUsernameError("Could not verify store username availability right now.");
+    } finally {
+      setIsCheckingStoreUsername(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -139,6 +208,7 @@ export function ContactPage() {
       setIsSubmitting(true);
       const payload = {
         companyName: form.companyName.trim(),
+        storeUsername: form.storeUsername.trim().toLowerCase(),
         businessEmail: form.businessEmail.trim().toLowerCase(),
         url: normalizeUrl(form.url),
         detailedRequirements: form.detailedRequirements.trim(),
@@ -250,6 +320,51 @@ export function ContactPage() {
               {submitAttempted && fieldErrors.companyName ? (
                 <p className="mt-1 text-xs font-medium text-rose-600">{fieldErrors.companyName}</p>
               ) : null}
+            </div>
+
+            {/* Store Username (Asked Below Company Name) */}
+            <div>
+              <label htmlFor="storeUsername" className="block text-sm font-bold text-slate-700">
+                Store Username <span className="text-rose-500">*</span>
+              </label>
+              <div className="relative mt-1.5">
+                <FiAtSign className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  id="storeUsername"
+                  type="text"
+                  value={form.storeUsername}
+                  onChange={(e) => handleChange("storeUsername", e.target.value)}
+                  onBlur={() => void checkStoreUsernameAvailability(form.storeUsername)}
+                  placeholder="choose a unique store username (e.g. acme_deals)"
+                  className={`w-full rounded-xl border ${
+                    (submitAttempted && fieldErrors.storeUsername) || storeUsernameError
+                      ? "border-rose-400 bg-rose-50/30"
+                      : isStoreUsernameAvailable
+                      ? "border-emerald-400 bg-emerald-50/20"
+                      : "border-slate-300 bg-white"
+                  } pl-10 pr-4 py-3 text-sm text-slate-900 focus:border-blue-600 focus:outline-hidden` }
+                />
+              </div>
+              {isCheckingStoreUsername ? (
+                <p className="mt-1 text-xs text-blue-600">Checking store username availability...</p>
+              ) : null}
+              {!isCheckingStoreUsername && isStoreUsernameAvailable ? (
+                <p className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-emerald-600">
+                  <FaCircleCheck className="h-3 w-3" />
+                  Store username is available.
+                </p>
+              ) : null}
+              {storeUsernameError || (submitAttempted && fieldErrors.storeUsername) ? (
+                <p className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-rose-600">
+                  {storeUsernameError.toLowerCase().includes("taken") ? (
+                    <FaCircleXmark className="h-3 w-3 shrink-0" />
+                  ) : null}
+                  {storeUsernameError || fieldErrors.storeUsername}
+                </p>
+              ) : null}
+              <p className="mt-1 text-[11px] text-slate-500">
+                Your campaign link: <code className="rounded bg-slate-100 px-1 py-0.5 font-semibold text-blue-700">/campaign/{form.storeUsername.trim().toLowerCase() || "username"}</code>
+              </p>
             </div>
 
             {/* Business Email */}

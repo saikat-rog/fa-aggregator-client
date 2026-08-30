@@ -3,6 +3,7 @@ import adminApi from "../lib/adminApi";
 
 export type BusinessRequirementPayload = {
   companyName: string;
+  storeUsername: string;
   businessEmail: string;
   url: string;
   currentMonthlySales?: string;
@@ -18,6 +19,7 @@ export type PendingEditData = Partial<BusinessRequirementPayload> & {
 
 export type BusinessRequirementItem = Omit<BusinessRequirementPayload, "url"> & {
   _id: string;
+  storeUsername?: string;
   url?: string;
   isUrlProtected?: boolean;
   advisorId?: string;
@@ -109,6 +111,15 @@ const unwrapRequirement = (resData: unknown): BusinessRequirementItem => {
 
   return inner as BusinessRequirementItem;
 };
+
+export async function duplicateStoreUsernameCheckApi(storeUsername: string) {
+  const response = await api.get(
+    `/business-requirements/username-availability?storeUsername=${encodeURIComponent(storeUsername)}`,
+  );
+  return unwrapData<{ isTaken?: boolean; exists?: boolean; available?: boolean; isAvailable?: boolean }>(
+    response.data,
+  );
+}
 
 export async function submitBusinessRequirement(payload: BusinessRequirementPayload) {
   const response = await api.post("/business-requirements", payload);

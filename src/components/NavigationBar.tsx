@@ -44,7 +44,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             ? [{ to: '/admin', label: 'Admin' }]
           : []
       : []),
-      { to: '/store', label: 'Store' },
+      { to: '/campaign', label: 'Campaign' },
       { to: '/blogs', label: 'Blogs' },
       { to: '/contact', label: 'Contact Us' },
   ]

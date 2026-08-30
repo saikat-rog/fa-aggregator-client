@@ -22,7 +22,7 @@ import { ContactPage } from "./pages/contact/Contact.page";
 
 function ResourceDetailRedirect() {
   const { id } = useParams<{ id: string }>();
-  return <Navigate to={`/store/${id || ""}`} replace />;
+  return <Navigate to={`/campaign/${id || ""}`} replace />;
 }
 
 function SlugRouteResolver() {
@@ -75,9 +75,11 @@ function App() {
             element={<AdminPage />}
           />
           <Route path="/lol" element={<Navigate to="/admin" replace />} />
-          <Route path="/store" element={<ResourcesPage />} />
+          <Route path="/campaign" element={<ResourcesPage />} />
+          <Route path="/campaign/:storeUsername" element={<ResourceDetailPage />} />
+          <Route path="/store" element={<Navigate to="/campaign" replace />} />
           <Route path="/store/:id" element={<ResourceDetailPage />} />
-          <Route path="/resources" element={<Navigate to="/store" replace />} />
+          <Route path="/resources" element={<Navigate to="/campaign" replace />} />
           <Route path="/resources/:id" element={<ResourceDetailRedirect />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/:slug" element={<SlugRouteResolver />} />

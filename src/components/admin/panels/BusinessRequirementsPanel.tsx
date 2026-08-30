@@ -328,6 +328,7 @@ export function BusinessRequirementsPanel({ params, setParam, setManyParams }: P
             <thead className="bg-slate-50">
               <tr className="border-b border-slate-200 text-xs uppercase tracking-wide text-blue-700">
                 <th className="px-4 py-3">Company Name</th>
+                <th className="px-4 py-3">Store Username</th>
                 <th className="px-4 py-3">Business Email</th>
                 <th className="px-4 py-3">Website</th>
                 <th className="px-4 py-3">Posted By Advisor</th>
@@ -340,6 +341,7 @@ export function BusinessRequirementsPanel({ params, setParam, setManyParams }: P
               {rows.map((item) => (
                 <tr key={item._id} className="border-b border-slate-100 transition hover:bg-slate-50/80">
                   <td className="px-4 py-3 font-medium text-slate-800">{item.companyName || "—"}</td>
+                  <td className="px-4 py-3 text-slate-600 font-mono text-xs">@{item.storeUsername || "—"}</td>
                   <td className="px-4 py-3 text-slate-600">{item.businessEmail || "—"}</td>
                   <td className="px-4 py-3 text-slate-600">
                     {item.url ? (
@@ -477,6 +479,7 @@ export function BusinessRequirementsPanel({ params, setParam, setManyParams }: P
                     <div className="rounded-xl border border-slate-200 bg-white p-3 space-y-2">
                       <p className="font-bold text-slate-800 uppercase border-b pb-1">Current Published Version</p>
                       <p><span className="font-semibold">Company:</span> {detail.companyName}</p>
+                      <p><span className="font-semibold">Store Username:</span> @{detail.storeUsername || "—"}</p>
                       <p><span className="font-semibold">Email:</span> {detail.businessEmail}</p>
                       <p><span className="font-semibold">URL:</span> {detail.url}</p>
                       <p className="font-semibold mt-1">Requirements:</p>
@@ -485,6 +488,7 @@ export function BusinessRequirementsPanel({ params, setParam, setManyParams }: P
                     <div className="rounded-xl border border-amber-200 bg-amber-100/50 p-3 space-y-2">
                       <p className="font-bold text-amber-900 uppercase border-b border-amber-200 pb-1">Proposed Updates</p>
                       <p><span className="font-semibold">Company:</span> <span className={detail.pendingEdit.companyName !== detail.companyName ? "bg-amber-200 px-1 rounded font-bold" : ""}>{detail.pendingEdit.companyName || "—"}</span></p>
+                      <p><span className="font-semibold">Store Username:</span> <span className={detail.pendingEdit.storeUsername !== detail.storeUsername ? "bg-amber-200 px-1 rounded font-bold" : ""}>@{detail.pendingEdit.storeUsername || "—"}</span></p>
                       <p><span className="font-semibold">Email:</span> <span className={detail.pendingEdit.businessEmail !== detail.businessEmail ? "bg-amber-200 px-1 rounded font-bold" : ""}>{detail.pendingEdit.businessEmail || "—"}</span></p>
                       <p><span className="font-semibold">URL:</span> <span className={detail.pendingEdit.url !== detail.url ? "bg-amber-200 px-1 rounded font-bold" : ""}>{detail.pendingEdit.url || "—"}</span></p>
                       <p className="font-semibold mt-1">Requirements:</p>
@@ -496,6 +500,7 @@ export function BusinessRequirementsPanel({ params, setParam, setManyParams }: P
 
               <div className="grid gap-3 text-sm text-slate-700 md:grid-cols-2">
                 <p><span className="font-semibold text-slate-900">Company Name:</span> {detail.companyName || "—"}</p>
+                <p><span className="font-semibold text-slate-900">Store Username:</span> @{detail.storeUsername || "—"}</p>
                 <p><span className="font-semibold text-slate-900">Business Email:</span> {detail.businessEmail || "—"}</p>
                 <p><span className="font-semibold text-slate-900">URL:</span> {detail.url ? <a href={detail.url} target="_blank" rel="noopener noreferrer" className="text-blue-700 underline">{detail.url}</a> : "—"}</p>
                 <p><span className="font-semibold text-slate-900">Status:</span> <span className="capitalize">{detail.status || "—"}</span></p>
