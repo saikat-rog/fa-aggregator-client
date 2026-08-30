@@ -44,9 +44,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             ? [{ to: '/admin', label: 'Admin' }]
           : []
       : []),
-      { to: '/campaign', label: 'Campaign' },
-      { to: '/blogs', label: 'Blogs' },
-      { to: '/contact', label: 'Contact Us' },
+    { to: '/campaign', label: 'Campaign' },
+    { to: '/blogs', label: 'Blogs' },
+    ...(isAuthenticated && role === 'advisor'
+      ? [{ to: '/contact', label: 'Contact Us' }]
+      : []),
   ]
 
   const handleLogout = async () => {
