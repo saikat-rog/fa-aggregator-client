@@ -1,10 +1,8 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { StoreForm } from "../../components/advisor/StoreForm";
 import { CampaignForm } from "../../components/user/CampaignForm";
 
 export function ContactPage() {
-  const navigate = useNavigate();
   const [role, setRole] = useState<string | null>(localStorage.getItem("role"));
   const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
 

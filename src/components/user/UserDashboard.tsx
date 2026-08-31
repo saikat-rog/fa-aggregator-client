@@ -12,7 +12,7 @@ import { MyEnquiriesSection } from "./dashboard/MyEnquiriesSection";
 import { SavedAdvisorsSection } from "./dashboard/SavedAdvisorsSection";
 import { UserStatsCards } from "./dashboard/UserStatsCards";
 import { CampaignForm } from "./CampaignForm";
-import { FiCompass, FiSearch, FiBriefcase } from "react-icons/fi";
+import { FiCompass, FiSearch } from "react-icons/fi";
 
 const UserDashboard = () => {
   const navigate = useNavigate();
