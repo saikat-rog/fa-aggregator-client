@@ -6,6 +6,8 @@ export type BusinessRequirementPayload = {
   storeUsername: string;
   businessEmail: string;
   url: string;
+  campaignGoal?: string;
+  budget?: string;
   currentMonthlySales?: string;
   goalMonthlySales?: string;
   desiredInfluencerScope?: string;
@@ -31,6 +33,7 @@ export type BusinessRequirementItem = Omit<BusinessRequirementPayload, "url"> & 
     telegram?: string;
   };
   instagramProfilePictureUrl?: string | null;
+  type?: "store" | "campaign";
   status: "pending" | "approved";
   approvedAt: string | null;
   editStatus?: "none" | "pending" | "approved" | "rejected";
@@ -132,6 +135,7 @@ export async function getBusinessRequirementsAdmin(params: {
   page: number;
   limit: number;
   status?: "pending" | "approved" | "pending_edit";
+  type?: "store" | "campaign";
 }) {
   const response = await adminApi.get("/admin/business-requirements", { params });
   return unwrapData<BusinessRequirementsAdminList>(response.data);
@@ -142,7 +146,7 @@ export async function approveBusinessRequirementAdmin(id: string) {
   return unwrapRequirement(response.data);
 }
 
-export async function getApprovedBusinessRequirements(params: { page: number; limit: number }) {
+export async function getApprovedBusinessRequirements(params: { page: number; limit: number; type?: "store" | "campaign" }) {
   const response = await api.get("/business-requirements/approved", { params });
   return unwrapData<ApprovedBusinessRequirementsList>(response.data);
 }

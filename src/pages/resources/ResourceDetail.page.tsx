@@ -152,11 +152,24 @@ export function ResourceDetailPage() {
               {/* Title & Tagline */}
               <div className="space-y-1">
                 <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-                  {requirement.postedByAdvisorName || requirement.companyName}
+                  {requirement.companyName || requirement.postedByAdvisorName}
                 </h1>
                 <p className="text-sm sm:text-base font-medium text-slate-600 px-2 leading-snug">
                   {requirement.companyName ? `Campaign Requirement for ${requirement.companyName}` : "Tap links below to access official details"}
                 </p>
+
+                <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+                  {requirement.campaignGoal ? (
+                    <span className="inline-flex items-center rounded-full bg-purple-50 border border-purple-200 px-3 py-1 text-xs font-bold text-purple-700">
+                      🎯 Goal: {requirement.campaignGoal}
+                    </span>
+                  ) : null}
+                  {requirement.budget ? (
+                    <span className="inline-flex items-center rounded-full bg-emerald-50 border border-emerald-200 px-3 py-1 text-xs font-bold text-emerald-700">
+                      💰 Budget: {requirement.budget}
+                    </span>
+                  ) : null}
+                </div>
               </div>
 
               {/* Advisor Social Action Icons Row */}

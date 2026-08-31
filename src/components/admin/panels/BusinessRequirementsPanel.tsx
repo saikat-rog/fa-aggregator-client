@@ -56,6 +56,8 @@ export function BusinessRequirementsPanel({ params, setParam, setManyParams }: P
   const selectedId = params.get("requirementsId") ?? "";
   const statusParam = params.get("requirementsStatus");
   const status = statusParam === "pending" || statusParam === "approved" || statusParam === "pending_edit" ? statusParam : undefined;
+  const typeParam = params.get("requirementsType");
+  const reqType = typeParam === "store" || typeParam === "campaign" ? typeParam : undefined;
 
   const [rows, setRows] = useState<BusinessRequirementItem[]>([]);
   const [clickRows, setClickRows] = useState<RequirementClickItem[]>([]);
@@ -81,7 +83,7 @@ export function BusinessRequirementsPanel({ params, setParam, setManyParams }: P
         setLoading(true);
         setError("");
         if (activeTab === "submissions") {
-          const payload = await getBusinessRequirementsAdmin({ page, limit, status });
+          const payload = await getBusinessRequirementsAdmin({ page, limit, status, type: reqType });
           setRows(payload.requirements ?? []);
           setPagination(payload.pagination ?? { page, limit, total: 0, totalPages: 1 });
         } else {
@@ -97,7 +99,7 @@ export function BusinessRequirementsPanel({ params, setParam, setManyParams }: P
     };
 
     void loadData();
-  }, [activeTab, page, limit, status]);
+  }, [activeTab, page, limit, status, reqType]);
 
 
   const onApproveEdit = async (id: string) => {
@@ -327,6 +329,7 @@ export function BusinessRequirementsPanel({ params, setParam, setManyParams }: P
           <table className="min-w-full text-left text-sm">
             <thead className="bg-slate-50">
               <tr className="border-b border-slate-200 text-xs uppercase tracking-wide text-blue-700">
+                <th className="px-4 py-3">Type</th>
                 <th className="px-4 py-3">Company Name</th>
                 <th className="px-4 py-3">Store Username</th>
                 <th className="px-4 py-3">Business Email</th>
@@ -340,6 +343,17 @@ export function BusinessRequirementsPanel({ params, setParam, setManyParams }: P
             <tbody>
               {rows.map((item) => (
                 <tr key={item._id} className="border-b border-slate-100 transition hover:bg-slate-50/80">
+                  <td className="px-4 py-3">
+                    {item.type === "campaign" ? (
+                      <span className="inline-flex items-center rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-bold text-purple-800 border border-purple-200">
+                        📣 Campaign
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center rounded-full bg-indigo-100 px-2.5 py-0.5 text-xs font-bold text-indigo-800 border border-indigo-200">
+                        🏪 Store
+                      </span>
+                    )}
+                  </td>
                   <td className="px-4 py-3 font-medium text-slate-800">{item.companyName || "—"}</td>
                   <td className="px-4 py-3 text-slate-600 font-mono text-xs">@{item.storeUsername || "—"}</td>
                   <td className="px-4 py-3 text-slate-600">{item.businessEmail || "—"}</td>

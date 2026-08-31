@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useSavedAdvisors } from "../../context/SavedAdvisorsContext";
 // import { LoginMethodsCard } from "../auth/LoginMethodsCard";
 import {
@@ -11,6 +11,7 @@ import { DailyGrowthSection } from "./dashboard/DailyGrowthSection";
 import { MyEnquiriesSection } from "./dashboard/MyEnquiriesSection";
 import { SavedAdvisorsSection } from "./dashboard/SavedAdvisorsSection";
 import { UserStatsCards } from "./dashboard/UserStatsCards";
+import { CampaignForm } from "./CampaignForm";
 import { FiCompass, FiSearch, FiBriefcase } from "react-icons/fi";
 
 const UserDashboard = () => {
@@ -99,6 +100,21 @@ const UserDashboard = () => {
 
     void loadMyEnquiries();
   }, [enquiryPage, enquiryLimit, navigate]);
+
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.hash === "#post-campaign") {
+      const timer = setTimeout(() => {
+        const el = document.getElementById("post-campaign");
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 250);
+      return () => clearTimeout(timer);
+    }
+  }, [location.hash]);
+
 
   const formatDate = useMemo(
     () => (value: string | null) =>
@@ -190,25 +206,8 @@ const UserDashboard = () => {
       />
 
       
-      {/* Submit Business Requirement Banner for Users */}
-      <section className="rounded-3xl border border-sky-100 bg-white p-6 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-50 px-3 py-1 text-xs font-bold text-sky-700">
-            <FiBriefcase className="h-3.5 w-3.5" />
-            Campaign & Business Requirement
-          </span>
-          <h3 className="mt-2 text-xl font-bold text-slate-900">Post a Business Requirement</h3>
-          <p className="mt-1 text-sm text-slate-600 max-w-xl">
-            Want to promote your brand or list a campaign? Submit your business requirement for Admin approval to get featured publicly.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => navigate("/contact")}
-          className="shrink-0 rounded-xl bg-blue-700 px-5 py-3 text-sm font-bold text-white shadow-md shadow-blue-500/20 hover:bg-blue-800 transition cursor-pointer"
-        >
-          Submit Requirement
-        </button>
+      <section id="post-campaign" className="mt-8">
+        <CampaignForm />
       </section>
 
       <DailyGrowthSection onReadNow={() => navigate("/blog")} />

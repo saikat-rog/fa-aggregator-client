@@ -30,8 +30,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     setIsAuthenticated(Boolean(localStorage.getItem('token')))
     setRole(localStorage.getItem('role'))
     setIsMobileMenuOpen(false)
-    window.scrollTo({ top: 0, behavior: 'auto' })
-  }, [location.pathname])
+    if (!location.hash) {
+      window.scrollTo({ top: 0, behavior: 'auto' })
+    }
+  }, [location.pathname, location.hash])
 
   const links = [
     { to: '/', label: 'Home' },
@@ -44,11 +46,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             ? [{ to: '/admin', label: 'Admin' }]
           : []
       : []),
+    { to: '/store', label: 'Store' },
     { to: '/campaign', label: 'Campaign' },
     { to: '/blogs', label: 'Blogs' },
-    ...(isAuthenticated && (role === 'advisor' || role === 'user')
-      ? [{ to: '/contact', label: 'Contact Us' }]
-      : []),
   ]
 
   const handleLogout = async () => {

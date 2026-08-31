@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FiExternalLink, FiLock, FiEye, FiPlusCircle, FiX } from "react-icons/fi";
+import { FiExternalLink, FiLock, FiEye, FiFileText, FiX } from "react-icons/fi";
 import { FaInstagram, FaYoutube, FaTelegram } from "react-icons/fa6";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -8,14 +8,13 @@ import {
   type ApprovedBusinessRequirementItem,
 } from "../../services/businessRequirements.service";
 import { SocialShareButtons } from "../../components/resources/SocialShareButtons";
-import { CampaignForm } from "../../components/user/CampaignForm";
+import { StoreForm } from "../../components/advisor/StoreForm";
 
 const PAGE_SIZE = 10;
-
 const getProxiedImageUrl = (url: string) =>
   `https://images.weserv.nl/?url=${encodeURIComponent(url)}`;
 
-export function ResourcesPage() {
+export function StorePage() {
   const navigate = useNavigate();
   const [requirements, setRequirements] = useState<ApprovedBusinessRequirementItem[]>([]);
   const [page, setPage] = useState(1);
@@ -26,17 +25,17 @@ export function ResourcesPage() {
 
   const isAuthenticated = Boolean(localStorage.getItem("token"));
   const role = typeof window !== "undefined" ? localStorage.getItem("role") : null;
-  const showPostCampaignButton = !isAuthenticated || role === "user";
+  const showApplyStoreButton = !isAuthenticated || role === "advisor";
 
-  const [showCampaignModal, setShowCampaignModal] = useState(false);
+  const [showStoreModal, setShowStoreModal] = useState(false);
 
-  const onPostCampaignClick = () => {
+  const onApplyStoreClick = () => {
     if (!isAuthenticated) {
       navigate("/auth");
       return;
     }
-    if (role === "user") {
-      setShowCampaignModal(true);
+    if (role === "advisor") {
+      setShowStoreModal(true);
     }
   };
 
@@ -48,12 +47,12 @@ export function ResourcesPage() {
       try {
         setIsLoading(true);
         setError("");
-        const payload = await getApprovedBusinessRequirements({ page, limit: PAGE_SIZE, type: "campaign" });
+        const payload = await getApprovedBusinessRequirements({ page, limit: PAGE_SIZE, type: "store" });
         if (!active) return;
         setRequirements(payload.requirements ?? []);
         setTotalPages(payload.pagination?.totalPages ?? 0);
       } catch (err: unknown) {
-        if (active) setError(err instanceof Error ? err.message : "Could not load approved requirements right now.");
+        if (active) setError(err instanceof Error ? err.message : "Could not load approved store listings right now.");
       } finally {
         if (active) setIsLoading(false);
       }
@@ -81,43 +80,43 @@ export function ResourcesPage() {
 
   return (
     <div className="space-y-8">
-      <section className="relative overflow-hidden rounded-3xl bg-linear-to-br from-blue-900 via-blue-700 to-blue-800 px-6 py-16 text-center text-white lg:px-10">
+      <section className="relative overflow-hidden rounded-3xl bg-linear-to-br from-slate-900 via-blue-900 to-indigo-900 px-6 py-16 text-center text-white lg:px-10 shadow-lg">
         <div className="pointer-events-none absolute -left-16 -top-20 h-56 w-56 rounded-full bg-blue-400/20 blur-3xl" />
-        <div className="pointer-events-none absolute -right-12 bottom-0 h-52 w-52 rounded-full bg-blue-600/30 blur-3xl" />
-        <h1 className="relative text-4xl font-bold lg:text-6xl">Approved Campaigns</h1>
-        <p className="relative mx-auto mt-4 max-w-2xl text-lg text-blue-100">
-          Explore active campaigns posted by brands & creators to connect and collaborate.
+        <div className="pointer-events-none absolute -right-12 bottom-0 h-52 w-52 rounded-full bg-indigo-600/30 blur-3xl" />
+        <h1 className="relative text-4xl font-extrabold lg:text-6xl tracking-tight">Approved Stores</h1>
+        <p className="relative mx-auto mt-4 max-w-2xl text-lg text-blue-100 font-medium">
+          Explore store listings and requirements posted by verified advisors.
         </p>
-        {showPostCampaignButton ? (
+        {showApplyStoreButton ? (
           <button
             type="button"
-            onClick={onPostCampaignClick}
-            className="relative mt-6 inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-extrabold text-blue-700 shadow-lg hover:bg-blue-50 transition cursor-pointer"
+            onClick={onApplyStoreClick}
+            className="relative mt-6 inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-extrabold text-indigo-900 shadow-lg hover:bg-blue-50 transition cursor-pointer"
           >
-            <FiPlusCircle className="h-4.5 w-4.5 text-blue-600" />
-            Post a Campaign
+            <FiFileText className="h-4.5 w-4.5 text-indigo-700" />
+            Apply for Store Listing
           </button>
         ) : null}
       </section>
 
-      {isLoading ? <p role="status" className="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-600">Loading approved campaigns...</p> : null}
+      {isLoading ? <p role="status" className="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-600">Loading approved store listings...</p> : null}
       {error ? <p role="alert" className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">{error}</p> : null}
-      {!isLoading && !error && requirements.length === 0 ? <p className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-slate-600">No approved campaigns are available yet.</p> : null}
+      {!isLoading && !error && requirements.length === 0 ? <p className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-slate-600">No approved store listings are available yet.</p> : null}
 
       {!isLoading && !error && requirements.length > 0 ? (
         <div className="grid gap-6 md:grid-cols-2">
           {requirements.map((item) => {
             const itemSlug = item.storeUsername || item._id;
-            const itemShareUrl = `${baseUrl}/campaign/${itemSlug}`;
+            const itemShareUrl = `${baseUrl}/store/${itemSlug}`;
             return (
               <article key={item._id} className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                 <div>
                   <div className="flex items-start justify-between gap-2">
-                    <Link to={`/campaign/${itemSlug}`} className="group">
+                    <Link to={`/store/${itemSlug}`} className="group">
                       <h2 className="text-2xl font-semibold text-slate-900 group-hover:text-blue-700 transition">{item.companyName}</h2>
                     </Link>
                     <Link
-                      to={`/campaign/${itemSlug}`}
+                      to={`/store/${itemSlug}`}
                       className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-blue-50 hover:text-blue-700 shrink-0"
                     >
                       <FiEye className="h-3.5 w-3.5" />
@@ -125,18 +124,6 @@ export function ResourcesPage() {
                     </Link>
                   </div>
 
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {item.campaignGoal ? (
-                      <span className="inline-flex items-center rounded-full bg-purple-50 border border-purple-200 px-2.5 py-0.5 text-xs font-bold text-purple-700">
-                        🎯 Goal: {item.campaignGoal}
-                      </span>
-                    ) : null}
-                    {item.budget ? (
-                      <span className="inline-flex items-center rounded-full bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 text-xs font-bold text-emerald-700">
-                        💰 Budget: {item.budget}
-                      </span>
-                    ) : null}
-                  </div>
                   {item.postedByAdvisorName ? (
                     <div className="mt-2 flex items-center gap-2 text-xs text-slate-500">
                       {item.instagramProfilePictureUrl ? (
@@ -165,6 +152,7 @@ export function ResourcesPage() {
                       </span>
                     </div>
                   ) : null}
+
                   {item.businessEmail ? (
                     <p className="mt-3 text-sm text-slate-600">
                       <span className="font-semibold text-slate-700">Business Email:</span>{" "}
@@ -211,7 +199,7 @@ export function ResourcesPage() {
                   ) : null}
 
                   {item.detailedRequirements ? (
-                    <p className="mt-3 text-sm text-slate-600 line-clamp-3"><span className="font-semibold text-slate-700">Detailed Requirements:</span> {item.detailedRequirements}</p>
+                    <p className="mt-3 text-sm text-slate-600 line-clamp-3"><span className="font-semibold text-slate-700">Store Details:</span> {item.detailedRequirements}</p>
                   ) : null}
                 </div>
 
@@ -224,7 +212,7 @@ export function ResourcesPage() {
                         onClick={() => void onOpenResourceLink(item._id, item.url)}
                         className="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-700 hover:text-blue-800 disabled:opacity-60 cursor-pointer"
                       >
-                        {trackingId === item._id ? "Opening..." : "View Resource Link"}
+                        {trackingId === item._id ? "Opening..." : "View Store Link"}
                         <FiExternalLink aria-hidden="true" />
                       </button>
                     ) : !isAuthenticated ? (
@@ -238,16 +226,16 @@ export function ResourcesPage() {
                     ) : null}
 
                     <Link
-                      to={`/campaign/${itemSlug}`}
+                      to={`/store/${itemSlug}`}
                       className="text-xs font-semibold text-slate-500 hover:text-blue-700 underline"
                     >
-                      Full Details & Direct Link
+                      Full Details & Store Link
                     </Link>
                   </div>
 
                   <SocialShareButtons
                     url={itemShareUrl}
-                    title={`Check out business requirement for ${item.companyName}`}
+                    title={`Check out store listing for ${item.companyName}`}
                   />
                 </div>
               </article>
@@ -256,28 +244,27 @@ export function ResourcesPage() {
         </div>
       ) : null}
 
-
       {!isLoading && !error && totalPages > 1 ? (
-        <nav aria-label="Requirements pagination" className="flex items-center justify-center gap-3">
+        <nav aria-label="Store pagination" className="flex items-center justify-center gap-3">
           <button type="button" disabled={page === 1} onClick={() => setPage((value) => value - 1)} className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold disabled:opacity-50">Previous</button>
           <span className="text-sm text-slate-600">Page {page} of {totalPages}</span>
           <button type="button" disabled={page >= totalPages} onClick={() => setPage((value) => value + 1)} className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold disabled:opacity-50">Next</button>
         </nav>
       ) : null}
     
-      {/* Campaign Dialog Modal */}
-      {showCampaignModal ? (
+      {/* Store Application Dialog Modal */}
+      {showStoreModal ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs overflow-y-auto">
           <div className="relative my-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-white shadow-2xl">
             <button
               type="button"
-              onClick={() => setShowCampaignModal(false)}
+              onClick={() => setShowStoreModal(false)}
               className="absolute right-5 top-5 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800 transition cursor-pointer"
               title="Close"
             >
               <FiX className="h-5 w-5" />
             </button>
-            <CampaignForm />
+            <StoreForm />
           </div>
         </div>
       ) : null}
