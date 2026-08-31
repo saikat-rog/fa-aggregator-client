@@ -232,7 +232,7 @@ export function ContactPage() {
       
       const displayMsg = (serverMsg && !serverMsg.startsWith("Request failed with status code"))
         ? serverMsg
-        : "You must be an approved advisor to submit business requirements.";
+        : "Failed to submit business requirement. Please try again.";
 
       if (status === 401) {
         setShowAdvisorModal(true);
@@ -487,9 +487,9 @@ export function ContactPage() {
                 <FiX className="h-5 w-5" />
               </button>
             </div>
-            <h3 className="mt-4 text-xl font-bold text-slate-900">Advisor Account Required</h3>
+            <h3 className="mt-4 text-xl font-bold text-slate-900">Account Login Required</h3>
             <p className="mt-2 text-sm text-slate-600">
-              Only logged in advisors can post business requirements. Please log in to your advisor account.
+              Please log in to your account to submit a business requirement.
             </p>
             <div className="mt-6 flex justify-end gap-3">
               <button

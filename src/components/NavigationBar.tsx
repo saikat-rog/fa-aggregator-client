@@ -46,7 +46,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       : []),
     { to: '/campaign', label: 'Campaign' },
     { to: '/blogs', label: 'Blogs' },
-    ...(isAuthenticated && role === 'advisor'
+    ...(isAuthenticated && (role === 'advisor' || role === 'user')
       ? [{ to: '/contact', label: 'Contact Us' }]
       : []),
   ]

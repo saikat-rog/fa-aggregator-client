@@ -160,11 +160,11 @@ export function ResourceDetailPage() {
               </div>
 
               {/* Advisor Social Action Icons Row */}
-              {requirement.socialLinks && (requirement.socialLinks.instagram || requirement.socialLinks.youtube || requirement.socialLinks.telegram) ? (
+              {requirement.socialLinks && (requirement.socialLinks.instagram?.trim() || requirement.socialLinks.youtube?.trim() || requirement.socialLinks.telegram?.trim()) ? (
                 <div className="flex items-center justify-center gap-3 pt-2">
-                  {requirement.socialLinks.youtube ? (
+                  {requirement.socialLinks.youtube?.trim() ? (
                     <a
-                      href={`https://youtube.com/${requirement.socialLinks.youtube.startsWith("@") ? requirement.socialLinks.youtube : `@${requirement.socialLinks.youtube}`}`}
+                      href={`https://youtube.com/${requirement.socialLinks.youtube.trim().startsWith("@") ? requirement.socialLinks.youtube.trim() : `@${requirement.socialLinks.youtube.trim()}`}`}
                       target="_blank"
                       rel="noreferrer"
                       className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200/80 bg-white text-xl text-red-600 shadow-xs transition hover:scale-105 hover:bg-slate-50"
@@ -174,9 +174,9 @@ export function ResourceDetailPage() {
                     </a>
                   ) : null}
 
-                  {requirement.socialLinks.telegram ? (
+                  {requirement.socialLinks.telegram?.trim() ? (
                     <a
-                      href={`https://t.me/${requirement.socialLinks.telegram.replace(/^@/, "")}`}
+                      href={`https://t.me/${requirement.socialLinks.telegram.trim().replace(/^@/, "")}`}
                       target="_blank"
                       rel="noreferrer"
                       className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200/80 bg-white text-xl text-sky-500 shadow-xs transition hover:scale-105 hover:bg-slate-50"
@@ -186,9 +186,9 @@ export function ResourceDetailPage() {
                     </a>
                   ) : null}
 
-                  {requirement.socialLinks.instagram ? (
+                  {requirement.socialLinks.instagram?.trim() ? (
                     <a
-                      href={`https://instagram.com/${requirement.socialLinks.instagram}`}
+                      href={`https://instagram.com/${requirement.socialLinks.instagram.trim()}`}
                       target="_blank"
                       rel="noreferrer"
                       className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200/80 bg-white text-xl text-pink-600 shadow-xs transition hover:scale-105 hover:bg-slate-50"
