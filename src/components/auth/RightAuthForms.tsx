@@ -56,6 +56,21 @@ const extractApiMessage = (error: unknown) => {
   return "";
 };
 
+type CountryCodeOption = {
+  code: string;
+  label: string;
+  digits: number;
+  maxDigits: number;
+  placeholder: string;
+  regex?: RegExp;
+  errorMsg?: string;
+};
+
+const COUNTRY_CODE_OPTIONS: CountryCodeOption[] = [
+  { code: "91", label: "+91 🇮🇳 India", digits: 10, maxDigits: 10, placeholder: "10-digit mobile number", regex: /^[6-9]\d{9}$/, errorMsg: "Indian mobile number must be 10 digits starting with 6, 7, 8, or 9" },
+  { code: "1", label: "+1 🇺🇸 USA", digits: 10, maxDigits: 10, placeholder: "10-digit mobile number", regex: /^[2-9]\d{9}$/, errorMsg: "US phone number must be 10 digits" },
+];
+
 const RightAuthForms = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -75,8 +90,46 @@ const RightAuthForms = () => {
   });
   const [googlePhoneForm, setGooglePhoneForm] = useState({
     countryCode: "91",
+    customCountryCode: "",
     phone: "",
   });
+  const [phoneError, setPhoneError] = useState("");
+
+  const getEffectiveCountryCode = () => {
+    if (googlePhoneForm.countryCode === "custom") {
+      return googlePhoneForm.customCountryCode.replace(/\D/g, "");
+    }
+    return googlePhoneForm.countryCode.replace(/\D/g, "");
+  };
+
+  const getEffectiveMaxDigits = () => {
+    const matched = COUNTRY_CODE_OPTIONS.find((c) => c.code === googlePhoneForm.countryCode);
+    if (matched) return matched.maxDigits;
+    return 12;
+  };
+
+  const validatePhone = (code: string, phoneStr: string) => {
+    if (!phoneStr.trim()) return "";
+    const cleanCode = code.replace(/\D/g, "");
+    const cleanPhone = phoneStr.replace(/\D/g, "");
+
+    if (!cleanCode || cleanCode.length < 1 || cleanCode.length > 4) {
+      return "Please enter a valid country code (1-4 digits).";
+    }
+
+    const matched = COUNTRY_CODE_OPTIONS.find((c) => c.code === cleanCode);
+    if (matched) {
+      if (matched.regex && !matched.regex.test(cleanPhone)) {
+        return matched.errorMsg || "Invalid phone number.";
+      }
+    } else {
+      if (cleanPhone.length < 7 || cleanPhone.length > 12) {
+        return "Phone number must be between 7 and 12 digits.";
+      }
+    }
+
+    return "";
+  };
 
   const formRoleRef = useRef<AuthRole>(initialRole);
 
@@ -184,8 +237,19 @@ const RightAuthForms = () => {
 
   const onGooglePhoneSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setPhoneError("");
     const phone = googlePhoneForm.phone.trim();
-    const formattedPhone = phone ? `+${googlePhoneForm.countryCode}${phone}` : "";
+    const effectiveCode = getEffectiveCountryCode();
+
+    if (phone) {
+      const err = validatePhone(effectiveCode, phone);
+      if (err) {
+        setPhoneError(err);
+        return;
+      }
+    }
+
+    const formattedPhone = phone ? `+${effectiveCode}${phone.replace(/\D/g, "")}` : "";
 
     if (formattedPhone && googlePhone.idToken) {
       try {
@@ -459,36 +523,59 @@ const RightAuthForms = () => {
                 Provide your mobile number to receive updates and connect with {googlePhone.role === "advisor" ? "clients" : "advisors"}, or click Skip to continue as <span className="font-semibold text-slate-700">{googlePhone.role}</span>.
               </p>
 
-              <div className="mt-5 flex h-12 gap-2.5">
-                <div className="flex w-24 overflow-hidden rounded-xl border border-slate-300 bg-slate-50">
-                  <span className="flex items-center px-2.5 text-sm font-semibold text-slate-500">+</span>
-                  <input
+              <div className="mt-5 flex flex-col gap-2">
+                <div className="flex h-12 gap-2">
+                  <select
                     value={googlePhoneForm.countryCode}
-                    onChange={(event) =>
+                    onChange={(event) => {
+                      setPhoneError("");
+                      const val = event.target.value;
+                      const matched = COUNTRY_CODE_OPTIONS.find((c) => c.code === val);
                       setGooglePhoneForm((prev) => ({
                         ...prev,
-                        countryCode: event.target.value.replace(/\D/g, ""),
-                      }))
-                    }
+                        countryCode: val,
+                        phone: matched ? prev.phone.slice(0, matched.maxDigits) : prev.phone,
+                      }));
+                    }}
+                    aria-label="Select Country Code"
+                    className="rounded-xl border border-slate-300 bg-slate-50 px-3 text-xs font-bold text-slate-800 outline-none focus:border-blue-500"
+                  >
+                    {COUNTRY_CODE_OPTIONS.map((opt) => (
+                      <option key={opt.code} value={opt.code}>
+                        {opt.label}
+                      </option>
+                    ))}
+                    
+                  </select>
+
+                  
+
+                  <input
+                    value={googlePhoneForm.phone}
+                    onChange={(event) => {
+                      setPhoneError("");
+                      const maxLen = getEffectiveMaxDigits();
+                      const digitsOnly = event.target.value.replace(/\D/g, "").slice(0, maxLen);
+                      setGooglePhoneForm((prev) => ({
+                        ...prev,
+                        phone: digitsOnly,
+                      }));
+                    }}
+                    maxLength={getEffectiveMaxDigits()}
                     inputMode="numeric"
-                    aria-label="Country code"
-                    className="w-full bg-transparent px-1 text-center text-sm font-bold outline-none"
+                    aria-label="Mobile number"
+                    placeholder={
+                      COUNTRY_CODE_OPTIONS.find((c) => c.code === googlePhoneForm.countryCode)?.placeholder ??
+                      "Mobile number (Optional)"
+                    }
+                    className="flex-1 rounded-xl border border-slate-300 px-4 text-sm font-medium outline-none focus:border-blue-500"
+                    autoFocus
                   />
                 </div>
-                <input
-                  value={googlePhoneForm.phone}
-                  onChange={(event) =>
-                    setGooglePhoneForm((prev) => ({
-                      ...prev,
-                      phone: event.target.value.replace(/\D/g, ""),
-                    }))
-                  }
-                  inputMode="numeric"
-                  aria-label="Mobile number"
-                  placeholder="10-digit mobile number (Optional)"
-                  className="flex-1 rounded-xl border border-slate-300 px-4 text-sm font-medium outline-none focus:border-blue-500"
-                  autoFocus
-                />
+
+                {phoneError ? (
+                  <p className="text-xs font-semibold text-rose-600 px-1">{phoneError}</p>
+                ) : null}
               </div>
 
               <div className="mt-6 flex justify-end gap-2.5">
