@@ -40,6 +40,10 @@ export interface AdvisorApplicationPayload {
 }
 
 export interface AdvisorListQueryParams {
+  telegramFollowersGt?: number;
+  telegramFollowersGte?: number;
+  telegramFollowersLt?: number;
+  telegramFollowersLte?: number;
   page?: number;
   limit?: number;
   country?: string;

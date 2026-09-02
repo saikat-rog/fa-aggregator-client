@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import {
+  FaTelegram,
   FaFacebookF,
   FaInstagram,
   FaLinkedinIn,
@@ -12,6 +13,7 @@ import type { AdvisorFilters } from "./Home.types";
 export const followerFields = [
   "instagramFollowers",
   "youtubeSubscribers",
+  "telegramFollowers",
   "tiktokFollowers",
   "linkedinFollowers",
   "facebookFollowers",
@@ -21,6 +23,7 @@ export const followerFields = [
 export type FollowerField = (typeof followerFields)[number];
 
 export const followerFieldLabels: Record<FollowerField, string> = {
+  telegramFollowers: "Subscribers / Members (minimum)",
   instagramFollowers: "Followers (minimum)",
   youtubeSubscribers: "Subscribers (minimum)",
   tiktokFollowers: "Followers (minimum)",
@@ -30,6 +33,7 @@ export const followerFieldLabels: Record<FollowerField, string> = {
 };
 
 export const followerFieldPlatformLabels: Record<FollowerField, string> = {
+  telegramFollowers: "Telegram",
   instagramFollowers: "Instagram",
   youtubeSubscribers: "YouTube",
   tiktokFollowers: "TikTok",
@@ -99,6 +103,8 @@ export const followerFieldUi: Record<
 };
 
 export const initialFilters: AdvisorFilters = {
+  telegramFollowersGt: "",
+  telegramFollowersGte: "",
   page: 1,
   limit: 20,
   country: "",

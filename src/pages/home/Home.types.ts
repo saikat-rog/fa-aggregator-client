@@ -22,6 +22,7 @@ export interface AdvisorApiItem {
   twitterFollowers?: number;
   facebookFollowers?: number;
   youtubeSubscribers?: number;
+  telegramFollowers?: number;
   tiktokFollowers?: number;
   about?: string;
   marketFocus?: string[];
@@ -42,6 +43,8 @@ export type AdvisorPagination = {
 };
 
 export type AdvisorFilters = {
+  telegramFollowersGt: string;
+  telegramFollowersGte: string;
   page: number;
   limit: number;
   country: string;
