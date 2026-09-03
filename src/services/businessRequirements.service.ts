@@ -8,6 +8,7 @@ export type BusinessRequirementPayload = {
   url: string;
   campaignGoal?: string;
   budget?: string;
+  rewardType?: string;
   currentMonthlySales?: string;
   goalMonthlySales?: string;
   desiredInfluencerScope?: string;

@@ -60,6 +60,7 @@ export async function getAdminUsers(params: UsersQuery, signal?: AbortSignal): P
 export interface AdminAdvisorCard {
   id: string;
   name?: string;
+  phone?: string;
   username?: string;
   profilePictureUrl?: string;
   ppp?: number | null;
@@ -133,6 +134,7 @@ export async function getAdminAdvisorEnquiries(advisorId: string, params: { page
 
 export interface AdvisorApplication {
   _id: string;
+  phone?: string;
   pincode?: string;
   status: "pending" | "approved" | "rejected";
   rejectionReason?: string;

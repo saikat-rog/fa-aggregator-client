@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { FaInstagram, FaTelegram, FaYoutube } from "react-icons/fa6";
-import { FiAtSign, FiBarChart2, FiCheckCircle, FiEdit3, FiFileText, FiGlobe, FiList, FiMapPin, FiTag, FiTrendingUp, FiUser, FiXCircle } from "react-icons/fi";
+import { FiAtSign, FiPhone, FiBarChart2, FiCheckCircle, FiEdit3, FiFileText, FiGlobe, FiList, FiMapPin, FiTag, FiTrendingUp, FiUser, FiXCircle } from "react-icons/fi";
 import { advisorFormOptionsApi, type AdvisorFormOptionsResponseData } from "../../../services/advisor.service";
 import { approveAdvisorApplication, getAdvisorApplications, rejectAdvisorApplication, updateAdvisorApplication, type AdvisorApplication, type UpdateAdvisorApplicationPayload } from "../../../services/admin/admin.service";
 import { PaginationControls } from "../PaginationControls";

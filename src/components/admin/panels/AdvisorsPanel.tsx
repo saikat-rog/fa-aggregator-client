@@ -12,6 +12,7 @@ import {
 } from "react-icons/fa6";
 import {
   FiArrowLeft,
+  FiPhone,
   FiAtSign,
   FiCheckCircle,
   FiChevronRight,
@@ -580,6 +581,7 @@ export function AdvisorsPanel({ params, setParam }: Props) {
                       <FiUser /> Advisor
                     </span>
                   </th>
+                  <th className="px-4 py-3">Mobile / Phone</th>
                   <th className="px-4 py-3">Category</th>
                   <th className="px-4 py-3 text-right">Action</th>
                 </tr>
@@ -625,6 +627,16 @@ export function AdvisorsPanel({ params, setParam }: Props) {
                             </p>
                           </div>
                         </div>
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-3 font-mono text-xs text-slate-700 font-semibold">
+                        {advisor.phone ? (
+                          <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 border border-slate-200 px-2 py-1">
+                            <FiPhone className="h-3 w-3 text-emerald-600 shrink-0" />
+                            {advisor.phone}
+                          </span>
+                        ) : (
+                          <span className="text-slate-400 font-sans font-normal">—</span>
+                        )}
                       </td>
                       <td className="whitespace-nowrap px-4 py-3 text-xs font-medium text-slate-600 sm:text-sm">
                         {getDisplayCategory(advisor.category)}
@@ -774,8 +786,14 @@ export function AdvisorsPanel({ params, setParam }: Props) {
                                 </span>
                               ) : null}
                             </div>
-                            <p className="mt-1 text-sm text-slate-600">
-                              {detailsUser?.email || String(profile.emailForContact ?? "-")}
+                            <p className="mt-1 text-sm text-slate-600 flex flex-wrap items-center gap-3">
+                              <span>{detailsUser?.email || String(profile.emailForContact ?? "-")}</span>
+                              {((detailsUser as any)?.phone || (detailsUser as any)?.advisorProfile?.phone) ? (
+                                <span className="inline-flex items-center gap-1 font-mono text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
+                                  <FiPhone className="h-3 w-3" />
+                                  {String((detailsUser as any)?.phone || (detailsUser as any)?.advisorProfile?.phone)}
+                                </span>
+                              ) : null}
                             </p>
                             <p className="mt-0.5 text-xs text-slate-500">
                               Location: {

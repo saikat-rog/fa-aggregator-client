@@ -164,6 +164,11 @@ export function ResourceDetailPage() {
                       🎯 Goal: {requirement.campaignGoal}
                     </span>
                   ) : null}
+                  {requirement.rewardType ? (
+                    <span className="inline-flex items-center rounded-full bg-blue-50 border border-blue-200 px-3 py-1 text-xs font-bold text-blue-700">
+                      🎁 Reward: {requirement.rewardType}
+                    </span>
+                  ) : null}
                   {requirement.budget ? (
                     <span className="inline-flex items-center rounded-full bg-emerald-50 border border-emerald-200 px-3 py-1 text-xs font-bold text-emerald-700">
                       💰 Budget: {requirement.budget}

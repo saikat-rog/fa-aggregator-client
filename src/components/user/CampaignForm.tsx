@@ -1,15 +1,17 @@
 import { useMemo, useState, useEffect } from "react";
 import {
   FiBriefcase,
-  FiFileText,
   FiMail,
   FiGlobe,
   FiCheckCircle,
-  FiDollarSign,
-  FiTarget,
   FiAtSign,
+  FiTarget,
+  FiDollarSign,
+  FiGift,
+  FiZap,
 } from "react-icons/fi";
 import { FaCircleCheck, FaCircleXmark } from "react-icons/fa6";
+import { HiSparkles } from "react-icons/hi2";
 import {
   duplicateStoreUsernameCheckApi,
   getMyRequirementApi,
@@ -25,6 +27,7 @@ type CampaignFormState = {
   url: string;
   campaignGoal: string;
   budget: string;
+  rewardType: "Paid" | "Barter" | "Both";
   detailedRequirements: string;
 };
 
@@ -35,6 +38,12 @@ const CAMPAIGN_GOAL_OPTIONS = [
   "Event turnout",
 ];
 
+const REWARD_TYPE_OPTIONS: Array<{ value: "Paid" | "Barter" | "Both"; label: string; icon: React.ReactNode }> = [
+  { value: "Paid", label: "Paid", icon: <FiDollarSign className="h-4 w-4" /> },
+  { value: "Barter", label: "Barter", icon: <FiGift className="h-4 w-4" /> },
+  { value: "Both", label: "Both", icon: <HiSparkles className="h-4 w-4 text-purple-600" /> },
+];
+
 const initialState: CampaignFormState = {
   companyName: "",
   storeUsername: "",
@@ -42,6 +51,7 @@ const initialState: CampaignFormState = {
   url: "",
   campaignGoal: "Foot traffic",
   budget: "",
+  rewardType: "Both",
   detailedRequirements: "",
 };
 
@@ -93,11 +103,12 @@ export function CampaignForm() {
             url: activeFields.url || "",
             campaignGoal: activeFields.campaignGoal || "Foot traffic",
             budget: activeFields.budget || "",
+            rewardType: (activeFields.rewardType as "Paid" | "Barter" | "Both") || "Both",
             detailedRequirements: activeFields.detailedRequirements || "",
           });
         }
       } catch {
-        // ignore load errors for fresh users
+        // ignore load errors
       }
     };
     void loadMyCampaign();
@@ -111,6 +122,7 @@ export function CampaignForm() {
       url: "",
       campaignGoal: "",
       budget: "",
+      rewardType: "",
       detailedRequirements: "",
     };
 
@@ -137,7 +149,7 @@ export function CampaignForm() {
     }
 
     if (!form.detailedRequirements.trim()) {
-      errors.detailedRequirements = "Detailed requirements are required.";
+      errors.detailedRequirements = "This field is required.";
     }
 
     return errors;
@@ -147,7 +159,7 @@ export function CampaignForm() {
     return !Object.values(fieldErrors).some((err) => Boolean(err));
   }, [fieldErrors]);
 
-  const handleChange = (field: keyof CampaignFormState, value: string) => {
+  const handleChange = (field: keyof CampaignFormState, value: any) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     if (field === "storeUsername") {
       setStoreUsernameError("");
@@ -193,7 +205,7 @@ export function CampaignForm() {
 
       if (isTaken) {
         setIsStoreUsernameAvailable(false);
-        setStoreUsernameError("This username is already taken.");
+        setStoreUsernameError("This handle is already taken.");
         return;
       }
 
@@ -201,7 +213,7 @@ export function CampaignForm() {
       setStoreUsernameError("");
     } catch {
       setIsStoreUsernameAvailable(null);
-      setStoreUsernameError("Could not verify username availability right now.");
+      setStoreUsernameError("Could not verify handle availability right now.");
     } finally {
       setIsCheckingStoreUsername(false);
     }
@@ -224,6 +236,7 @@ export function CampaignForm() {
         url: normalizeUrl(form.url),
         campaignGoal: form.campaignGoal,
         budget: form.budget.trim(),
+        rewardType: form.rewardType,
         detailedRequirements: form.detailedRequirements.trim(),
       };
 
@@ -264,7 +277,7 @@ export function CampaignForm() {
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-slate-900">Tell us what you need</h2>
         <p className="mt-1 text-sm text-slate-500">
-          Post your campaign requirement. Once approved by Admin, it will be visible to creators & advisors.
+          Post your campaign requirement. Visible to every advisor & creator once approved.
         </p>
       </div>
 
@@ -313,188 +326,216 @@ export function CampaignForm() {
       ) : null}
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid gap-6 md:grid-cols-2">
-          {/* Campaign Goal Dropdown */}
-          <div>
-            <label htmlFor="campaignGoal" className="block text-sm font-bold text-slate-700">
-              Campaign Goal <span className="text-rose-500">*</span>
-            </label>
-            <div className="relative mt-1.5">
-              <FiTarget className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-              <select
-                id="campaignGoal"
-                value={form.campaignGoal}
-                onChange={(e) => handleChange("campaignGoal", e.target.value)}
-                className="w-full rounded-xl border border-slate-300 bg-white pl-10 pr-4 py-3 text-sm text-slate-900 outline-none focus:border-blue-600"
-              >
-                {CAMPAIGN_GOAL_OPTIONS.map((goal) => (
-                  <option key={goal} value={goal}>
-                    {goal}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* Budget (Optional, if paid) */}
-          <div>
-            <label htmlFor="budget" className="block text-sm font-bold text-slate-700">
-              Budget <span className="text-slate-400 font-normal">(optional, if paid)</span>
-            </label>
-            <div className="relative mt-1.5">
-              <FiDollarSign className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input
-                id="budget"
-                type="text"
-                value={form.budget}
-                onChange={(e) => handleChange("budget", e.target.value)}
-                placeholder="e.g. $500, ₹10,000, or Negotiable"
-                className="w-full rounded-xl border border-slate-300 bg-white pl-10 pr-4 py-3 text-sm text-slate-900 outline-none focus:border-blue-600"
-              />
-            </div>
-          </div>
-
-          {/* Company / Brand Name */}
-          <div>
-            <label htmlFor="companyName" className="block text-sm font-bold text-slate-700">
-              Company / Brand Name <span className="text-rose-500">*</span>
-            </label>
-            <div className="relative mt-1.5">
-              <FiBriefcase className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input
-                id="companyName"
-                type="text"
-                value={form.companyName}
-                onChange={(e) => handleChange("companyName", e.target.value)}
-                placeholder="e.g. Acme Corporation"
-                className={`w-full rounded-xl border ${
-                  submitAttempted && fieldErrors.companyName
-                    ? "border-rose-400 bg-rose-50/30"
-                    : "border-slate-300 bg-white"
-                } pl-10 pr-4 py-3 text-sm text-slate-900 outline-none focus:border-blue-600`}
-              />
-            </div>
-            {submitAttempted && fieldErrors.companyName ? (
-              <p className="mt-1 text-xs font-medium text-rose-600">{fieldErrors.companyName}</p>
-            ) : null}
-          </div>
-
-          {/* Unique Campaign Handle / Username */}
-          <div>
-            <label htmlFor="storeUsername" className="block text-sm font-bold text-slate-700">
-              Campaign Handle / Username <span className="text-rose-500">*</span>
-            </label>
-            <div className="relative mt-1.5">
-              <FiAtSign className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input
-                id="storeUsername"
-                type="text"
-                value={form.storeUsername}
-                onChange={(e) => handleChange("storeUsername", e.target.value)}
-                onBlur={() => void checkStoreUsernameAvailability(form.storeUsername)}
-                placeholder="e.g. acme_deals"
-                className={`w-full rounded-xl border ${
-                  (submitAttempted && fieldErrors.storeUsername) || storeUsernameError
-                    ? "border-rose-400 bg-rose-50/30"
-                    : isStoreUsernameAvailable
-                    ? "border-emerald-400 bg-emerald-50/20"
-                    : "border-slate-300 bg-white"
-                } pl-10 pr-4 py-3 text-sm text-slate-900 outline-none focus:border-blue-600`}
-              />
-            </div>
-            {isCheckingStoreUsername ? (
-              <p className="mt-1 text-xs text-blue-600">Checking handle availability...</p>
-            ) : null}
-            {!isCheckingStoreUsername && isStoreUsernameAvailable ? (
-              <p className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-emerald-600">
-                <FaCircleCheck className="h-3 w-3" />
-                Handle is available.
-              </p>
-            ) : null}
-            {storeUsernameError || (submitAttempted && fieldErrors.storeUsername) ? (
-              <p className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-rose-600">
-                {storeUsernameError.toLowerCase().includes("taken") ? (
-                  <FaCircleXmark className="h-3 w-3 shrink-0" />
-                ) : null}
-                {storeUsernameError || fieldErrors.storeUsername}
-              </p>
-            ) : null}
-          </div>
-
-          {/* Business Email */}
-          <div>
-            <label htmlFor="businessEmail" className="block text-sm font-bold text-slate-700">
-              Contact / Business Email <span className="text-rose-500">*</span>
-            </label>
-            <div className="relative mt-1.5">
-              <FiMail className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input
-                id="businessEmail"
-                type="email"
-                value={form.businessEmail}
-                onChange={(e) => handleChange("businessEmail", e.target.value)}
-                placeholder="contact@company.com"
-                className={`w-full rounded-xl border ${
-                  submitAttempted && fieldErrors.businessEmail
-                    ? "border-rose-400 bg-rose-50/30"
-                    : "border-slate-300 bg-white"
-                } pl-10 pr-4 py-3 text-sm text-slate-900 outline-none focus:border-blue-600`}
-              />
-            </div>
-            {submitAttempted && fieldErrors.businessEmail ? (
-              <p className="mt-1 text-xs font-medium text-rose-600">{fieldErrors.businessEmail}</p>
-            ) : null}
-          </div>
-
-          {/* Website URL */}
-          <div>
-            <label htmlFor="url" className="block text-sm font-bold text-slate-700">
-              Website / Target URL <span className="text-rose-500">*</span>
-            </label>
-            <div className="relative mt-1.5">
-              <FiGlobe className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input
-                id="url"
-                type="text"
-                value={form.url}
-                onChange={(e) => handleChange("url", e.target.value)}
-                placeholder="https://company.com"
-                className={`w-full rounded-xl border ${
-                  submitAttempted && fieldErrors.url
-                    ? "border-rose-400 bg-rose-50/30"
-                    : "border-slate-300 bg-white"
-                } pl-10 pr-4 py-3 text-sm text-slate-900 outline-none focus:border-blue-600`}
-              />
-            </div>
-            {submitAttempted && fieldErrors.url ? (
-              <p className="mt-1 text-xs font-medium text-rose-600">{fieldErrors.url}</p>
-            ) : null}
+        {/* 1. Campaign Goal Dropdown */}
+        <div>
+          <label htmlFor="campaignGoal" className="block text-sm font-bold text-slate-800 mb-1.5">
+            Campaign goal
+          </label>
+          <div className="relative">
+            <FiTarget className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <select
+              id="campaignGoal"
+              value={form.campaignGoal}
+              onChange={(e) => handleChange("campaignGoal", e.target.value)}
+              className="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50/50 pl-10 pr-10 py-3 text-sm font-medium text-slate-900 outline-none focus:border-blue-600 focus:bg-white transition"
+            >
+              {CAMPAIGN_GOAL_OPTIONS.map((goal) => (
+                <option key={goal} value={goal}>
+                  {goal}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
-        {/* Detailed Requirements */}
+        {/* 2. Budget (optional, if paid) */}
         <div>
-          <label htmlFor="detailedRequirements" className="block text-sm font-bold text-slate-700">
-            Detailed Requirements <span className="text-rose-500">*</span>
+          <label htmlFor="budget" className="block text-sm font-bold text-slate-800 mb-1.5">
+            Budget <span className="text-slate-400 font-normal">(optional, if paid)</span>
           </label>
-          <div className="relative mt-1.5">
-            <FiFileText className="pointer-events-none absolute left-3.5 top-3.5 text-slate-400" />
-            <textarea
-              id="detailedRequirements"
-              rows={4}
-              value={form.detailedRequirements}
-              onChange={(e) => handleChange("detailedRequirements", e.target.value)}
-              placeholder="Describe your campaign objectives, target audience, deliverables..."
-              className={`w-full rounded-xl border ${
-                submitAttempted && fieldErrors.detailedRequirements
-                  ? "border-rose-400 bg-rose-50/30"
-                  : "border-slate-300 bg-white"
-              } pl-10 pr-4 py-3 text-sm text-slate-900 outline-none focus:border-blue-600`}
-            />
+          <input
+            id="budget"
+            type="text"
+            value={form.budget}
+            onChange={(e) => handleChange("budget", e.target.value)}
+            placeholder="e.g. ₹2,000 per post"
+            className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-blue-600 focus:bg-white transition"
+          />
+        </div>
+
+        {/* 3. Reward Type (Paid / Barter / Both) */}
+        <div>
+          <label className="block text-sm font-bold text-slate-800 mb-2">
+            Reward type
+          </label>
+          <div className="grid grid-cols-3 gap-3">
+            {REWARD_TYPE_OPTIONS.map((opt) => {
+              const isSelected = form.rewardType === opt.value;
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => handleChange("rewardType", opt.value)}
+                  className={`flex items-center justify-center gap-2 rounded-xl py-3 px-4 text-sm font-bold transition border cursor-pointer ${
+                    isSelected
+                      ? "border-purple-600 bg-purple-50 text-purple-700 shadow-xs"
+                      : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                  }`}
+                >
+                  {opt.icon}
+                  {opt.label}
+                </button>
+              );
+            })}
           </div>
+        </div>
+
+        {/* 4. What should creators do? * (Detailed Requirements) */}
+        <div>
+          <label htmlFor="detailedRequirements" className="block text-sm font-bold text-slate-800 mb-1.5">
+            What should creators do? <span className="text-rose-500">*</span>
+          </label>
+          <textarea
+            id="detailedRequirements"
+            rows={4}
+            value={form.detailedRequirements}
+            onChange={(e) => handleChange("detailedRequirements", e.target.value)}
+            placeholder="e.g. 1 reel + 2 stories featuring our new weekend brunch menu."
+            className={`w-full rounded-xl border ${
+              submitAttempted && fieldErrors.detailedRequirements
+                ? "border-rose-400 bg-rose-50/30"
+                : "border-slate-200 bg-slate-50/50 focus:bg-white"
+            } p-4 text-sm text-slate-900 outline-none focus:border-blue-600 transition`}
+          />
           {submitAttempted && fieldErrors.detailedRequirements ? (
             <p className="mt-1 text-xs font-medium text-rose-600">{fieldErrors.detailedRequirements}</p>
           ) : null}
+        </div>
+
+        {/* 5. Company Name, Handle, Email, Website */}
+        <div className="pt-4 border-t border-slate-100 space-y-5">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+            Brand & Contact Info
+          </h3>
+
+          <div className="grid gap-5 md:grid-cols-2">
+            {/* Company / Brand Name */}
+            <div>
+              <label htmlFor="companyName" className="block text-xs font-bold text-slate-700 mb-1">
+                Company / Brand Name <span className="text-rose-500">*</span>
+              </label>
+              <div className="relative">
+                <FiBriefcase className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  id="companyName"
+                  type="text"
+                  value={form.companyName}
+                  onChange={(e) => handleChange("companyName", e.target.value)}
+                  placeholder="e.g. Acme Studio"
+                  className={`w-full rounded-xl border ${
+                    submitAttempted && fieldErrors.companyName
+                      ? "border-rose-400 bg-rose-50/30"
+                      : "border-slate-200 bg-white"
+                  } pl-10 pr-4 py-2.5 text-sm text-slate-900 outline-none focus:border-blue-600`}
+                />
+              </div>
+              {submitAttempted && fieldErrors.companyName ? (
+                <p className="mt-1 text-xs font-medium text-rose-600">{fieldErrors.companyName}</p>
+              ) : null}
+            </div>
+
+            {/* Unique Campaign Handle / Username */}
+            <div>
+              <label htmlFor="storeUsername" className="block text-xs font-bold text-slate-700 mb-1">
+                Campaign Handle / Username <span className="text-rose-500">*</span>
+              </label>
+              <div className="relative">
+                <FiAtSign className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  id="storeUsername"
+                  type="text"
+                  value={form.storeUsername}
+                  onChange={(e) => handleChange("storeUsername", e.target.value)}
+                  onBlur={() => void checkStoreUsernameAvailability(form.storeUsername)}
+                  placeholder="e.g. acme_deals"
+                  className={`w-full rounded-xl border ${
+                    (submitAttempted && fieldErrors.storeUsername) || storeUsernameError
+                      ? "border-rose-400 bg-rose-50/30"
+                      : isStoreUsernameAvailable
+                      ? "border-emerald-400 bg-emerald-50/20"
+                      : "border-slate-200 bg-white"
+                  } pl-10 pr-4 py-2.5 text-sm text-slate-900 outline-none focus:border-blue-600`}
+                />
+              </div>
+              {isCheckingStoreUsername ? (
+                <p className="mt-1 text-xs text-blue-600">Checking handle availability...</p>
+              ) : null}
+              {!isCheckingStoreUsername && isStoreUsernameAvailable ? (
+                <p className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-emerald-600">
+                  <FaCircleCheck className="h-3 w-3" />
+                  Handle is available.
+                </p>
+              ) : null}
+              {storeUsernameError || (submitAttempted && fieldErrors.storeUsername) ? (
+                <p className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-rose-600">
+                  {storeUsernameError.toLowerCase().includes("taken") ? (
+                    <FaCircleXmark className="h-3 w-3 shrink-0" />
+                  ) : null}
+                  {storeUsernameError || fieldErrors.storeUsername}
+                </p>
+              ) : null}
+            </div>
+
+            {/* Business Email */}
+            <div>
+              <label htmlFor="businessEmail" className="block text-xs font-bold text-slate-700 mb-1">
+                Contact / Business Email <span className="text-rose-500">*</span>
+              </label>
+              <div className="relative">
+                <FiMail className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  id="businessEmail"
+                  type="email"
+                  value={form.businessEmail}
+                  onChange={(e) => handleChange("businessEmail", e.target.value)}
+                  placeholder="contact@company.com"
+                  className={`w-full rounded-xl border ${
+                    submitAttempted && fieldErrors.businessEmail
+                      ? "border-rose-400 bg-rose-50/30"
+                      : "border-slate-200 bg-white"
+                  } pl-10 pr-4 py-2.5 text-sm text-slate-900 outline-none focus:border-blue-600`}
+                />
+              </div>
+              {submitAttempted && fieldErrors.businessEmail ? (
+                <p className="mt-1 text-xs font-medium text-rose-600">{fieldErrors.businessEmail}</p>
+              ) : null}
+            </div>
+
+            {/* Website URL */}
+            <div>
+              <label htmlFor="url" className="block text-xs font-bold text-slate-700 mb-1">
+                Website / Target URL <span className="text-rose-500">*</span>
+              </label>
+              <div className="relative">
+                <FiGlobe className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  id="url"
+                  type="text"
+                  value={form.url}
+                  onChange={(e) => handleChange("url", e.target.value)}
+                  placeholder="https://company.com"
+                  className={`w-full rounded-xl border ${
+                    submitAttempted && fieldErrors.url
+                      ? "border-rose-400 bg-rose-50/30"
+                      : "border-slate-200 bg-white"
+                  } pl-10 pr-4 py-2.5 text-sm text-slate-900 outline-none focus:border-blue-600`}
+                />
+              </div>
+              {submitAttempted && fieldErrors.url ? (
+                <p className="mt-1 text-xs font-medium text-rose-600">{fieldErrors.url}</p>
+              ) : null}
+            </div>
+          </div>
         </div>
 
         {/* Submit Button */}
@@ -502,13 +543,13 @@ export function CampaignForm() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full rounded-xl bg-red-700 py-3.5 text-base font-bold text-white shadow-md transition hover:bg-red-800 disabled:opacity-60 cursor-pointer"
+            className="w-full rounded-2xl bg-linear-to-r from-orange-500 to-amber-600 py-4 text-base font-bold text-white shadow-lg hover:from-orange-600 hover:to-amber-700 transition disabled:opacity-60 cursor-pointer"
           >
             {isSubmitting
               ? "Submitting Campaign..."
               : existingCampaign
               ? "Update Campaign"
-              : "Post Campaign"}
+              : "Post campaign"}
           </button>
         </div>
       </form>

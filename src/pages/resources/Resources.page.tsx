@@ -126,6 +126,11 @@ export function ResourcesPage() {
                         🎯 Goal: {item.campaignGoal}
                       </span>
                     ) : null}
+                    {item.rewardType ? (
+                      <span className="inline-flex items-center rounded-full bg-blue-50 border border-blue-200 px-2.5 py-0.5 text-xs font-bold text-blue-700">
+                        🎁 Reward: {item.rewardType}
+                      </span>
+                    ) : null}
                     {item.budget ? (
                       <span className="inline-flex items-center rounded-full bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 text-xs font-bold text-emerald-700">
                         💰 Budget: {item.budget}
