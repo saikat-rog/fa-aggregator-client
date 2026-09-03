@@ -8,7 +8,6 @@ import {
   type ApprovedBusinessRequirementItem,
 } from "../../services/businessRequirements.service";
 import { SocialShareButtons } from "../../components/resources/SocialShareButtons";
-import { StoreForm } from "../../components/advisor/StoreForm";
 
 const PAGE_SIZE = 10;
 const getProxiedImageUrl = (url: string) =>
@@ -27,16 +26,12 @@ export function StorePage() {
   const role = typeof window !== "undefined" ? localStorage.getItem("role") : null;
   const showApplyStoreButton = !isAuthenticated || role === "advisor";
 
-  const [showStoreModal, setShowStoreModal] = useState(false);
-
   const onApplyStoreClick = () => {
     if (!isAuthenticated) {
       navigate("/auth");
       return;
     }
-    if (role === "advisor") {
-      setShowStoreModal(true);
-    }
+    navigate("/store/apply");
   };
 
   const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
@@ -252,22 +247,7 @@ export function StorePage() {
         </nav>
       ) : null}
     
-      {/* Store Application Dialog Modal */}
-      {showStoreModal ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs overflow-y-auto">
-          <div className="relative my-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-white shadow-2xl">
-            <button
-              type="button"
-              onClick={() => setShowStoreModal(false)}
-              className="absolute right-5 top-5 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800 transition cursor-pointer"
-              title="Close"
-            >
-              <FiX className="h-5 w-5" />
-            </button>
-            <StoreForm />
-          </div>
-        </div>
-      ) : null}
+      
     </div>
   );
 }

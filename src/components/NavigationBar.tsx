@@ -39,9 +39,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     { to: '/', label: 'Home' },
     ...(isAuthenticated
       ? role === 'advisor'
-        ? [{ to: '/a/dashboard', label: 'Dashboard' }]
+        ? [
+            { to: '/a/dashboard', label: 'Dashboard' },
+            { to: '/store/apply', label: 'Apply for Store' },
+          ]
         : role === 'user'
-          ? [{ to: '/u/dashboard', label: 'Dashboard' }]
+          ? [
+              { to: '/u/dashboard', label: 'Dashboard' },
+              { to: '/campaign/apply', label: 'Post a Campaign' },
+            ]
           : role === 'admin'
             ? [{ to: '/admin', label: 'Admin' }]
           : []
@@ -78,6 +84,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <NavLink
                 key={link.to}
                 to={link.to}
+                end
                 className={({ isActive }) =>
                   `rounded-lg px-3 py-1.5 text-sm transition ${
                     isActive ? 'bg-blue-600 text-white' : 'text-slate-600 hover:bg-blue-50 hover:text-blue-700'
@@ -120,6 +127,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <NavLink
                   key={link.to}
                   to={link.to}
+                  end
                   onClick={() => setIsMobileMenuOpen(false)}
                   className={({ isActive }) =>
                     `w-full rounded-xl px-3.5 py-2.5 text-sm font-medium transition ${

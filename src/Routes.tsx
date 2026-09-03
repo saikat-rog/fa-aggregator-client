@@ -20,6 +20,8 @@ import { ResourcesPage } from "./pages/resources/Resources.page";
 import { ResourceDetailPage } from "./pages/resources/ResourceDetail.page";
 import { ContactPage } from "./pages/contact/Contact.page";
 import { StorePage } from "./pages/store/Store.page";
+import { StoreApplyPage } from "./pages/store/StoreApply.page";
+import { CampaignApplyPage } from "./pages/resources/CampaignApply.page";
 
 function ResourceDetailRedirect() {
   const { id } = useParams<{ id: string }>();
@@ -77,8 +79,10 @@ function App() {
           />
           <Route path="/lol" element={<Navigate to="/admin" replace />} />
           <Route path="/campaign" element={<ResourcesPage />} />
+          <Route path="/campaign/apply" element={<CampaignApplyPage />} />
           <Route path="/campaign/:storeUsername" element={<ResourceDetailPage />} />
           <Route path="/store" element={<StorePage />} />
+          <Route path="/store/apply" element={<StoreApplyPage />} />
           <Route path="/store/:storeUsername" element={<ResourceDetailPage />} />
           <Route path="/resources" element={<Navigate to="/campaign" replace />} />
           <Route path="/resources/:id" element={<ResourceDetailRedirect />} />

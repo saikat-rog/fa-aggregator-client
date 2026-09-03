@@ -8,7 +8,6 @@ import {
   type ApprovedBusinessRequirementItem,
 } from "../../services/businessRequirements.service";
 import { SocialShareButtons } from "../../components/resources/SocialShareButtons";
-import { CampaignForm } from "../../components/user/CampaignForm";
 
 const PAGE_SIZE = 10;
 
@@ -28,16 +27,12 @@ export function ResourcesPage() {
   const role = typeof window !== "undefined" ? localStorage.getItem("role") : null;
   const showPostCampaignButton = !isAuthenticated || role === "user";
 
-  const [showCampaignModal, setShowCampaignModal] = useState(false);
-
   const onPostCampaignClick = () => {
     if (!isAuthenticated) {
       navigate("/auth");
       return;
     }
-    if (role === "user") {
-      setShowCampaignModal(true);
-    }
+    navigate("/campaign/apply");
   };
 
   const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
@@ -265,22 +260,7 @@ export function ResourcesPage() {
         </nav>
       ) : null}
     
-      {/* Campaign Dialog Modal */}
-      {showCampaignModal ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs overflow-y-auto">
-          <div className="relative my-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-white shadow-2xl">
-            <button
-              type="button"
-              onClick={() => setShowCampaignModal(false)}
-              className="absolute right-5 top-5 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800 transition cursor-pointer"
-              title="Close"
-            >
-              <FiX className="h-5 w-5" />
-            </button>
-            <CampaignForm />
-          </div>
-        </div>
-      ) : null}
+      
     </div>
   );
 }
