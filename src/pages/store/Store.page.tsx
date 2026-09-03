@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FiExternalLink, FiLock, FiEye, FiFileText, FiX } from "react-icons/fi";
+import { FiExternalLink, FiLock, FiEye, FiFileText } from "react-icons/fi";
 import { FaInstagram, FaYoutube, FaTelegram } from "react-icons/fa6";
 import { Link, useNavigate } from "react-router-dom";
 import {

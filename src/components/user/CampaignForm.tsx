@@ -8,7 +8,6 @@ import {
   FiTarget,
   FiDollarSign,
   FiGift,
-  FiZap,
 } from "react-icons/fi";
 import { FaCircleCheck, FaCircleXmark } from "react-icons/fa6";
 import { HiSparkles } from "react-icons/hi2";

@@ -70,6 +70,12 @@ export const followerFieldUi: Record<
     badgeClass: "bg-transparent text-pink-700 border-pink-200",
     inputFocusClass: "focus:border-pink-400",
   },
+  telegramFollowers: {
+    icon: <FaTelegram className="h-4 w-4" />,
+    ringClass: "ring-sky-200",
+    badgeClass: "bg-transparent text-sky-700 border-sky-200",
+    inputFocusClass: "focus:border-sky-400",
+  },
   youtubeSubscribers: {
     icon: <FaYoutube className="h-4 w-4" />,
     ringClass: "ring-rose-200",

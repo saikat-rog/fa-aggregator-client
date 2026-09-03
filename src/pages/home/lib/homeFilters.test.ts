@@ -10,6 +10,8 @@ const baseFilters: AdvisorFilters = {
   state: "",
   category: "",
   industries: [],
+  telegramFollowersGt: "",
+  telegramFollowersGte: "",
   instagramFollowersGt: "",
   instagramFollowersGte: "",
   youtubeSubscribersGt: "",
