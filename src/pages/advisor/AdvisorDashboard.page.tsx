@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { FaCircleCheck } from "react-icons/fa6";
 import { useLocation, useSearchParams } from "react-router-dom";
 import ApplicationForm from "../../components/advisor/ApplicationForm";
-import { StoreForm } from "../../components/advisor/StoreForm";
 // import { LoginMethodsCard } from "../../components/auth/LoginMethodsCard";
 import {
   advisorProfileAnalyticsApi,
@@ -441,10 +440,7 @@ const AdvisorDashboardPage = () => {
         )}
 
         
-      {/* Store Requirement Form for Advisors */}
-      <section id="store-application" className="mt-8">
-        <StoreForm />
-      </section>
+
 
         <article className="rounded-3xl border border-amber-200 bg-amber-50/40 p-5 shadow-sm">
           <h2 className="text-lg font-semibold text-amber-900">

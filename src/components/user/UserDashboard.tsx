@@ -11,7 +11,6 @@ import { DailyGrowthSection } from "./dashboard/DailyGrowthSection";
 import { MyEnquiriesSection } from "./dashboard/MyEnquiriesSection";
 import { SavedAdvisorsSection } from "./dashboard/SavedAdvisorsSection";
 import { UserStatsCards } from "./dashboard/UserStatsCards";
-import { CampaignForm } from "./CampaignForm";
 import { FiCompass, FiSearch } from "react-icons/fi";
 
 const UserDashboard = () => {
@@ -206,9 +205,7 @@ const UserDashboard = () => {
       />
 
       
-      <section id="post-campaign" className="mt-8">
-        <CampaignForm />
-      </section>
+
 
       <DailyGrowthSection onReadNow={() => navigate("/blog")} />
 

@@ -9,7 +9,7 @@ import {
   FiDollarSign,
   FiGift,
 } from "react-icons/fi";
-import { FaCircleCheck, FaCircleXmark } from "react-icons/fa6";
+import { FaCircleCheck, FaCircleXmark, FaIndianRupeeSign } from "react-icons/fa6";
 import { HiSparkles } from "react-icons/hi2";
 import {
   duplicateStoreUsernameCheckApi,
@@ -38,7 +38,7 @@ const CAMPAIGN_GOAL_OPTIONS = [
 ];
 
 const REWARD_TYPE_OPTIONS: Array<{ value: "Paid" | "Barter" | "Both"; label: string; icon: React.ReactNode }> = [
-  { value: "Paid", label: "Paid", icon: <FiDollarSign className="h-4 w-4" /> },
+  { value: "Paid", label: "Paid", icon: <FaIndianRupeeSign className="h-3.5 w-3.5" /> },
   { value: "Barter", label: "Barter", icon: <FiGift className="h-4 w-4" /> },
   { value: "Both", label: "Both", icon: <HiSparkles className="h-4 w-4 text-purple-600" /> },
 ];
@@ -218,6 +218,82 @@ export function CampaignForm() {
     }
   };
 
+    // If user has already posted a campaign, render Read-Only Submitted View (No editing)
+  if (existingCampaign) {
+    return (
+      <div className="rounded-3xl border border-slate-200 bg-white p-6 md:p-10 shadow-sm">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-5 mb-6">
+          <div>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200 px-3 py-1 text-xs font-bold text-emerald-800">
+              <FiCheckCircle className="h-3.5 w-3.5 text-emerald-600" />
+              Campaign Posted
+            </span>
+            <h2 className="text-2xl font-bold text-slate-900 mt-2">Your Campaign Details</h2>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Status: <span className="font-bold uppercase text-blue-700">{existingCampaign.status}</span>
+            </p>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-amber-200 bg-amber-50/60 p-4 text-amber-900 text-xs font-medium mb-6 flex items-start gap-2.5">
+          <FiLock className="h-4 w-4 text-amber-700 shrink-0 mt-0.5" />
+          <div>
+            <p className="font-bold">Campaigns cannot be edited after posting.</p>
+            <p className="mt-0.5 text-amber-800">
+              Your campaign is submitted for creator visibility. User campaigns cannot be edited once posted.
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-6 text-sm text-slate-800">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3.5">
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Company / Brand</p>
+              <p className="text-base font-bold text-slate-900 mt-1">{existingCampaign.companyName || "—"}</p>
+            </div>
+
+            <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3.5">
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Campaign Handle</p>
+              <p className="text-base font-bold text-blue-700 mt-1">@{existingCampaign.storeUsername || "—"}</p>
+            </div>
+
+            <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3.5">
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Campaign Goal</p>
+              <p className="text-sm font-semibold text-slate-800 mt-1">🎯 {existingCampaign.campaignGoal || "—"}</p>
+            </div>
+
+            <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3.5">
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Reward Type & Budget</p>
+              <p className="text-sm font-semibold text-slate-800 mt-1">
+                🎁 {existingCampaign.rewardType || "Both"} {existingCampaign.budget ? "(" + existingCampaign.budget + ")" : ""}
+              </p>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-4">
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+              What Creators Should Do
+            </p>
+            <p className="text-sm font-medium text-slate-700 leading-relaxed whitespace-pre-wrap">
+              {existingCampaign.detailedRequirements || "No detailed instructions provided."}
+            </p>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 pt-2 border-t border-slate-100">
+            <div>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Business Email</p>
+              <p className="text-sm font-semibold text-slate-800 mt-0.5">{existingCampaign.businessEmail || "—"}</p>
+            </div>
+            <div>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Website URL</p>
+              <p className="text-sm font-semibold text-blue-700 truncate mt-0.5">{existingCampaign.url || "—"}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitAttempted(true);
@@ -300,29 +376,7 @@ export function CampaignForm() {
         </div>
       ) : null}
 
-      {existingCampaign ? (
-        <div className="mb-6 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-blue-900 text-sm font-medium flex items-center justify-between">
-          <div>
-            <p className="font-bold">
-              Campaign Status:{" "}
-              <span className="uppercase text-blue-700">{existingCampaign.status}</span>
-            </p>
-            {existingCampaign.editStatus === "pending" ? (
-              <p className="text-xs text-amber-700 mt-1 font-semibold">
-                ⏳ You have proposed updates currently pending Admin approval.
-              </p>
-            ) : existingCampaign.status === "approved" ? (
-              <p className="text-xs text-emerald-700 mt-1 font-semibold">
-                ✓ Your campaign is live on the site. You can submit updates below.
-              </p>
-            ) : (
-              <p className="text-xs text-slate-600 mt-1">
-                Your campaign is under initial Admin review.
-              </p>
-            )}
-          </div>
-        </div>
-      ) : null}
+      
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* 1. Campaign Goal Dropdown */}

@@ -154,9 +154,11 @@ export function ResourceDetailPage() {
                 <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
                   {requirement.companyName || requirement.postedByAdvisorName}
                 </h1>
-                <p className="text-sm sm:text-base font-medium text-slate-600 px-2 leading-snug">
-                  {requirement.companyName ? `Campaign Requirement for ${requirement.companyName}` : "Tap links below to access official details"}
-                </p>
+                {requirement.storeUsername ? (
+                  <p className="text-sm font-bold text-blue-700">
+                    @{requirement.storeUsername}
+                  </p>
+                ) : null}
 
                 <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
                   {requirement.campaignGoal ? (
@@ -218,6 +220,19 @@ export function ResourceDetailPage() {
                 </div>
               ) : null}
             </div>
+
+            {/* Detailed Requirements Card Box */}
+            {requirement.detailedRequirements ? (
+              <div className="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-xs space-y-2">
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  <FiFileText className="h-4 w-4 text-blue-600" />
+                  <span>What Creators Should Do</span>
+                </div>
+                <p className="text-sm font-medium text-slate-800 leading-relaxed whitespace-pre-wrap">
+                  {requirement.detailedRequirements}
+                </p>
+              </div>
+            ) : null}
 
             {/* Link Pills List Stack */}
             <div className="space-y-3.5 pt-2">
