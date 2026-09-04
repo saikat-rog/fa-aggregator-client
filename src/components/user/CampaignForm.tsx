@@ -7,7 +7,6 @@ import {
   FiAtSign,
   FiTarget,
   FiLock,
-  FiFileText,
   FiGift,
 } from "react-icons/fi";
 import { FaCircleCheck, FaCircleXmark, FaIndianRupeeSign } from "react-icons/fa6";
