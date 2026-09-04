@@ -121,6 +121,11 @@ export function ResourcesPage() {
                   </div>
 
                   <div className="mt-3 flex flex-wrap gap-2">
+                    {item.category ? (
+                      <span className="inline-flex items-center rounded-full bg-indigo-50 border border-indigo-200 px-2.5 py-0.5 text-xs font-bold text-indigo-700">
+                        🏷️ {item.category}
+                      </span>
+                    ) : null}
                     {item.campaignGoal ? (
                       <span className="inline-flex items-center rounded-full bg-purple-50 border border-purple-200 px-2.5 py-0.5 text-xs font-bold text-purple-700">
                         🎯 Goal: {item.campaignGoal}

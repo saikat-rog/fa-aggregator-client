@@ -3,6 +3,7 @@ import {
   FiBriefcase,
   FiFileText,
   FiMail,
+  FiLock,
   FiGlobe,
   FiCheckCircle,
   FiAtSign,
@@ -191,6 +192,49 @@ export function StoreForm() {
     }
   };
 
+    // Read-only view if advisor already submitted store listing application
+  if (existingStore) {
+    return (
+      <div className="rounded-3xl border border-slate-200 bg-white p-6 md:p-10 shadow-sm">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-5 mb-6">
+          <div>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200 px-3 py-1 text-xs font-bold text-emerald-800">
+              <FiCheckCircle className="h-3.5 w-3.5 text-emerald-600" />
+              Store Application Submitted
+            </span>
+            <h2 className="text-2xl font-bold text-slate-900 mt-2">Your Store Application</h2>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Status: <span className="font-bold uppercase text-blue-700">{existingStore.status}</span>
+            </p>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-amber-200 bg-amber-50/60 p-4 text-amber-900 text-xs font-medium mb-6 flex items-start gap-2.5">
+          <FiLock className="h-4 w-4 text-amber-700 shrink-0 mt-0.5" />
+          <div>
+            <p className="font-bold">Store applications cannot be edited or re-submitted.</p>
+            <p className="mt-0.5 text-amber-800">
+              Advisors can only have one active store listing application. If you need assistance, please contact support.
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-4 text-sm text-slate-800">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3.5">
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Company / Store Name</p>
+              <p className="text-base font-bold text-slate-900 mt-1">{existingStore.companyName || "—"}</p>
+            </div>
+
+            <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3.5">
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Store Handle</p>
+              <p className="text-base font-bold text-blue-700 mt-1">@{existingStore.storeUsername || "—"}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitAttempted(true);
