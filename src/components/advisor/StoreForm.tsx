@@ -323,29 +323,7 @@ export function StoreForm() {
         </span>
       </div>
 
-      {existingStore ? (
-        <div className="mb-6 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-blue-900 text-sm font-medium flex items-center justify-between">
-          <div>
-            <p className="font-bold">
-              Store Status:{" "}
-              <span className="uppercase text-blue-700">{existingStore.status}</span>
-            </p>
-            {existingStore.editStatus === "pending" ? (
-              <p className="text-xs text-amber-700 mt-1 font-semibold">
-                ⏳ You have proposed updates currently pending Admin approval.
-              </p>
-            ) : existingStore.status === "approved" ? (
-              <p className="text-xs text-emerald-700 mt-1 font-semibold">
-                ✓ Your store requirement is live on the site. You can submit updates below.
-              </p>
-            ) : (
-              <p className="text-xs text-slate-600 mt-1">
-                Your store requirement is under initial Admin review.
-              </p>
-            )}
-          </div>
-        </div>
-      ) : null}
+
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid gap-6 md:grid-cols-2">
