@@ -71,7 +71,8 @@ export function StoreForm() {
   useEffect(() => {
     const loadMyStore = async () => {
       try {
-        const req = await getMyRequirementApi();
+        const res = await getMyRequirementApi();
+        const req = res?.requirement;
         if (req) {
           setExistingStore(req);
           const activeFields = req.pendingEdit ? { ...req, ...req.pendingEdit } : req;
@@ -259,14 +260,14 @@ export function StoreForm() {
           res.msg || "Your store requirement updates have been submitted for Admin approval!"
         );
         const updated = await getMyRequirementApi();
-        if (updated) setExistingStore(updated);
+        if (updated?.requirement) setExistingStore(updated.requirement);
       } else {
         const res = await submitBusinessRequirement(payload);
         setSuccessMessage(
           res.msg || "Your store application was submitted and sent for Admin review!"
         );
         const created = await getMyRequirementApi();
-        if (created) setExistingStore(created);
+        if (created?.requirement) setExistingStore(created.requirement);
       }
       setSubmitAttempted(false);
     } catch (err: unknown) {

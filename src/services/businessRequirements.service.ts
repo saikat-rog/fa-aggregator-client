@@ -181,8 +181,13 @@ export async function getApprovedBusinessRequirementByIdPublic(id: string) {
 
 export async function getMyRequirementApi() {
   const response = await api.get("/business-requirements/my-requirement");
-  const data = response.data?.data?.requirement ?? response.data?.requirement ?? null;
-  return data ? (data as BusinessRequirementItem) : null;
+  const data = response.data?.data ?? response.data;
+  const single = data?.requirement ?? null;
+  const list = data?.requirements ?? (single ? [single] : []);
+  return {
+    requirement: single ? (single as BusinessRequirementItem) : null,
+    requirements: list as BusinessRequirementItem[],
+  };
 }
 
 export async function updateMyRequirementApi(payload: BusinessRequirementPayload) {

@@ -20,6 +20,9 @@ const ADVISOR_DECLARATION_MESSAGE =
 
 const persistAuthSession = (authResponse: AuthSuccessPayload) => {
   localStorage.setItem("token", authResponse.accessToken);
+  if ((authResponse as any).email) {
+    localStorage.setItem("userEmail", (authResponse as any).email);
+  }
   localStorage.setItem("role", authResponse.role);
   localStorage.setItem(
     "roles",

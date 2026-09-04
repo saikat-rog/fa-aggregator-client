@@ -1,6 +1,28 @@
+export function getLoggedInUserEmail(): string {
+  if (typeof window === "undefined") return "";
+  const stored = localStorage.getItem("userEmail");
+  if (stored) return stored;
+  const token = localStorage.getItem("token");
+  if (!token) return "";
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    if (payload && typeof payload.email === "string") {
+      localStorage.setItem("userEmail", payload.email);
+      return payload.email;
+    }
+  } catch {
+    // ignore
+  }
+  return "";
+}
+
 import { useMemo, useState, useEffect } from "react";
 import {
   FiBriefcase,
+  FiChevronDown,
+  FiChevronUp,
+  FiExternalLink,
+  FiEye,
   FiMail,
   FiGlobe,
   FiCheckCircle,
@@ -98,11 +120,15 @@ export function CampaignForm() {
   const [isCheckingStoreUsername, setIsCheckingStoreUsername] = useState(false);
   const [isStoreUsernameAvailable, setIsStoreUsernameAvailable] = useState<boolean | null>(null);
 
+  const [expandedCampId, setExpandedCampId] = useState<string | null>(null);
+
   const loadMyCampaigns = async () => {
     try {
-      const req = await getMyRequirementApi();
-      if (req) {
-        setMyCampaigns([req]);
+      const res = await getMyRequirementApi();
+      if (res && res.requirements) {
+        setMyCampaigns(res.requirements);
+      } else if (res && res.requirement) {
+        setMyCampaigns([res.requirement]);
       }
     } catch {
       // ignore
@@ -111,6 +137,10 @@ export function CampaignForm() {
 
   useEffect(() => {
     void loadMyCampaigns();
+    const accountEmail = getLoggedInUserEmail();
+    if (accountEmail) {
+      setForm((prev) => ({ ...prev, businessEmail: accountEmail }));
+    }
   }, []);
 
   const fieldErrors = useMemo(() => {
@@ -478,17 +508,24 @@ export function CampaignForm() {
                   <input
                     id="businessEmail"
                     type="email"
+                    readOnly={Boolean(getLoggedInUserEmail())}
                     value={form.businessEmail}
                     onChange={(e) => handleChange("businessEmail", e.target.value)}
                     placeholder="contact@company.com"
                     className={`w-full rounded-xl border ${
-                      submitAttempted && fieldErrors.businessEmail
-                        ? "border-rose-400 bg-rose-50/30"
-                        : "border-slate-200 bg-white"
-                    } pl-10 pr-4 py-2.5 text-sm text-slate-900 outline-none focus:border-blue-600`}
+                      getLoggedInUserEmail()
+                        ? "border-emerald-200 bg-emerald-50/40 text-slate-700 cursor-not-allowed"
+                        : submitAttempted && fieldErrors.businessEmail
+                        ? "border-rose-400 bg-rose-50/30 text-slate-900"
+                        : "border-slate-200 bg-white text-slate-900"
+                    } pl-10 pr-4 py-2.5 text-sm outline-none focus:border-blue-600`}
                   />
                 </div>
-                {submitAttempted && fieldErrors.businessEmail ? (
+                {getLoggedInUserEmail() ? (
+                  <p className="mt-1 text-[11px] font-semibold text-emerald-700">
+                    ✓ Account email auto-filled from your logged in session.
+                  </p>
+                ) : submitAttempted && fieldErrors.businessEmail ? (
                   <p className="mt-1 text-xs font-medium text-rose-600">{fieldErrors.businessEmail}</p>
                 ) : null}
               </div>
@@ -533,24 +570,156 @@ export function CampaignForm() {
         </form>
       </div>
 
-      {/* Previously Posted Campaigns Section (if user has any) */}
+      {/* Previously Posted Campaigns Section with Detailed View */}
       {myCampaigns.length > 0 ? (
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h3 className="text-lg font-bold text-slate-900 mb-4">Your Posted Campaigns</h3>
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 md:p-8 shadow-sm space-y-4">
+          <div>
+            <h3 className="text-xl font-bold text-slate-900">Your Posted Campaigns</h3>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Click any campaign below to view its full details and live page link.
+            </p>
+          </div>
+
           <div className="space-y-4">
-            {myCampaigns.map((camp) => (
-              <div key={camp._id} className="rounded-2xl border border-slate-100 bg-slate-50/70 p-4">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-bold text-slate-900">{camp.companyName}</h4>
-                  <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-700 uppercase">
-                    {camp.status}
-                  </span>
+            {myCampaigns.map((camp) => {
+              const isExpanded = expandedCampId === camp._id;
+              return (
+                <div
+                  key={camp._id}
+                  className="rounded-2xl border border-slate-200/80 bg-slate-50/50 overflow-hidden transition-all shadow-2xs"
+                >
+                  {/* Card Header */}
+                  <div className="p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div className="space-y-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h4 className="text-lg font-bold text-slate-900">
+                          {camp.companyName}
+                        </h4>
+                        {camp.storeUsername ? (
+                          <span className="text-xs font-bold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200">
+                            @{camp.storeUsername}
+                          </span>
+                        ) : null}
+                        <span
+                          className={`rounded-full px-2.5 py-0.5 text-xs font-bold uppercase ${
+                            camp.status === "approved"
+                              ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
+                              : "bg-amber-100 text-amber-800 border border-amber-200"
+                          }`}
+                        >
+                          {camp.status === "approved" ? "Live / Approved" : "Pending Review"}
+                        </span>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600 pt-1">
+                        <span className="font-semibold text-slate-800">🏷️ {camp.category || "Cafe/Restaurant"}</span>
+                        <span>•</span>
+                        <span>🎯 Goal: <strong>{camp.campaignGoal || "—"}</strong></span>
+                        {camp.rewardType ? (
+                          <>
+                            <span>•</span>
+                            <span>🎁 Reward: <strong>{camp.rewardType}</strong></span>
+                          </>
+                        ) : null}
+                        {camp.budget ? (
+                          <>
+                            <span>•</span>
+                            <span>💰 <strong>{camp.budget}</strong></span>
+                          </>
+                        ) : null}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto justify-end pt-2 sm:pt-0 border-t sm:border-0 border-slate-200">
+                      {camp.storeUsername ? (
+                        <a
+                          href={`/campaign/${camp.storeUsername}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-700 transition hover:bg-blue-100"
+                        >
+                          <FiExternalLink className="h-3.5 w-3.5" />
+                          Live Page
+                        </a>
+                      ) : null}
+
+                      <button
+                        type="button"
+                        onClick={() => setExpandedCampId(isExpanded ? null : camp._id)}
+                        className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                      >
+                        <FiEye className="h-3.5 w-3.5" />
+                        {isExpanded ? "Hide Details" : "View Full Details"}
+                        {isExpanded ? (
+                          <FiChevronUp className="h-4 w-4 ml-0.5" />
+                        ) : (
+                          <FiChevronDown className="h-4 w-4 ml-0.5" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Expanded Detailed View */}
+                  {isExpanded ? (
+                    <div className="border-t border-slate-200/80 bg-white p-5 space-y-4 text-sm text-slate-800">
+                      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3">
+                          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Company / Brand</p>
+                          <p className="text-sm font-bold text-slate-900 mt-0.5">{camp.companyName}</p>
+                        </div>
+
+                        <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3">
+                          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Campaign Handle</p>
+                          <p className="text-sm font-bold text-blue-700 mt-0.5">@{camp.storeUsername || "—"}</p>
+                        </div>
+
+                        <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3">
+                          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Category</p>
+                          <p className="text-sm font-semibold text-slate-800 mt-0.5">🏷️ {camp.category || "Cafe/Restaurant"}</p>
+                        </div>
+
+                        <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3">
+                          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Campaign Goal</p>
+                          <p className="text-sm font-semibold text-slate-800 mt-0.5">🎯 {camp.campaignGoal || "—"}</p>
+                        </div>
+
+                        <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3">
+                          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Reward Type</p>
+                          <p className="text-sm font-semibold text-slate-800 mt-0.5">🎁 {camp.rewardType || "Both"}</p>
+                        </div>
+
+                        <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3">
+                          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Budget</p>
+                          <p className="text-sm font-semibold text-slate-800 mt-0.5">💰 {camp.budget || "Not specified"}</p>
+                        </div>
+                      </div>
+
+                      {/* What Creators Should Do / Detailed Requirements */}
+                      <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-4">
+                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
+                          What Creators Should Do
+                        </p>
+                        <p className="text-sm font-medium text-slate-800 leading-relaxed whitespace-pre-wrap">
+                          {camp.detailedRequirements || "No detailed instructions provided."}
+                        </p>
+                      </div>
+
+                      {/* Contact & URL Row */}
+                      <div className="grid gap-4 sm:grid-cols-2 pt-2 border-t border-slate-100 text-xs">
+                        <div>
+                          <p className="font-bold text-slate-400 uppercase tracking-wider">Contact / Business Email</p>
+                          <p className="text-sm font-semibold text-slate-800 mt-0.5">{camp.businessEmail || "—"}</p>
+                        </div>
+                        <div>
+                          <p className="font-bold text-slate-400 uppercase tracking-wider">Website / Target Link</p>
+                          <p className="text-sm font-semibold text-blue-700 truncate mt-0.5">{camp.url || "—"}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ) : null}
                 </div>
-                <p className="text-xs text-slate-500 mt-1">
-                  Category: <span className="font-semibold text-slate-700">{camp.category || "Cafe/Restaurant"}</span> | Goal: <span className="font-semibold text-slate-700">{camp.campaignGoal}</span>
-                </p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       ) : null}

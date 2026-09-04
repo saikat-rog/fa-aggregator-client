@@ -23,8 +23,27 @@ import { SocialShareButtons } from "../../components/resources/SocialShareButton
 const getProxiedImageUrl = (url: string) =>
   `https://images.weserv.nl/?url=${encodeURIComponent(url)}`;
 
+function getLoggedInUserEmail(): string {
+  if (typeof window === "undefined") return "";
+  const stored = localStorage.getItem("userEmail");
+  if (stored) return stored;
+  const token = localStorage.getItem("token");
+  if (!token) return "";
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    if (payload && typeof payload.email === "string") {
+      localStorage.setItem("userEmail", payload.email);
+      return payload.email;
+    }
+  } catch {
+    // ignore
+  }
+  return "";
+}
+
 export function ResourceDetailPage() {
   const navigate = useNavigate();
+  const isAuthenticated = Boolean(localStorage.getItem("token"));
   const { id, storeUsername } = useParams<{ id?: string; storeUsername?: string }>();
   const identifier = storeUsername || id;
   const [requirement, setRequirement] = useState<ApprovedBusinessRequirementItem | null>(null);
@@ -85,15 +104,17 @@ export function ResourceDetailPage() {
 
   const handleSendMessageSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!msgName.trim() || !msgEmail.trim() || !msgText.trim()) return;
+    if (!msgName.trim() || !msgText.trim()) return;
+    if (!isAuthenticated && !msgEmail.trim()) return;
 
+    const emailToUse = msgEmail.trim() || getLoggedInUserEmail() || "";
     const recipientEmail = requirement?.businessEmail || "";
     const companyName = requirement?.companyName || "Campaign";
 
     if (recipientEmail) {
       const mailtoSubject = encodeURIComponent(`Application for Campaign: ${companyName}`);
       const mailtoBody = encodeURIComponent(
-        `Name: ${msgName.trim()}\nEmail: ${msgEmail.trim()}\n\nMessage / Proposal:\n${msgText.trim()}`
+        `Name: ${msgName.trim()}${emailToUse ? `\nEmail: ${emailToUse}` : ""}\n\nMessage / Proposal:\n${msgText.trim()}`
       );
       // Use location.href instead of window.open to prevent popup blockers
       window.location.href = `mailto:${recipientEmail}?subject=${mailtoSubject}&body=${mailtoBody}`;
@@ -289,6 +310,8 @@ export function ResourceDetailPage() {
                 type="button"
                 onClick={() => {
                   setMsgSent(false);
+                  const accEmail = getLoggedInUserEmail();
+                  if (accEmail) setMsgEmail(accEmail);
                   setShowMessageModal(true);
                 }}
                 className="group w-full rounded-full bg-slate-900 hover:bg-slate-800 text-white p-2.5 sm:p-3 pr-6 flex items-center justify-between shadow-md transition-all duration-200 active:scale-[0.98] cursor-pointer"
@@ -349,7 +372,9 @@ export function ResourceDetailPage() {
                 Apply to {requirement?.companyName}
               </h3>
               <p className="text-xs text-slate-500 mt-1">
-                No login required. Send your application message directly to the campaign manager.
+                {isAuthenticated
+                  ? "Send your application message directly to the campaign manager."
+                  : "No login required. Send your application message directly to the campaign manager."}
               </p>
             </div>
 
@@ -384,19 +409,21 @@ export function ResourceDetailPage() {
                   />
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Your Email *
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    value={msgEmail}
-                    onChange={(e) => setMsgEmail(e.target.value)}
-                    placeholder="you@domain.com"
-                    className="w-full rounded-xl border border-slate-200 p-3 text-sm outline-none focus:border-blue-600"
-                  />
-                </div>
+                {isAuthenticated ? null : (
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      Your Email *
+                    </label>
+                    <input
+                      type="email"
+                      required={!isAuthenticated}
+                      value={msgEmail}
+                      onChange={(e) => setMsgEmail(e.target.value)}
+                      placeholder="you@domain.com"
+                      className="w-full rounded-xl border border-slate-200 p-3 text-sm outline-none focus:border-blue-600"
+                    />
+                  </div>
+                )}
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
