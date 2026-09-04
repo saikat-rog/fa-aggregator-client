@@ -108,9 +108,16 @@ export function ResourcesPage() {
               <article key={item._id} className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                 <div>
                   <div className="flex items-start justify-between gap-2">
-                    <Link to={`/campaign/${itemSlug}`} className="group">
-                      <h2 className="text-2xl font-semibold text-slate-900 group-hover:text-blue-700 transition">{item.companyName}</h2>
-                    </Link>
+                    <div>
+                      <Link to={`/campaign/${itemSlug}`} className="group flex items-center gap-2 flex-wrap">
+                        <h2 className="text-2xl font-semibold text-slate-900 group-hover:text-blue-700 transition">{item.companyName}</h2>
+                        {item.storeUsername ? (
+                          <span className="text-xs font-bold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200">
+                            @{item.storeUsername}
+                          </span>
+                        ) : null}
+                      </Link>
+                    </div>
                     <Link
                       to={`/campaign/${itemSlug}`}
                       className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-blue-50 hover:text-blue-700 shrink-0"
@@ -178,6 +185,14 @@ export function ResourcesPage() {
                       </a>
                     </p>
                   ) : null}
+                  {item.url ? (
+                    <p className="mt-1 text-sm text-slate-600 truncate">
+                      <span className="font-semibold text-slate-700">Website / Link:</span>{" "}
+                      <a href={item.url.startsWith("http") ? item.url : `https://${item.url}`} target="_blank" rel="noreferrer" className="text-blue-700 hover:underline font-medium">
+                        {item.url}
+                      </a>
+                    </p>
+                  ) : null}
 
                   {item.socialLinks && (item.socialLinks.instagram || item.socialLinks.youtube || item.socialLinks.telegram) ? (
                     <div className="mt-3 flex flex-wrap gap-2 items-center">
@@ -216,7 +231,7 @@ export function ResourcesPage() {
                   ) : null}
 
                   {item.detailedRequirements ? (
-                    <p className="mt-3 text-sm text-slate-600 line-clamp-3"><span className="font-semibold text-slate-700">Detailed Requirements:</span> {item.detailedRequirements}</p>
+                    <div className="mt-3 text-sm text-slate-600 rounded-xl bg-slate-50 p-3 border border-slate-100"><span className="font-bold text-slate-700 block mb-1">Detailed Requirements:</span> <p className="whitespace-pre-wrap leading-relaxed">{item.detailedRequirements}</p></div>
                   ) : null}
                 </div>
 

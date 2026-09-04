@@ -68,7 +68,9 @@ export function ResourceDetailPage() {
     if (isApprovedAdvisor) {
       setMsgSent(false);
       const accEmail = getLoggedInUserEmail();
+      const accName = localStorage.getItem("userName") || requirement?.postedByAdvisorName || "Approved Advisor";
       if (accEmail) setMsgEmail(accEmail);
+      if (accName) setMsgName(accName);
       setShowMessageModal(true);
     } else {
       setShowAdvisorAuthModal(true);
@@ -374,16 +376,16 @@ export function ResourceDetailPage() {
                 </>
               ) : (
                 /* Contact Store Email Pill (Stores only) */
-                requirement.businessEmail ? (
+                (requirement.businessEmail || (requirement as any).emailForContact) ? (
                   <a
-                    href={`mailto:${requirement.businessEmail}`}
+                    href={`mailto:${requirement.businessEmail || (requirement as any).emailForContact}`}
                     className="group w-full rounded-full bg-slate-900 hover:bg-slate-800 text-white p-2.5 sm:p-3 pr-6 flex items-center justify-between shadow-md transition-all duration-200 active:scale-[0.98]"
                   >
                     <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/20 text-white shadow-xs">
                       <FiMail className="h-5 w-5" />
                     </div>
-                    <span className="flex-1 text-center font-bold text-base sm:text-lg px-2">
-                      Contact Store ({requirement.businessEmail})
+                    <span className="flex-1 text-center font-bold text-base sm:text-lg px-2 truncate">
+                      Contact Store ({requirement.businessEmail || (requirement as any).emailForContact})
                     </span>
                     <FiMail className="h-5 w-5 text-white/80 group-hover:text-white transition" />
                   </a>
@@ -391,7 +393,7 @@ export function ResourceDetailPage() {
               )}
 
               {/* Primary Website Link (Public) */}
-              {requirement.url ? (
+              {(requirement.url || (requirement as any).personalWebsite || (requirement as any).website) ? (
                 <button
                   type="button"
                   disabled={tracking}
@@ -401,7 +403,7 @@ export function ResourceDetailPage() {
                   <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white shadow-xs font-bold">
                     <FiExternalLink className="h-5 w-5" />
                   </div>
-                  <span className="flex-1 text-center font-bold text-slate-900 text-base sm:text-lg px-2">
+                  <span className="flex-1 text-center font-bold text-slate-900 text-base sm:text-lg px-2 truncate">
                     {tracking ? "Opening Website..." : `View ${requirement.companyName} Website`}
                   </span>
                   <FiExternalLink className="h-5 w-5 text-slate-600 group-hover:text-blue-700 transition" />
@@ -460,34 +462,42 @@ export function ResourceDetailPage() {
               </div>
             ) : (
               <form onSubmit={handleSendMessageSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Your Name *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={msgName}
-                    onChange={(e) => setMsgName(e.target.value)}
-                    placeholder="e.g. John Doe"
-                    className="w-full rounded-xl border border-slate-200 p-3 text-sm outline-none focus:border-blue-600"
-                  />
-                </div>
-
-                {isAuthenticated ? null : (
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Your Email *
-                    </label>
-                    <input
-                      type="email"
-                      required={!isAuthenticated}
-                      value={msgEmail}
-                      onChange={(e) => setMsgEmail(e.target.value)}
-                      placeholder="you@domain.com"
-                      className="w-full rounded-xl border border-slate-200 p-3 text-sm outline-none focus:border-blue-600"
-                    />
+                {isAuthenticated ? (
+                  <div className="rounded-2xl border border-blue-100 bg-blue-50/70 p-3.5 flex flex-col gap-1 text-xs">
+                    <span className="font-bold text-blue-950">Applying as Approved Advisor</span>
+                    <span className="font-medium text-blue-800">
+                      {msgEmail || getLoggedInUserEmail() || "Account Email"}
+                    </span>
                   </div>
+                ) : (
+                  <>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">
+                        Your Name *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={msgName}
+                        onChange={(e) => setMsgName(e.target.value)}
+                        placeholder="e.g. John Doe"
+                        className="w-full rounded-xl border border-slate-200 p-3 text-sm outline-none focus:border-blue-600"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">
+                        Your Email *
+                      </label>
+                      <input
+                        type="email"
+                        required
+                        value={msgEmail}
+                        onChange={(e) => setMsgEmail(e.target.value)}
+                        placeholder="you@domain.com"
+                        className="w-full rounded-xl border border-slate-200 p-3 text-sm outline-none focus:border-blue-600"
+                      />
+                    </div>
+                  </>
                 )}
 
                 <div>
