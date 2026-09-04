@@ -85,13 +85,20 @@ export function ResourceDetailPage() {
 
   const handleSendMessageSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!msgName || !msgEmail || !msgText || !requirement?.businessEmail) return;
+    if (!msgName.trim() || !msgEmail.trim() || !msgText.trim()) return;
 
-    const mailtoSubject = encodeURIComponent(`Application for Campaign: ${requirement.companyName}`);
-    const mailtoBody = encodeURIComponent(
-      `Name: ${msgName}\nEmail: ${msgEmail}\n\nMessage / Proposal:\n${msgText}`
-    );
-    window.open(`mailto:${requirement.businessEmail}?subject=${mailtoSubject}&body=${mailtoBody}`, "_blank");
+    const recipientEmail = requirement?.businessEmail || "";
+    const companyName = requirement?.companyName || "Campaign";
+
+    if (recipientEmail) {
+      const mailtoSubject = encodeURIComponent(`Application for Campaign: ${companyName}`);
+      const mailtoBody = encodeURIComponent(
+        `Name: ${msgName.trim()}\nEmail: ${msgEmail.trim()}\n\nMessage / Proposal:\n${msgText.trim()}`
+      );
+      // Use location.href instead of window.open to prevent popup blockers
+      window.location.href = `mailto:${recipientEmail}?subject=${mailtoSubject}&body=${mailtoBody}`;
+    }
+
     setMsgSent(true);
   };
 
