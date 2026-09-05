@@ -71,7 +71,8 @@ export function CampaignApplicationsPanel({ params, setParam }: Props) {
           >
             <option value="">All Statuses</option>
             <option value="pending">Pending</option>
-            <option value="responded">Responded</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
           </select>
         </div>
       </div>
@@ -137,8 +138,10 @@ export function CampaignApplicationsPanel({ params, setParam }: Props) {
                   <td className="px-3 py-3 whitespace-nowrap">
                     <span
                       className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase ${
-                        app.status === "responded"
+                        app.status === "approved" || app.status === "responded"
                           ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
+                          : app.status === "rejected"
+                          ? "bg-rose-100 text-rose-800 border border-rose-200"
                           : "bg-amber-100 text-amber-800 border border-amber-200"
                       }`}
                     >

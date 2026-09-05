@@ -13,7 +13,7 @@ import {
 } from "../../services/businessRequirements.service";
 import {
   getMyReceivedCampaignApplicationsApi,
-  markCampaignApplicationRespondedApi,
+  updateCampaignApplicationStatusApi,
   type CampaignApplicationItem,
 } from "../../services/campaignApplications.service";
 import { DailyGrowthSection } from "./dashboard/DailyGrowthSection";
@@ -99,10 +99,10 @@ const UserDashboard = () => {
     void loadMyCampaignsAndApps();
   }, []);
 
-  const handleMarkAppResponded = async (appId: string) => {
+  const handleUpdateAppStatus = async (appId: string, status: "approved" | "rejected" | "pending") => {
     try {
       setUpdatingAppId(appId);
-      await markCampaignApplicationRespondedApi(appId);
+      await updateCampaignApplicationStatusApi(appId, status);
       await loadMyCampaignsAndApps();
     } catch {
       // ignore
@@ -476,7 +476,7 @@ const UserDashboard = () => {
                             <table className="w-full text-left text-xs text-slate-700">
                               <thead className="bg-slate-100 text-[11px] font-bold uppercase tracking-wider text-slate-600">
                                 <tr>
-                                  <th className="px-3 py-2.5">Applicant</th>
+                                  <th className="px-3 py-2.5">Applicant & Phone</th>
                                   <th className="px-3 py-2.5">Proposal Message</th>
                                   <th className="px-3 py-2.5">Date</th>
                                   <th className="px-3 py-2.5">Status</th>
@@ -518,19 +518,29 @@ const UserDashboard = () => {
                                       </span>
                                     </td>
                                     <td className="px-3 py-3 text-right whitespace-nowrap">
-                                      {app.status === "pending" ? (
-                                        <button
-                                          type="button"
-                                          disabled={updatingAppId === app._id}
-                                          onClick={() => void handleMarkAppResponded(app._id)}
-                                          className="rounded-lg bg-emerald-600 px-2.5 py-1 text-[11px] font-bold text-white shadow-2xs hover:bg-emerald-700 transition disabled:opacity-60 cursor-pointer"
-                                        >
-                                          {updatingAppId === app._id ? "Saving..." : "Mark Responded"}
-                                        </button>
-                                      ) : (
-                                        <span className="text-[11px] font-semibold text-slate-400">Responded</span>
-                                      )}
-                                    </td>
+                                       <div className="flex items-center justify-end gap-1.5">
+                                         {app.status !== "approved" && app.status !== "responded" ? (
+                                           <button
+                                             type="button"
+                                             disabled={updatingAppId === app._id}
+                                             onClick={() => void handleUpdateAppStatus(app._id, "approved")}
+                                             className="rounded-lg bg-emerald-600 px-2.5 py-1 text-[11px] font-bold text-white shadow-2xs hover:bg-emerald-700 transition disabled:opacity-60 cursor-pointer"
+                                           >
+                                             Approve
+                                           </button>
+                                         ) : null}
+                                         {app.status !== "rejected" ? (
+                                           <button
+                                             type="button"
+                                             disabled={updatingAppId === app._id}
+                                             onClick={() => void handleUpdateAppStatus(app._id, "rejected")}
+                                             className="rounded-lg bg-rose-600 px-2.5 py-1 text-[11px] font-bold text-white shadow-2xs hover:bg-rose-700 transition disabled:opacity-60 cursor-pointer"
+                                           >
+                                             Reject
+                                           </button>
+                                         ) : null}
+                                       </div>
+                                     </td>
                                   </tr>
                                 ))}
                               </tbody>

@@ -11,8 +11,11 @@ export interface CampaignApplicationItem {
     campaignGoal?: string;
     rewardType?: string;
     budget?: string;
+    url?: string;
+    businessEmail?: string;
+    detailedRequirements?: string;
   };
-  campaignOwner: string;
+  campaignOwner: string | { _id: string; name?: string; email?: string };
   applicant: {
     _id: string;
     name?: string;
@@ -24,9 +27,11 @@ export interface CampaignApplicationItem {
   };
   applicantName: string;
   applicantEmail: string;
+  applicantPhone?: string;
   message: string;
-  status: "pending" | "responded";
-  respondedAt: string | null;
+  status: "pending" | "approved" | "rejected" | "responded";
+  respondedAt?: string | null;
+  updatedStatusAt?: string | null;
   createdAt: string;
   updatedAt?: string;
 }
@@ -43,8 +48,14 @@ export interface MyReceivedCampaignApplicationsResponse {
   pagination: CampaignApplicationPagination;
 }
 
-export async function submitCampaignApplicationApi(campaignId: string, message: string) {
-  const response = await api.post(`/campaign-applications/${campaignId}/apply`, { message });
+export interface MySubmittedCampaignApplicationsResponse {
+  applications: CampaignApplicationItem[];
+  totalApplied: number;
+  pagination: CampaignApplicationPagination;
+}
+
+export async function submitCampaignApplicationApi(campaignId: string, message: string, phone?: string) {
+  const response = await api.post(`/campaign-applications/${campaignId}/apply`, { message, phone });
   return response.data;
 }
 
@@ -59,9 +70,24 @@ export async function getMyReceivedCampaignApplicationsApi(params?: {
   return payload as MyReceivedCampaignApplicationsResponse;
 }
 
+export async function updateCampaignApplicationStatusApi(applicationId: string, status: "approved" | "rejected" | "pending") {
+  const response = await api.patch(`/campaign-applications/${applicationId}/status`, { status });
+  return response.data;
+}
+
 export async function markCampaignApplicationRespondedApi(applicationId: string) {
   const response = await api.patch(`/campaign-applications/${applicationId}/mark-responded`, {});
   return response.data;
+}
+
+export async function getMySubmittedCampaignApplicationsApi(params?: {
+  page?: number;
+  limit?: number;
+  status?: string;
+}) {
+  const response = await api.get("/campaign-applications/my-applications", { params });
+  const payload = response.data?.data ?? response.data;
+  return payload as MySubmittedCampaignApplicationsResponse;
 }
 
 export async function getAdminCampaignApplicationsApi(params?: {

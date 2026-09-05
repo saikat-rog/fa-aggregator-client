@@ -23,6 +23,14 @@ import {
 } from "../../services/businessRequirements.service";
 import { SocialShareButtons } from "../../components/resources/SocialShareButtons";
 
+const isValidPhone = (phone: string): boolean => {
+  const trimmed = phone.trim();
+  if (!trimmed) return false;
+  if (!/^[+\d\s().-]+$/.test(trimmed)) return false;
+  const digitsOnly = trimmed.replace(/\D/g, "");
+  return digitsOnly.length >= 7 && digitsOnly.length <= 15;
+};
+
 const getProxiedImageUrl = (url: string) =>
   `https://images.weserv.nl/?url=${encodeURIComponent(url)}`;
 
@@ -58,6 +66,7 @@ export function ResourceDetailPage() {
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [msgName, setMsgName] = useState("");
   const [msgEmail, setMsgEmail] = useState("");
+  const [msgPhone, setMsgPhone] = useState("");
   const [msgText, setMsgText] = useState("");
   const [msgSent, setMsgSent] = useState(false);
   const [isSubmittingApp, setIsSubmittingApp] = useState(false);
@@ -71,8 +80,10 @@ export function ResourceDetailPage() {
       setMsgSent(false);
       const accEmail = getLoggedInUserEmail();
       const accName = localStorage.getItem("userName") || requirement?.postedByAdvisorName || "Approved Advisor";
+      const accPhone = localStorage.getItem("userPhone") || localStorage.getItem("phone") || "";
       if (accEmail) setMsgEmail(accEmail);
       if (accName) setMsgName(accName);
+      if (accPhone) setMsgPhone(accPhone);
       setShowMessageModal(true);
     } else {
       setShowAdvisorAuthModal(true);
@@ -160,10 +171,22 @@ export function ResourceDetailPage() {
     e.preventDefault();
     if (!msgText.trim() || !requirement?._id) return;
 
+    if (!msgPhone.trim()) {
+      setAppSubmitError("Phone number is required to submit application.");
+      return;
+    }
+
+    if (!isValidPhone(msgPhone)) {
+      setAppSubmitError("Please enter a valid phone number with 7–15 digits (e.g. +91 9876543210).");
+      return;
+    }
+
     try {
       setIsSubmittingApp(true);
       setAppSubmitError("");
-      await submitCampaignApplicationApi(requirement._id, msgText.trim());
+      await submitCampaignApplicationApi(requirement._id, msgText.trim(), msgPhone.trim());
+      localStorage.setItem("userPhone", msgPhone.trim());
+      localStorage.setItem("phone", msgPhone.trim());
       setMsgSent(true);
     } catch (err: any) {
       const msg = err?.response?.data?.msg || "Failed to submit application proposal.";
@@ -462,11 +485,9 @@ export function ResourceDetailPage() {
                   </div>
                 ) : null}
                 {isAuthenticated ? (
-                  <div className="rounded-2xl border border-blue-100 bg-blue-50/70 p-3.5 flex flex-col gap-1 text-xs">
+                  <div className="rounded-2xl border border-blue-100 bg-blue-50/70 p-3.5 flex flex-col gap-1 text-xs space-y-1">
                     <span className="font-bold text-blue-950">Applying as Approved Advisor</span>
-                    <span className="font-medium text-blue-800">
-                      {msgEmail || getLoggedInUserEmail() || "Account Email"}
-                    </span>
+                    <div className="text-blue-800 font-medium">Email: {msgEmail || getLoggedInUserEmail() || "Account Email"}</div>
                   </div>
                 ) : (
                   <>
@@ -498,6 +519,32 @@ export function ResourceDetailPage() {
                     </div>
                   </>
                 )}
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Phone Number *
+                  </label>
+                  <input
+                    type="tel"
+                    required
+                    value={msgPhone}
+                    onChange={(e) => {
+                      setMsgPhone(e.target.value);
+                      if (appSubmitError) setAppSubmitError("");
+                    }}
+                    placeholder="e.g. +91 9876543210"
+                    className={`w-full rounded-xl border ${
+                      msgPhone.trim() && !isValidPhone(msgPhone)
+                        ? "border-rose-400 bg-rose-50/20"
+                        : "border-slate-200"
+                    } p-3 text-sm outline-none focus:border-blue-600`}
+                  />
+                  {msgPhone.trim() && !isValidPhone(msgPhone) ? (
+                    <p className="mt-1 text-xs text-rose-600 font-medium">
+                      Please enter a valid phone number (7–15 digits, e.g. +91 9876543210).
+                    </p>
+                  ) : null}
+                </div>
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">

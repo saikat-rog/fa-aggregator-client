@@ -35,7 +35,7 @@ import { FaCircleCheck, FaCircleXmark, FaIndianRupeeSign } from "react-icons/fa6
 import { HiSparkles } from "react-icons/hi2";
 import {
   getMyReceivedCampaignApplicationsApi,
-  markCampaignApplicationRespondedApi,
+  updateCampaignApplicationStatusApi,
   type CampaignApplicationItem,
 } from "../../services/campaignApplications.service";
 import {
@@ -139,10 +139,10 @@ export function CampaignForm() {
     }
   };
 
-  const handleMarkAppResponded = async (appId: string) => {
+  const handleUpdateAppStatus = async (appId: string, status: "approved" | "rejected" | "pending") => {
     try {
       setUpdatingAppId(appId);
-      await markCampaignApplicationRespondedApi(appId);
+      await updateCampaignApplicationStatusApi(appId, status);
       await loadReceivedApplications();
     } catch {
       // ignore
@@ -780,7 +780,7 @@ export function CampaignForm() {
                                 <table className="w-full text-left text-xs text-slate-700">
                                   <thead className="bg-slate-100 text-[11px] font-bold uppercase tracking-wider text-slate-600">
                                     <tr>
-                                      <th className="px-3 py-2.5">Applicant</th>
+                                      <th className="px-3 py-2.5">Applicant & Phone</th>
                                       <th className="px-3 py-2.5">Proposal Message</th>
                                       <th className="px-3 py-2.5">Date</th>
                                       <th className="px-3 py-2.5">Status</th>
@@ -793,12 +793,15 @@ export function CampaignForm() {
                                         <td className="px-3 py-3 font-semibold text-slate-900">
                                           <div>{app.applicantName}</div>
                                           <div className="text-[11px] font-medium text-slate-500">{app.applicantEmail}</div>
+                                          {app.applicantPhone ? (
+                                            <div className="text-[11px] font-bold text-slate-700 mt-0.5">📞 {app.applicantPhone}</div>
+                                          ) : null}
                                           {app.applicant?.advisorProfile?.username ? (
                                             <a
                                               href={`/${app.applicant.advisorProfile.username}`}
                                               target="_blank"
                                               rel="noreferrer"
-                                              className="text-[11px] font-bold text-blue-700 hover:underline"
+                                              className="text-[11px] font-bold text-blue-700 hover:underline block mt-0.5"
                                             >
                                               @{app.applicant.advisorProfile.username}
                                             </a>
@@ -812,28 +815,50 @@ export function CampaignForm() {
                                         </td>
                                         <td className="px-3 py-3 whitespace-nowrap">
                                           <span
-                                            className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
-                                              app.status === "responded"
+                                            className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase ${
+                                              app.status === "approved" || app.status === "responded"
                                                 ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
+                                                : app.status === "rejected"
+                                                ? "bg-rose-100 text-rose-800 border border-rose-200"
                                                 : "bg-amber-100 text-amber-800 border border-amber-200"
                                             }`}
                                           >
-                                            {app.status}
+                                            {app.status === "responded" ? "approved" : app.status}
                                           </span>
                                         </td>
                                         <td className="px-3 py-3 text-right whitespace-nowrap">
-                                          {app.status === "pending" ? (
-                                            <button
-                                              type="button"
-                                              disabled={updatingAppId === app._id}
-                                              onClick={() => void handleMarkAppResponded(app._id)}
-                                              className="rounded-lg bg-emerald-600 px-2.5 py-1 text-[11px] font-bold text-white shadow-2xs hover:bg-emerald-700 transition disabled:opacity-60 cursor-pointer"
-                                            >
-                                              {updatingAppId === app._id ? "Saving..." : "Mark Responded"}
-                                            </button>
-                                          ) : (
-                                            <span className="text-[11px] font-semibold text-slate-400">Responded</span>
-                                          )}
+                                          <div className="flex items-center justify-end gap-1.5">
+                                            {app.status !== "approved" && app.status !== "responded" ? (
+                                              <button
+                                                type="button"
+                                                disabled={updatingAppId === app._id}
+                                                onClick={() => void handleUpdateAppStatus(app._id, "approved")}
+                                                className="rounded-lg bg-emerald-600 px-2.5 py-1 text-[11px] font-bold text-white shadow-2xs hover:bg-emerald-700 transition disabled:opacity-60 cursor-pointer"
+                                              >
+                                                Approve
+                                              </button>
+                                            ) : null}
+                                            {app.status !== "rejected" ? (
+                                              <button
+                                                type="button"
+                                                disabled={updatingAppId === app._id}
+                                                onClick={() => void handleUpdateAppStatus(app._id, "rejected")}
+                                                className="rounded-lg bg-rose-600 px-2.5 py-1 text-[11px] font-bold text-white shadow-2xs hover:bg-rose-700 transition disabled:opacity-60 cursor-pointer"
+                                              >
+                                                Reject
+                                              </button>
+                                            ) : null}
+                                            {app.status !== "pending" ? (
+                                              <button
+                                                type="button"
+                                                disabled={updatingAppId === app._id}
+                                                onClick={() => void handleUpdateAppStatus(app._id, "pending")}
+                                                className="rounded-lg bg-slate-100 px-2 py-1 text-[11px] font-semibold text-slate-600 border border-slate-200 hover:bg-slate-200 transition disabled:opacity-60 cursor-pointer"
+                                              >
+                                                Reset
+                                              </button>
+                                            ) : null}
+                                          </div>
                                         </td>
                                       </tr>
                                     ))}

@@ -11,6 +11,7 @@ import {
   type EnquiryPagination,
 } from "../../services/advisor.service";
 import { getMyRequirementClicks, type RequirementClickItem } from "../../services/businessRequirements.service";
+import { getMySubmittedCampaignApplicationsApi, type CampaignApplicationItem } from "../../services/campaignApplications.service";
 import { FiExternalLink, FiMousePointer } from "react-icons/fi";
 
 
@@ -58,6 +59,9 @@ const AdvisorDashboardPage = () => {
   const [clicksPage, setClicksPage] = useState(1);
   const [clicksLimit, setClicksLimit] = useState(10);
   const [clicksPagination, setClicksPagination] = useState({ page: 1, limit: 10, total: 0, totalPages: 1 });
+  const [mySubmittedApps, setMySubmittedApps] = useState<CampaignApplicationItem[]>([]);
+  const [mySubmittedAppsLoading, setMySubmittedAppsLoading] = useState(true);
+  const [totalSubmittedAppsCount, setTotalSubmittedAppsCount] = useState(0);
 
   const [enquiries, setEnquiries] = useState<Enquiry[]>([]);
   const [enquiriesLoading, setEnquiriesLoading] = useState(true);
@@ -152,6 +156,22 @@ const AdvisorDashboardPage = () => {
     };
 
     loadAnalytics();
+  }, []);
+
+  useEffect(() => {
+    const loadSubmittedApps = async () => {
+      try {
+        setMySubmittedAppsLoading(true);
+        const res = await getMySubmittedCampaignApplicationsApi({ limit: 100 });
+        setMySubmittedApps(res.applications || []);
+        setTotalSubmittedAppsCount(res.totalApplied || res.applications?.length || 0);
+      } catch {
+        // ignore
+      } finally {
+        setMySubmittedAppsLoading(false);
+      }
+    };
+    void loadSubmittedApps();
   }, []);
 
   useEffect(() => {
@@ -306,7 +326,7 @@ const AdvisorDashboardPage = () => {
         </p>
       </section>
 
-      <section className="grid grid-cols-2 gap-4 lg:grid-cols-6">
+      <section className="grid grid-cols-2 gap-4 lg:grid-cols-7">
         <article className="rounded-2xl border border-blue-100 bg-white p-4 shadow-sm">
           <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
             Profile Clicks
@@ -365,6 +385,16 @@ const AdvisorDashboardPage = () => {
             {analyticsLoading ? "..." : renderMetricValue(profileShareClicks)}
           </p>
           <p className="mt-1 text-xs text-slate-500">Share button clicks</p>
+        </article>
+
+        <article className="rounded-2xl border border-indigo-100 bg-linear-to-br from-indigo-50/50 to-white p-4 shadow-sm">
+          <p className="text-xs font-medium uppercase tracking-wide text-indigo-600">
+            Campaigns Applied
+          </p>
+          <p className="mt-2 text-3xl font-bold text-indigo-900">
+            {mySubmittedAppsLoading ? "..." : totalSubmittedAppsCount}
+          </p>
+          <p className="mt-1 text-xs text-slate-500">Submitted campaign proposals</p>
         </article>
       </section>
 
@@ -636,7 +666,118 @@ const AdvisorDashboardPage = () => {
       </section>
       ) : null}
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+            {/* My Campaign Applications History Section */}
+      <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="text-xl font-bold text-slate-900">My Campaign Applications</h2>
+            <p className="mt-1 text-sm text-slate-600">
+              Track all campaign proposals you submitted to brands and check their status (Pending, Approved, Rejected).
+            </p>
+          </div>
+        </div>
+
+        {mySubmittedAppsLoading ? (
+          <div className="py-8 text-center text-sm text-slate-500">Loading your campaign applications...</div>
+        ) : mySubmittedApps.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-8 text-center">
+            <p className="text-base font-semibold text-slate-700">No campaign applications submitted yet</p>
+            <p className="mt-1 text-sm text-slate-500">
+              Explore active campaigns and submit your proposal to connect with brands.
+            </p>
+            <a
+              href="/campaign"
+              className="mt-3 inline-block rounded-xl bg-blue-700 px-4 py-2 text-xs font-bold text-white hover:bg-blue-800 transition"
+            >
+              Explore Campaigns
+            </a>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-slate-200 text-xs">
+              <thead className="bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-600">
+                <tr>
+                  <th className="px-3 py-3">Campaign / Brand</th>
+                  <th className="px-3 py-3">Proposal Message</th>
+                  <th className="px-3 py-3">Contact Info Submitted</th>
+                  <th className="px-3 py-3">Applied Date</th>
+                  <th className="px-3 py-3">Status</th>
+                  <th className="px-3 py-3 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 bg-white">
+                {mySubmittedApps.map((app) => {
+                  const campaign = typeof app.campaign === "object" ? app.campaign : null;
+                  const handle = campaign?.storeUsername || "";
+                  return (
+                    <tr key={app._id} className="align-top">
+                      <td className="px-3 py-3 font-semibold text-slate-900">
+                        <div className="text-sm font-bold text-slate-900">{campaign?.companyName || "Campaign"}</div>
+                        {handle ? (
+                          <a
+                            href={`/campaign/${handle}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-xs font-bold text-blue-700 hover:underline block"
+                          >
+                            @{handle}
+                          </a>
+                        ) : null}
+                        {campaign?.category ? (
+                          <span className="inline-block mt-1 text-[11px] font-medium text-slate-500">
+                            🏷️ {campaign.category}
+                          </span>
+                        ) : null}
+                      </td>
+                      <td className="px-3 py-3 max-w-xs whitespace-pre-wrap font-medium text-slate-800 leading-relaxed">
+                        {app.message}
+                      </td>
+                      <td className="px-3 py-3 text-slate-600 space-y-0.5">
+                        <div>{app.applicantEmail}</div>
+                        {app.applicantPhone ? (
+                          <div className="font-semibold text-slate-800">📞 {app.applicantPhone}</div>
+                        ) : null}
+                      </td>
+                      <td className="px-3 py-3 text-slate-500 whitespace-nowrap">
+                        {new Date(app.createdAt).toLocaleDateString()}
+                      </td>
+                      <td className="px-3 py-3 whitespace-nowrap">
+                        <span
+                          className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold uppercase ${
+                            app.status === "approved" || app.status === "responded"
+                              ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
+                              : app.status === "rejected"
+                              ? "bg-rose-100 text-rose-800 border border-rose-200"
+                              : "bg-amber-100 text-amber-800 border border-amber-200"
+                          }`}
+                        >
+                          {app.status === "responded" ? "approved" : app.status}
+                        </span>
+                      </td>
+                      <td className="px-3 py-3 text-right whitespace-nowrap">
+                        {handle ? (
+                          <a
+                            href={`/campaign/${handle}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition"
+                          >
+                            View Page
+                          </a>
+                        ) : (
+                          "—"
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
+<section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="flex items-center gap-2 text-xl font-semibold text-slate-900">
