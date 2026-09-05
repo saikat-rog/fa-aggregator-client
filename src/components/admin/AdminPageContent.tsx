@@ -9,6 +9,7 @@ import { MarketsPanel } from "./panels/MarketsPanel";
 import { ExpertiseIndicesPanel } from "./panels/ExpertiseIndicesPanel";
 import { BlogsPanel } from "./panels/BlogsPanel";
 import { BusinessRequirementsPanel } from "./panels/BusinessRequirementsPanel";
+import { CampaignApplicationsPanel } from "./panels/CampaignApplicationsPanel";
 
 export function AdminPageContent() {
   const [params, setParams] = useSearchParams();
@@ -56,6 +57,7 @@ export function AdminPageContent() {
       {view === "expertise-indices" ? <ExpertiseIndicesPanel /> : null}
       {view === "blogs" ? <BlogsPanel params={params} setParam={setParam} setManyParams={setManyParams} /> : null}
       {view === "requirements" ? <BusinessRequirementsPanel params={params} setParam={setParam} setManyParams={setManyParams} /> : null}
+      {view === "campaign-applications" ? <CampaignApplicationsPanel params={params} setParam={setParam} /> : null}
     </div>
   );
 }

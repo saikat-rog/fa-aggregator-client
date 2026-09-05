@@ -8,13 +8,13 @@ import {
   FiFileText,
   FiZap,
   FiMessageSquare,
-  FiSend,
   FiX,
   FiCheckCircle,
   FiLock,
   FiAlertCircle,
 } from "react-icons/fi";
 import { FaInstagram, FaYoutube, FaTelegram } from "react-icons/fa6";
+import { submitCampaignApplicationApi } from "../../services/campaignApplications.service";
 import {
   getApprovedBusinessRequirementByIdPublic,
   trackRequirementClickApi,
@@ -60,6 +60,8 @@ export function ResourceDetailPage() {
   const [msgEmail, setMsgEmail] = useState("");
   const [msgText, setMsgText] = useState("");
   const [msgSent, setMsgSent] = useState(false);
+  const [isSubmittingApp, setIsSubmittingApp] = useState(false);
+  const [appSubmitError, setAppSubmitError] = useState("");
   const [role, setRole] = useState<string | null>(null);
   const [isApprovedAdvisor, setIsApprovedAdvisor] = useState(false);
   const [showAdvisorAuthModal, setShowAdvisorAuthModal] = useState(false);
@@ -154,25 +156,21 @@ export function ResourceDetailPage() {
     }
   };
 
-  const handleSendMessageSubmit = (e: React.FormEvent) => {
+  const handleSendMessageSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!msgName.trim() || !msgText.trim()) return;
-    if (!isAuthenticated && !msgEmail.trim()) return;
+    if (!msgText.trim() || !requirement?._id) return;
 
-    const emailToUse = msgEmail.trim() || getLoggedInUserEmail() || "";
-    const recipientEmail = requirement?.businessEmail || "";
-    const companyName = requirement?.companyName || "Campaign";
-
-    if (recipientEmail) {
-      const mailtoSubject = encodeURIComponent(`Application for Campaign: ${companyName}`);
-      const mailtoBody = encodeURIComponent(
-        `Name: ${msgName.trim()}${emailToUse ? `\nEmail: ${emailToUse}` : ""}\n\nMessage / Proposal:\n${msgText.trim()}`
-      );
-      // Use location.href instead of window.open to prevent popup blockers
-      window.location.href = `mailto:${recipientEmail}?subject=${mailtoSubject}&body=${mailtoBody}`;
+    try {
+      setIsSubmittingApp(true);
+      setAppSubmitError("");
+      await submitCampaignApplicationApi(requirement._id, msgText.trim());
+      setMsgSent(true);
+    } catch (err: any) {
+      const msg = err?.response?.data?.msg || "Failed to submit application proposal.";
+      setAppSubmitError(msg);
+    } finally {
+      setIsSubmittingApp(false);
     }
-
-    setMsgSent(true);
   };
 
   const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
@@ -255,29 +253,31 @@ export function ResourceDetailPage() {
                   </p>
                 ) : null}
 
-                {/* Badges: Category, Goal, Reward, Budget */}
-                <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
-                  {requirement.category ? (
-                    <span className="inline-flex items-center rounded-full bg-indigo-50 border border-indigo-200 px-3 py-1 text-xs font-bold text-indigo-700">
-                      🏷️ {requirement.category}
-                    </span>
-                  ) : null}
-                  {requirement.campaignGoal ? (
-                    <span className="inline-flex items-center rounded-full bg-purple-50 border border-purple-200 px-3 py-1 text-xs font-bold text-purple-700">
-                      🎯 Goal: {requirement.campaignGoal}
-                    </span>
-                  ) : null}
-                  {requirement.rewardType ? (
-                    <span className="inline-flex items-center rounded-full bg-blue-50 border border-blue-200 px-3 py-1 text-xs font-bold text-blue-700">
-                      🎁 Reward: {requirement.rewardType}
-                    </span>
-                  ) : null}
-                  {requirement.budget ? (
-                    <span className="inline-flex items-center rounded-full bg-emerald-50 border border-emerald-200 px-3 py-1 text-xs font-bold text-emerald-700">
-                      💰 Budget: {requirement.budget}
-                    </span>
-                  ) : null}
-                </div>
+                {/* Badges: Category, Goal, Reward, Budget (Only for Campaigns) */}
+                {!isStorePage && requirement.type !== "store" ? (
+                  <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+                    {requirement.category ? (
+                      <span className="inline-flex items-center rounded-full bg-indigo-50 border border-indigo-200 px-3 py-1 text-xs font-bold text-indigo-700">
+                        🏷️ {requirement.category}
+                      </span>
+                    ) : null}
+                    {requirement.campaignGoal ? (
+                      <span className="inline-flex items-center rounded-full bg-purple-50 border border-purple-200 px-3 py-1 text-xs font-bold text-purple-700">
+                        🎯 Goal: {requirement.campaignGoal}
+                      </span>
+                    ) : null}
+                    {requirement.rewardType ? (
+                      <span className="inline-flex items-center rounded-full bg-blue-50 border border-blue-200 px-3 py-1 text-xs font-bold text-blue-700">
+                        🎁 Reward: {requirement.rewardType}
+                      </span>
+                    ) : null}
+                    {requirement.budget ? (
+                      <span className="inline-flex items-center rounded-full bg-emerald-50 border border-emerald-200 px-3 py-1 text-xs font-bold text-emerald-700">
+                        💰 Budget: {requirement.budget}
+                      </span>
+                    ) : null}
+                  </div>
+                ) : null}
               </div>
 
               {/* Social Action Icons Row (if present) */}
@@ -343,23 +343,17 @@ export function ResourceDetailPage() {
 
               {!isStorePage ? (
                 <>
-                  {/* Apply by Email (Campaigns only) */}
+                  {/* Business Email Info Row (if present) */}
                   {requirement.businessEmail ? (
-                    <a
-                      href={`mailto:${requirement.businessEmail}?subject=${encodeURIComponent(`Application for Campaign: ${requirement.companyName}`)}&body=${encodeURIComponent(`Hi ${requirement.companyName},\n\nI am interested in applying for your campaign on Folksmint.\n\nMy Profile / Proposal Details:\n`)}`}
-                      className="group w-full rounded-full bg-linear-to-r from-blue-700 to-indigo-700 hover:from-blue-800 hover:to-indigo-800 text-white p-2.5 sm:p-3 pr-6 flex items-center justify-between shadow-md transition-all duration-200 active:scale-[0.98]"
-                    >
-                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/20 text-white shadow-xs">
-                        <FiMail className="h-5 w-5" />
-                      </div>
-                      <span className="flex-1 text-center font-bold text-base sm:text-lg px-2">
-                        Apply by Email
-                      </span>
-                      <FiSend className="h-5 w-5 text-white/80 group-hover:text-white transition" />
-                    </a>
+                    <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-3.5 px-4 text-xs shadow-2xs">
+                      <span className="font-semibold text-slate-500">Business Contact Email:</span>
+                      <a href={`mailto:${requirement.businessEmail}`} className="font-bold text-blue-700 hover:underline">
+                        {requirement.businessEmail}
+                      </a>
+                    </div>
                   ) : null}
 
-                  {/* Apply by Message (Always visible button, triggers auth/approval dialog if not approved advisor) */}
+                  {/* Apply by Message (Only application method for Campaigns) */}
                   <button
                     type="button"
                     onClick={handleApplyByMessageClick}
@@ -448,20 +442,25 @@ export function ResourceDetailPage() {
             {msgSent ? (
               <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-emerald-800 text-center space-y-2">
                 <FiCheckCircle className="h-8 w-8 text-emerald-600 mx-auto" />
-                <p className="font-bold text-base">Application Email Draft Created!</p>
+                <p className="font-bold text-base">Application Submitted Successfully!</p>
                 <p className="text-xs text-emerald-700">
-                  Your default email client has been launched with your message pre-filled.
+                  Your proposal has been delivered directly to the campaign manager's dashboard.
                 </p>
                 <button
                   type="button"
                   onClick={() => setShowMessageModal(false)}
-                  className="mt-3 rounded-xl bg-emerald-700 px-5 py-2 text-xs font-bold text-white shadow-xs"
+                  className="mt-3 rounded-xl bg-emerald-700 px-5 py-2 text-xs font-bold text-white shadow-xs cursor-pointer"
                 >
                   Close
                 </button>
               </div>
             ) : (
               <form onSubmit={handleSendMessageSubmit} className="space-y-4">
+                {appSubmitError ? (
+                  <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs font-medium text-rose-700">
+                    {appSubmitError}
+                  </div>
+                ) : null}
                 {isAuthenticated ? (
                   <div className="rounded-2xl border border-blue-100 bg-blue-50/70 p-3.5 flex flex-col gap-1 text-xs">
                     <span className="font-bold text-blue-950">Applying as Approved Advisor</span>
@@ -516,9 +515,10 @@ export function ResourceDetailPage() {
 
                 <button
                   type="submit"
-                  className="w-full rounded-2xl bg-blue-700 py-3.5 text-sm font-bold text-white shadow-md hover:bg-blue-800 transition cursor-pointer"
+                  disabled={isSubmittingApp}
+                  className="w-full rounded-2xl bg-blue-700 py-3.5 text-sm font-bold text-white shadow-md hover:bg-blue-800 transition disabled:opacity-60 cursor-pointer"
                 >
-                  Send Application Message
+                  {isSubmittingApp ? "Submitting Proposal..." : "Submit Application Proposal"}
                 </button>
               </form>
             )}

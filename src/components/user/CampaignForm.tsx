@@ -34,6 +34,11 @@ import {
 import { FaCircleCheck, FaCircleXmark, FaIndianRupeeSign } from "react-icons/fa6";
 import { HiSparkles } from "react-icons/hi2";
 import {
+  getMyReceivedCampaignApplicationsApi,
+  markCampaignApplicationRespondedApi,
+  type CampaignApplicationItem,
+} from "../../services/campaignApplications.service";
+import {
   duplicateStoreUsernameCheckApi,
   getMyRequirementApi,
   submitBusinessRequirement,
@@ -121,6 +126,30 @@ export function CampaignForm() {
   const [isStoreUsernameAvailable, setIsStoreUsernameAvailable] = useState<boolean | null>(null);
 
   const [expandedCampId, setExpandedCampId] = useState<string | null>(null);
+  const [receivedApps, setReceivedApps] = useState<CampaignApplicationItem[]>([]);
+  const [updatingAppId, setUpdatingAppId] = useState<string | null>(null);
+
+  const loadReceivedApplications = async () => {
+    try {
+      const res = await getMyReceivedCampaignApplicationsApi({ limit: 100 });
+      const apps = res?.applications || (res as any)?.data?.applications || [];
+      setReceivedApps(apps);
+    } catch {
+      // ignore
+    }
+  };
+
+  const handleMarkAppResponded = async (appId: string) => {
+    try {
+      setUpdatingAppId(appId);
+      await markCampaignApplicationRespondedApi(appId);
+      await loadReceivedApplications();
+    } catch {
+      // ignore
+    } finally {
+      setUpdatingAppId(null);
+    }
+  };
 
   const loadMyCampaigns = async () => {
     try {
@@ -137,6 +166,7 @@ export function CampaignForm() {
 
   useEffect(() => {
     void loadMyCampaigns();
+    void loadReceivedApplications();
     const accountEmail = getLoggedInUserEmail();
     if (accountEmail) {
       setForm((prev) => ({ ...prev, businessEmail: accountEmail }));
@@ -609,6 +639,17 @@ export function CampaignForm() {
                         >
                           {camp.status === "approved" ? "Live / Approved" : "Pending Review"}
                         </span>
+                        {(() => {
+                          const campApps = receivedApps.filter((a) => {
+                            const cId = typeof a.campaign === "object" && a.campaign ? String(a.campaign._id) : String(a.campaign);
+                            return cId === String(camp._id);
+                          });
+                          return (
+                            <span className="text-xs font-bold text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-full border border-indigo-200">
+                              📩 {campApps.length} Application{campApps.length === 1 ? "" : "s"}
+                            </span>
+                          );
+                        })()}
                       </div>
 
                       <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600 pt-1">
@@ -715,6 +756,94 @@ export function CampaignForm() {
                           <p className="text-sm font-semibold text-blue-700 truncate mt-0.5">{camp.url || "—"}</p>
                         </div>
                       </div>
+
+                      {/* Received Applications Table */}
+                      {(() => {
+                        const campApps = receivedApps.filter((a) => {
+                          const cId = typeof a.campaign === "object" && a.campaign ? String(a.campaign._id) : String(a.campaign);
+                          return cId === String(camp._id);
+                        });
+                        return (
+                          <div className="pt-4 border-t border-slate-200/80 space-y-3">
+                            <div className="flex items-center justify-between">
+                              <h5 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                                Received Advisor Applications ({campApps.length})
+                              </h5>
+                            </div>
+
+                            {campApps.length === 0 ? (
+                              <p className="text-xs font-medium text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-100 italic">
+                                No advisor proposals received for this campaign yet.
+                              </p>
+                            ) : (
+                              <div className="overflow-x-auto rounded-2xl border border-slate-200">
+                                <table className="w-full text-left text-xs text-slate-700">
+                                  <thead className="bg-slate-100 text-[11px] font-bold uppercase tracking-wider text-slate-600">
+                                    <tr>
+                                      <th className="px-3 py-2.5">Applicant</th>
+                                      <th className="px-3 py-2.5">Proposal Message</th>
+                                      <th className="px-3 py-2.5">Date</th>
+                                      <th className="px-3 py-2.5">Status</th>
+                                      <th className="px-3 py-2.5 text-right">Action</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="divide-y divide-slate-100 bg-white">
+                                    {campApps.map((app) => (
+                                      <tr key={app._id} className="align-top">
+                                        <td className="px-3 py-3 font-semibold text-slate-900">
+                                          <div>{app.applicantName}</div>
+                                          <div className="text-[11px] font-medium text-slate-500">{app.applicantEmail}</div>
+                                          {app.applicant?.advisorProfile?.username ? (
+                                            <a
+                                              href={`/${app.applicant.advisorProfile.username}`}
+                                              target="_blank"
+                                              rel="noreferrer"
+                                              className="text-[11px] font-bold text-blue-700 hover:underline"
+                                            >
+                                              @{app.applicant.advisorProfile.username}
+                                            </a>
+                                          ) : null}
+                                        </td>
+                                        <td className="px-3 py-3 max-w-xs whitespace-pre-wrap leading-relaxed font-medium text-slate-800">
+                                          {app.message}
+                                        </td>
+                                        <td className="px-3 py-3 text-slate-500 whitespace-nowrap">
+                                          {new Date(app.createdAt).toLocaleDateString()}
+                                        </td>
+                                        <td className="px-3 py-3 whitespace-nowrap">
+                                          <span
+                                            className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
+                                              app.status === "responded"
+                                                ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
+                                                : "bg-amber-100 text-amber-800 border border-amber-200"
+                                            }`}
+                                          >
+                                            {app.status}
+                                          </span>
+                                        </td>
+                                        <td className="px-3 py-3 text-right whitespace-nowrap">
+                                          {app.status === "pending" ? (
+                                            <button
+                                              type="button"
+                                              disabled={updatingAppId === app._id}
+                                              onClick={() => void handleMarkAppResponded(app._id)}
+                                              className="rounded-lg bg-emerald-600 px-2.5 py-1 text-[11px] font-bold text-white shadow-2xs hover:bg-emerald-700 transition disabled:opacity-60 cursor-pointer"
+                                            >
+                                              {updatingAppId === app._id ? "Saving..." : "Mark Responded"}
+                                            </button>
+                                          ) : (
+                                            <span className="text-[11px] font-semibold text-slate-400">Responded</span>
+                                          )}
+                                        </td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })()}
                     </div>
                   ) : null}
                 </div>
