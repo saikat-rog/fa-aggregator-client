@@ -13,8 +13,7 @@ import {
 } from "../../services/businessRequirements.service";
 import {
   getMyReceivedCampaignApplicationsApi,
-  updateCampaignApplicationStatusApi,
-  type CampaignApplicationItem,
+    type CampaignApplicationItem,
 } from "../../services/campaignApplications.service";
 import { DailyGrowthSection } from "./dashboard/DailyGrowthSection";
 import { MyEnquiriesSection } from "./dashboard/MyEnquiriesSection";
@@ -62,8 +61,7 @@ const UserDashboard = () => {
   const [campaignsLoading, setCampaignsLoading] = useState(true);
   const [expandedCampId, setExpandedCampId] = useState<string | null>(null);
   const [receivedApps, setReceivedApps] = useState<CampaignApplicationItem[]>([]);
-  const [updatingAppId, setUpdatingAppId] = useState<string | null>(null);
-
+  
   const loadMyCampaignsAndApps = async () => {
     try {
       setCampaignsLoading(true);
@@ -99,18 +97,7 @@ const UserDashboard = () => {
     void loadMyCampaignsAndApps();
   }, []);
 
-  const handleUpdateAppStatus = async (appId: string, status: "approved" | "rejected" | "pending") => {
-    try {
-      setUpdatingAppId(appId);
-      await updateCampaignApplicationStatusApi(appId, status);
-      await loadMyCampaignsAndApps();
-    } catch {
-      // ignore
-    } finally {
-      setUpdatingAppId(null);
-    }
-  };
-
+  
   useEffect(() => {
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev);
@@ -184,6 +171,36 @@ const UserDashboard = () => {
     }
   }, [location.hash]);
 
+    const totalUniqueAdvisorsApplied = useMemo(() => {
+    const uniqueKeys = new Set<string>();
+    for (const app of receivedApps) {
+      const campaignId =
+        typeof app.campaign === "object" && app.campaign?._id
+          ? String(app.campaign._id)
+          : typeof app.campaign === "string" && app.campaign
+          ? app.campaign
+          : "unknown_campaign";
+
+      const applicantId =
+        typeof app.applicant === "object" && app.applicant?._id
+          ? String(app.applicant._id)
+          : typeof app.applicant === "string" && app.applicant
+          ? app.applicant
+          : null;
+
+      const applicantKey =
+        applicantId ||
+        app.applicantEmail?.trim().toLowerCase() ||
+        app.applicantName?.trim().toLowerCase();
+
+      if (applicantKey) {
+        // Unique per campaign: applying to multiple campaigns counts for each, but multiple applications to the same campaign count only once
+        uniqueKeys.add(`${campaignId}___${applicantKey}`);
+      }
+    }
+    return uniqueKeys.size;
+  }, [receivedApps]);
+
   const formatDate = useMemo(
     () => (value: string | null) =>
       value
@@ -225,6 +242,9 @@ const UserDashboard = () => {
         totalEnquiries={enquiryPagination.total}
         savedLoading={isSavedListLoading}
         totalSavedAdvisors={savedAdvisors.length}
+        campaignsLoading={campaignsLoading}
+        totalCampaigns={myCampaigns.length}
+        totalAdvisorsApplied={totalUniqueAdvisorsApplied}
       />
 
       {showFirstStepPanel ? (
@@ -366,6 +386,12 @@ const UserDashboard = () => {
                     </div>
 
                     <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto justify-end pt-2 sm:pt-0 border-t sm:border-0 border-slate-200">
+                      <Link
+                        to={`/u/campaigns/${camp._id}/applications`}
+                        className="inline-flex items-center gap-1.5 rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-700 transition hover:bg-indigo-100"
+                      >
+                        📩 Applications ({campApps.length})
+                      </Link>
                       {camp.storeUsername ? (
                         <a
                           href={`/campaign/${camp.storeUsername}`}
@@ -459,94 +485,29 @@ const UserDashboard = () => {
                         </div>
                       </div>
 
-                      {/* Received Applications Table */}
-                      <div className="pt-4 border-t border-slate-200/80 space-y-3">
-                        <div className="flex items-center justify-between">
-                          <h5 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-                            Received Advisor Applications ({campApps.length})
-                          </h5>
-                        </div>
-
-                        {campApps.length === 0 ? (
-                          <p className="text-xs font-medium text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-100 italic">
-                            No advisor proposals received for this campaign yet.
-                          </p>
-                        ) : (
-                          <div className="overflow-x-auto rounded-2xl border border-slate-200">
-                            <table className="w-full text-left text-xs text-slate-700">
-                              <thead className="bg-slate-100 text-[11px] font-bold uppercase tracking-wider text-slate-600">
-                                <tr>
-                                  <th className="px-3 py-2.5">Applicant & Phone</th>
-                                  <th className="px-3 py-2.5">Proposal Message</th>
-                                  <th className="px-3 py-2.5">Date</th>
-                                  <th className="px-3 py-2.5">Status</th>
-                                  <th className="px-3 py-2.5 text-right">Action</th>
-                                </tr>
-                              </thead>
-                              <tbody className="divide-y divide-slate-100 bg-white">
-                                {campApps.map((app) => (
-                                  <tr key={app._id} className="align-top">
-                                    <td className="px-3 py-3 font-semibold text-slate-900">
-                                      <div>{app.applicantName}</div>
-                                      <div className="text-[11px] font-medium text-slate-500">{app.applicantEmail}</div>
-                                      {app.applicant?.advisorProfile?.username ? (
-                                        <Link
-                                          to={`/${app.applicant.advisorProfile.username}`}
-                                          target="_blank"
-                                          rel="noreferrer"
-                                          className="text-[11px] font-bold text-blue-700 hover:underline"
-                                        >
-                                          @{app.applicant.advisorProfile.username}
-                                        </Link>
-                                      ) : null}
-                                    </td>
-                                    <td className="px-3 py-3 max-w-xs whitespace-pre-wrap leading-relaxed font-medium text-slate-800">
-                                      {app.message}
-                                    </td>
-                                    <td className="px-3 py-3 text-slate-500 whitespace-nowrap">
-                                      {new Date(app.createdAt).toLocaleDateString()}
-                                    </td>
-                                    <td className="px-3 py-3 whitespace-nowrap">
-                                      <span
-                                        className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
-                                          app.status === "responded"
-                                            ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
-                                            : "bg-amber-100 text-amber-800 border border-amber-200"
-                                        }`}
-                                      >
-                                        {app.status}
-                                      </span>
-                                    </td>
-                                    <td className="px-3 py-3 text-right whitespace-nowrap">
-                                       <div className="flex items-center justify-end gap-1.5">
-                                         {app.status !== "approved" && app.status !== "responded" ? (
-                                           <button
-                                             type="button"
-                                             disabled={updatingAppId === app._id}
-                                             onClick={() => void handleUpdateAppStatus(app._id, "approved")}
-                                             className="rounded-lg bg-emerald-600 px-2.5 py-1 text-[11px] font-bold text-white shadow-2xs hover:bg-emerald-700 transition disabled:opacity-60 cursor-pointer"
-                                           >
-                                             Approve
-                                           </button>
-                                         ) : null}
-                                         {app.status !== "rejected" ? (
-                                           <button
-                                             type="button"
-                                             disabled={updatingAppId === app._id}
-                                             onClick={() => void handleUpdateAppStatus(app._id, "rejected")}
-                                             className="rounded-lg bg-rose-600 px-2.5 py-1 text-[11px] font-bold text-white shadow-2xs hover:bg-rose-700 transition disabled:opacity-60 cursor-pointer"
-                                           >
-                                             Reject
-                                           </button>
-                                         ) : null}
-                                       </div>
-                                     </td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
+                      {/* Dedicated Applications Section Link */}
+                      <div className="pt-4 border-t border-slate-200/80">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-2xl border border-indigo-100 bg-linear-to-r from-indigo-50/80 via-blue-50/40 to-indigo-50/80 p-4">
+                          <div className="space-y-0.5">
+                            <h5 className="text-xs font-bold text-indigo-950 uppercase tracking-wider flex items-center gap-1.5">
+                              <span>📩 Received Advisor Applications</span>
+                              <span className="rounded-full bg-indigo-600 text-white text-[10px] font-extrabold px-2 py-0.5">
+                                {campApps.length}
+                              </span>
+                            </h5>
+                            <p className="text-xs text-indigo-800/80 font-medium">
+                              {campApps.length === 0
+                                ? "No advisor proposals received yet for this campaign."
+                                : `Review and manage ${campApps.length} received advisor pitch proposal${campApps.length === 1 ? "" : "s"}.`}
+                            </p>
                           </div>
-                        )}
+                          <Link
+                            to={`/u/campaigns/${camp._id}/applications`}
+                            className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-bold text-white shadow-2xs hover:bg-indigo-700 transition shrink-0"
+                          >
+                            View Applications ({campApps.length}) →
+                          </Link>
+                        </div>
                       </div>
                     </div>
                   ) : null}

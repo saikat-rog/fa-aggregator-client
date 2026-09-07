@@ -22,6 +22,7 @@ import { ContactPage } from "./pages/contact/Contact.page";
 import { StorePage } from "./pages/store/Store.page";
 import { StoreApplyPage } from "./pages/store/StoreApply.page";
 import { CampaignApplyPage } from "./pages/resources/CampaignApply.page";
+import CampaignApplicationsPage from "./pages/campaign/CampaignApplications.page";
 
 function ResourceDetailRedirect() {
   const { id } = useParams<{ id: string }>();
@@ -61,6 +62,7 @@ function App() {
           >
               <Route index element={<Navigate to="/" replace />} />
               <Route path="dashboard" element={<UserDashboard />} />
+              <Route path="campaigns/:campaignId/applications" element={<CampaignApplicationsPage />} />
           </Route>
           <Route
             path="/a"
@@ -72,6 +74,7 @@ function App() {
           >
               <Route index element={<Navigate to="/" replace />} />
               <Route path="dashboard" element={<AdvisorDashboardPage />} />
+              <Route path="campaigns/:campaignId/applications" element={<CampaignApplicationsPage />} />
           </Route>
           <Route
             path="/admin"
@@ -80,6 +83,7 @@ function App() {
           <Route path="/lol" element={<Navigate to="/admin" replace />} />
           <Route path="/campaign" element={<ResourcesPage />} />
           <Route path="/campaign/apply" element={<CampaignApplyPage />} />
+          <Route path="/campaigns/:campaignId/applications" element={<CampaignApplicationsPage />} />
           <Route path="/campaign/:storeUsername" element={<ResourceDetailPage />} />
           <Route path="/store" element={<StorePage />} />
           <Route path="/store/apply" element={<StoreApplyPage />} />
