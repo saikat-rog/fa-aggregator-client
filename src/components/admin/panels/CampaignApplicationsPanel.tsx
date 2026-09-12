@@ -17,9 +17,10 @@ import {
 interface Props {
   params: URLSearchParams;
   setParam: (k: string, v?: string) => void;
+  setManyParams?: (updates: Record<string, string | undefined>) => void;
 }
 
-export function CampaignApplicationsPanel({ params, setParam }: Props) {
+export function CampaignApplicationsPanel({ params, setParam, setManyParams }: Props) {
   const page = getNum(params.get("campAppPage"), 1);
   const limit = getNum(params.get("campAppLimit"), 10);
   const status = params.get("campAppStatus") ?? "";
@@ -64,8 +65,16 @@ export function CampaignApplicationsPanel({ params, setParam }: Props) {
           <select
             value={status}
             onChange={(e) => {
-              setParam("campAppStatus", e.target.value);
-              setParam("campAppPage", "1");
+              const val = e.target.value;
+              if (setManyParams) {
+                setManyParams({
+                  campAppStatus: val || undefined,
+                  campAppPage: "1",
+                });
+              } else {
+                setParam("campAppStatus", val || undefined);
+                setParam("campAppPage", "1");
+              }
             }}
             className="rounded-xl border border-slate-300 bg-white px-3 py-1.5 font-semibold text-slate-800 outline-none focus:border-blue-600"
           >
@@ -159,8 +168,16 @@ export function CampaignApplicationsPanel({ params, setParam }: Props) {
         pagination={pagination ?? undefined}
         onPageChange={(v) => setParam("campAppPage", String(v))}
         onLimitChange={(v) => {
-          setParam("campAppLimit", String(v));
-          setParam("campAppPage", "1");
+          const limitStr = String(v);
+          if (setManyParams) {
+            setManyParams({
+              campAppLimit: limitStr,
+              campAppPage: "1",
+            });
+          } else {
+            setParam("campAppLimit", limitStr);
+            setParam("campAppPage", "1");
+          }
         }}
       />
     </section>

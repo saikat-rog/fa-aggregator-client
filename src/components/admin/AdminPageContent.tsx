@@ -17,19 +17,23 @@ export function AdminPageContent() {
   const view = views.includes(activeView) ? activeView : "users";
 
   const setParam = (key: string, value?: string) => {
-    const next = new URLSearchParams(params);
-    if (!value) next.delete(key);
-    else next.set(key, value);
-    setParams(next, { replace: true });
+    setParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (!value) next.delete(key);
+      else next.set(key, value);
+      return next;
+    }, { replace: true });
   };
 
   const setManyParams = (updates: Record<string, string | undefined>) => {
-    const next = new URLSearchParams(params);
-    for (const [key, value] of Object.entries(updates)) {
-      if (!value) next.delete(key);
-      else next.set(key, value);
-    }
-    setParams(next, { replace: true });
+    setParams((prev) => {
+      const next = new URLSearchParams(prev);
+      for (const [key, value] of Object.entries(updates)) {
+        if (!value) next.delete(key);
+        else next.set(key, value);
+      }
+      return next;
+    }, { replace: true });
   };
 
   return (
@@ -57,7 +61,7 @@ export function AdminPageContent() {
       {view === "expertise-indices" ? <ExpertiseIndicesPanel /> : null}
       {view === "blogs" ? <BlogsPanel params={params} setParam={setParam} setManyParams={setManyParams} /> : null}
       {view === "requirements" ? <BusinessRequirementsPanel params={params} setParam={setParam} setManyParams={setManyParams} /> : null}
-      {view === "campaign-applications" ? <CampaignApplicationsPanel params={params} setParam={setParam} /> : null}
+      {view === "campaign-applications" ? <CampaignApplicationsPanel params={params} setParam={setParam} setManyParams={setManyParams} /> : null}
     </div>
   );
 }

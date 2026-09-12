@@ -330,7 +330,7 @@ export function CampaignApplicationsPage() {
             </h3>
             <p className="mt-1 text-xs text-slate-500 max-w-sm mx-auto">
               {applications.length === 0
-                ? "When approved creators and advisors apply to your campaign, their detailed pitches and contact info will appear here."
+                ? "When creators apply to your campaign, their detailed pitches and contact info will appear here."
                 : "Try switching filter tabs above to see all proposals."}
             </p>
           </div>
@@ -423,8 +423,8 @@ export function CampaignApplicationsPage() {
                         {isApproved ? "Approved" : app.status}
                       </span>
 
-                      <div className="flex items-center gap-1.5 ml-2">
-                        {!isApproved ? (
+                      {isPending ? (
+                        <div className="flex items-center gap-1.5 ml-2">
                           <button
                             type="button"
                             disabled={isUpdating}
@@ -434,9 +434,7 @@ export function CampaignApplicationsPage() {
                             <FiCheckCircle className="h-3.5 w-3.5" />
                             Approve
                           </button>
-                        ) : null}
 
-                        {!isRejected ? (
                           <button
                             type="button"
                             disabled={isUpdating}
@@ -446,19 +444,8 @@ export function CampaignApplicationsPage() {
                             <FiXCircle className="h-3.5 w-3.5" />
                             Reject
                           </button>
-                        ) : null}
-
-                        {!isPending ? (
-                          <button
-                            type="button"
-                            disabled={isUpdating}
-                            onClick={() => void handleUpdateStatus(app._id, "pending")}
-                            className="rounded-xl border border-slate-200 bg-slate-100 px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-200 transition disabled:opacity-50 cursor-pointer"
-                          >
-                            Reset
-                          </button>
-                        ) : null}
-                      </div>
+                        </div>
+                      ) : null}
                     </div>
                   </div>
 

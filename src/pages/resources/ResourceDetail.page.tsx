@@ -11,14 +11,14 @@ import {
   FiX,
   FiCheckCircle,
   FiLock,
-  FiAlertCircle,
+
 } from "react-icons/fi";
 import { FaInstagram, FaYoutube, FaTelegram } from "react-icons/fa6";
 import { submitCampaignApplicationApi } from "../../services/campaignApplications.service";
 import {
   getApprovedBusinessRequirementByIdPublic,
   trackRequirementClickApi,
-  getMyRequirementApi,
+
   type ApprovedBusinessRequirementItem,
 } from "../../services/businessRequirements.service";
 import { SocialShareButtons } from "../../components/resources/SocialShareButtons";
@@ -71,15 +71,13 @@ export function ResourceDetailPage() {
   const [msgSent, setMsgSent] = useState(false);
   const [isSubmittingApp, setIsSubmittingApp] = useState(false);
   const [appSubmitError, setAppSubmitError] = useState("");
-  const [role, setRole] = useState<string | null>(null);
-  const [isApprovedAdvisor, setIsApprovedAdvisor] = useState(false);
   const [showAdvisorAuthModal, setShowAdvisorAuthModal] = useState(false);
 
   const handleApplyByMessageClick = () => {
-    if (isApprovedAdvisor) {
+    if (isAuthenticated) {
       setMsgSent(false);
-      const accEmail = getLoggedInUserEmail();
-      const accName = localStorage.getItem("userName") || requirement?.postedByAdvisorName || "Approved Advisor";
+      const accEmail = getLoggedInUserEmail() || localStorage.getItem("email") || "";
+      const accName = localStorage.getItem("userName") || localStorage.getItem("name") || "";
       const accPhone = localStorage.getItem("userPhone") || localStorage.getItem("phone") || "";
       if (accEmail) setMsgEmail(accEmail);
       if (accName) setMsgName(accName);
@@ -90,36 +88,7 @@ export function ResourceDetailPage() {
     }
   };
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    const userRole = localStorage.getItem("role");
-    setRole(userRole);
 
-    if (!token || userRole !== "advisor") {
-      setIsApprovedAdvisor(false);
-      return;
-    }
-
-    let active = true;
-    const checkApproval = async () => {
-      try {
-        const res = await getMyRequirementApi();
-        if (!active) return;
-        const approved = Boolean(
-          res?.requirement?.status === "approved" ||
-            res?.requirements?.some((r) => r.status === "approved")
-        );
-        setIsApprovedAdvisor(approved);
-      } catch {
-        if (active) setIsApprovedAdvisor(false);
-      }
-    };
-    void checkApproval();
-
-    return () => {
-      active = false;
-    };
-  }, []);
 
   useEffect(() => {
     if (!identifier) return;
@@ -486,7 +455,7 @@ export function ResourceDetailPage() {
                 ) : null}
                 {isAuthenticated ? (
                   <div className="rounded-2xl border border-blue-100 bg-blue-50/70 p-3.5 flex flex-col gap-1 text-xs space-y-1">
-                    <span className="font-bold text-blue-950">Applying as Approved Advisor</span>
+                    <span className="font-bold text-blue-950">Applying as {msgName || localStorage.getItem("userName") || getLoggedInUserEmail() || "Applicant"}</span>
                     <div className="text-blue-800 font-medium">Email: {msgEmail || getLoggedInUserEmail() || "Account Email"}</div>
                   </div>
                 ) : (
@@ -573,7 +542,7 @@ export function ResourceDetailPage() {
         </div>
       ) : null}
 
-      {/* Advisor Auth Prompt Dialog Modal */}
+      {/* Auth Prompt Dialog Modal */}
       {showAdvisorAuthModal ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs">
           <div className="relative w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl space-y-5 text-center">
@@ -585,105 +554,33 @@ export function ResourceDetailPage() {
               <FiX className="h-5 w-5" />
             </button>
 
-            {!isAuthenticated ? (
-              <>
-                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-blue-50 text-blue-700">
-                  <FiLock className="h-7 w-7" />
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-xl font-bold text-slate-900">
-                    Advisor Login Required
-                  </h3>
-                  <p className="text-sm text-slate-600 leading-relaxed max-w-xs mx-auto">
-                    Only approved advisors can apply to campaigns by message. Please log in as an Advisor to submit an application proposal.
-                  </p>
-                </div>
-                <div className="pt-2 space-y-2">
-                  <button
-                    type="button"
-                    onClick={() => navigate("/auth")}
-                    className="w-full rounded-2xl bg-blue-700 py-3.5 text-sm font-bold text-white shadow-md hover:bg-blue-800 transition cursor-pointer"
-                  >
-                    Log In as Advisor
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowAdvisorAuthModal(false)}
-                    className="w-full rounded-2xl bg-slate-100 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-200 transition cursor-pointer"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </>
-            ) : role === "user" ? (
-              <>
-                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-amber-100 text-amber-700">
-                  <FiAlertCircle className="h-7 w-7" />
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-xl font-bold text-slate-900">
-                    Advisor Account Required
-                  </h3>
-                  <p className="text-sm text-slate-600 leading-relaxed max-w-xs mx-auto">
-                    You are currently logged in as a <span className="font-bold text-slate-900">User</span>. Only approved Advisors can apply to campaigns by message. Please log out and log in as an Advisor.
-                  </p>
-                </div>
-                <div className="pt-2 space-y-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      localStorage.removeItem("token");
-                      localStorage.removeItem("role");
-                      localStorage.removeItem("roles");
-                      window.location.href = "/auth";
-                    }}
-                    className="w-full rounded-2xl bg-rose-600 py-3.5 text-sm font-bold text-white shadow-md hover:bg-rose-700 transition cursor-pointer"
-                  >
-                    Log Out & Log In as Advisor
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowAdvisorAuthModal(false)}
-                    className="w-full rounded-2xl bg-slate-100 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-200 transition cursor-pointer"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-amber-100 text-amber-700">
-                  <FiAlertCircle className="h-7 w-7" />
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-xl font-bold text-slate-900">
-                    Advisor Profile Pending Approval
-                  </h3>
-                  <p className="text-sm text-slate-600 leading-relaxed max-w-xs mx-auto">
-                    Your Advisor store profile application is currently under review by an Admin. Only approved Advisors can apply to campaigns by message.
-                  </p>
-                </div>
-                <div className="pt-2 space-y-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowAdvisorAuthModal(false);
-                      navigate("/store/apply");
-                    }}
-                    className="w-full rounded-2xl bg-amber-600 py-3.5 text-sm font-bold text-white shadow-md hover:bg-amber-700 transition cursor-pointer"
-                  >
-                    Check Store Profile Status
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowAdvisorAuthModal(false)}
-                    className="w-full rounded-2xl bg-slate-100 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-200 transition cursor-pointer"
-                  >
-                    Close
-                  </button>
-                </div>
-              </>
-            )}
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-blue-50 text-blue-700">
+              <FiLock className="h-7 w-7" />
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-xl font-bold text-slate-900">
+                Login Required
+              </h3>
+              <p className="text-sm text-slate-600 leading-relaxed max-w-xs mx-auto">
+                Please log in to submit your application proposal to this campaign.
+              </p>
+            </div>
+            <div className="pt-2 space-y-2">
+              <button
+                type="button"
+                onClick={() => navigate("/auth")}
+                className="w-full rounded-2xl bg-blue-700 py-3.5 text-sm font-bold text-white shadow-md hover:bg-blue-800 transition cursor-pointer"
+              >
+                Log In
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowAdvisorAuthModal(false)}
+                className="w-full rounded-2xl bg-slate-100 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-200 transition cursor-pointer"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
       ) : null}
