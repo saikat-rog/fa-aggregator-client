@@ -6,6 +6,7 @@ export type BusinessRequirementPayload = {
   storeUsername: string;
   businessEmail: string;
   url: string;
+  type?: "store" | "campaign";
   campaignGoal?: string;
   budget?: string;
   rewardType?: string;
@@ -117,9 +118,10 @@ const unwrapRequirement = (resData: unknown): BusinessRequirementItem => {
   return inner as BusinessRequirementItem;
 };
 
-export async function duplicateStoreUsernameCheckApi(storeUsername: string) {
+export async function duplicateStoreUsernameCheckApi(storeUsername: string, type?: "store" | "campaign") {
+  const typeParam = type ? `&type=${encodeURIComponent(type)}` : "";
   const response = await api.get(
-    `/business-requirements/username-availability?storeUsername=${encodeURIComponent(storeUsername)}`,
+    `/business-requirements/username-availability?storeUsername=${encodeURIComponent(storeUsername)}${typeParam}`,
   );
   return unwrapData<{ isTaken?: boolean; exists?: boolean; available?: boolean; isAvailable?: boolean }>(
     response.data,
