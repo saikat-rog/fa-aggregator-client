@@ -105,7 +105,7 @@ export function ResourceDetailPage() {
         }
       } catch (err: unknown) {
         if (active) {
-          setError(err instanceof Error ? err.message : "Campaign requirement not found or failed to load.");
+          setError(err instanceof Error ? err.message : (isStorePage ? "Store requirement not found or failed to load." : "Campaign requirement not found or failed to load."));
         }
       } finally {
         if (active) setIsLoading(false);
@@ -196,7 +196,7 @@ export function ResourceDetailPage() {
         {isLoading ? (
           <div className="rounded-3xl border border-slate-200 bg-white p-10 text-center text-slate-600 shadow-xs">
             <div className="mx-auto h-9 w-9 animate-spin rounded-full border-4 border-blue-200 border-t-blue-700" />
-            <p className="mt-4 text-sm font-semibold text-slate-700">Loading campaign details...</p>
+            <p className="mt-4 text-sm font-semibold text-slate-700">{isStorePage ? "Loading store details..." : "Loading campaign details..."}</p>
           </div>
         ) : null}
 
@@ -401,7 +401,7 @@ export function ResourceDetailPage() {
             <div className="pt-4 flex flex-col items-center justify-center space-y-3">
               <SocialShareButtons
                 url={shareUrl}
-                title={`Check out campaign requirement for ${requirement.companyName}`}
+                title={isStorePage ? `Check out store listing for ${requirement.companyName}` : `Check out campaign requirement for ${requirement.companyName}`}
               />
             </div>
           </main>
@@ -588,7 +588,7 @@ export function ResourceDetailPage() {
       {/* Footer Badge */}
       <footer className="pt-8 pb-2 text-center text-xs font-semibold text-slate-600">
         <div className="inline-flex items-center gap-2">
-          <span>Start your campaign with</span>
+          <span>{isStorePage ? "Start your store with" : "Start your campaign with"}</span>
           <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/80 bg-white px-3 py-1 text-xs font-bold text-slate-900 shadow-xs">
             <FiZap className="h-3.5 w-3.5 fill-blue-600 text-blue-600" />
             Folksmint

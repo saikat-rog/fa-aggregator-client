@@ -1,6 +1,6 @@
 export function getLoggedInUserEmail(): string {
   if (typeof window === "undefined") return "";
-  const stored = localStorage.getItem("userEmail");
+  const stored = localStorage.getItem("userEmail") || localStorage.getItem("email");
   if (stored) return stored;
   const token = localStorage.getItem("token");
   if (!token) return "";
@@ -263,7 +263,10 @@ export function CampaignForm() {
     setErrorMessage("");
     setSuccessMessage("");
 
-    if (!isFormValid) return;
+    if (!isFormValid || storeUsernameError) {
+      setErrorMessage(storeUsernameError || "Please fill in all required fields marked with *.");
+      return;
+    }
 
     try {
       setIsSubmitting(true);
@@ -284,7 +287,13 @@ export function CampaignForm() {
       setSuccessMessage(
         res.msg || "Your campaign was submitted and sent for Admin review!"
       );
-      setForm(initialState);
+      const accountEmail = getLoggedInUserEmail();
+      setForm({
+        ...initialState,
+        businessEmail: accountEmail || "",
+      });
+      setStoreUsernameError("");
+      setIsStoreUsernameAvailable(null);
       setSubmitAttempted(false);
       void loadMyCampaigns();
     } catch (err: unknown) {
