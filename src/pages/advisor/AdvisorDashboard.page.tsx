@@ -478,7 +478,7 @@ const AdvisorDashboardPage = () => {
           </h2>
           <p className="mt-1 text-sm text-amber-800">
             Please follow these rules to keep your advisor listing active and
-            visible on FinBlue.
+            visible on Folksmint.
           </p>
           <div className="mt-4 space-y-2">
             {platformWarnings.map((item) => (

@@ -1,4 +1,4 @@
-export function getLoggedInUserEmail(): string {
+function getLoggedInUserEmail(): string {
   if (typeof window === "undefined") return "";
   const stored = localStorage.getItem("userEmail") || localStorage.getItem("email");
   if (stored) return stored;
@@ -43,6 +43,7 @@ import {
   getMyRequirementApi,
   submitBusinessRequirement,
   type BusinessRequirementItem,
+  type BusinessRequirementPayload,
 } from "../../services/businessRequirements.service";
 
 type CampaignFormState = {
@@ -270,7 +271,7 @@ export function CampaignForm() {
 
     try {
       setIsSubmitting(true);
-      const payload = {
+      const payload: BusinessRequirementPayload = {
         type: "campaign",
         category: form.category,
         companyName: form.companyName.trim(),
