@@ -66,7 +66,7 @@ const UserDashboard = () => {
     try {
       setCampaignsLoading(true);
       const [reqRes, appRes] = await Promise.allSettled([
-        getMyRequirementApi(),
+        getMyRequirementApi({ type: "campaign" }),
         getMyReceivedCampaignApplicationsApi({ limit: 100 }),
       ]);
 

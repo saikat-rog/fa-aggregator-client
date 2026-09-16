@@ -2,6 +2,10 @@ import { useEffect, useState } from "react";
 import { Link, useParams, useNavigate, useLocation } from "react-router-dom";
 import {
   FiArrowLeft,
+  FiShoppingBag,
+  FiCompass,
+  FiAlertCircle,
+  FiHome,
   FiExternalLink,
   FiUser,
   FiMail,
@@ -59,7 +63,8 @@ export function ResourceDetailPage() {
   const { id, storeUsername } = useParams<{ id?: string; storeUsername?: string }>();
   const identifier = storeUsername || id;
   const [requirement, setRequirement] = useState<ApprovedBusinessRequirementItem | null>(null);
-  const isStorePage = requirement?.type === "store" || location.pathname.startsWith("/store");
+  const isStorePage = location.pathname.startsWith("/store");
+  const expectedType: "store" | "campaign" = isStorePage ? "store" : "campaign";
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [tracking, setTracking] = useState(false);
@@ -97,15 +102,23 @@ export function ResourceDetailPage() {
       try {
         setIsLoading(true);
         setError("");
-        const item = await getApprovedBusinessRequirementByIdPublic(identifier);
+        const item = await getApprovedBusinessRequirementByIdPublic(identifier, expectedType);
         if (!active) return;
         setRequirement(item);
         if (item?.storeUsername && storeUsername !== item.storeUsername) {
-          navigate(`/campaign/${item.storeUsername}`, { replace: true });
+          navigate(`/${expectedType}/${item.storeUsername}`, { replace: true });
         }
       } catch (err: unknown) {
         if (active) {
-          setError(err instanceof Error ? err.message : (isStorePage ? "Store requirement not found or failed to load." : "Campaign requirement not found or failed to load."));
+          const apiMsg =
+            typeof err === "object" && err !== null && "response" in err
+              ? (err as { response?: { data?: { msg?: string } } }).response?.data?.msg
+              : "";
+          const notFoundFallback = isStorePage
+            ? "This store was not found or is no longer active."
+            : "This campaign was not found or is no longer active.";
+
+          setError(apiMsg || (err instanceof Error && !err.message.includes("status code") ? err.message : notFoundFallback));
         }
       } finally {
         if (active) setIsLoading(false);
@@ -115,14 +128,14 @@ export function ResourceDetailPage() {
     return () => {
       active = false;
     };
-  }, [id]);
+  }, [identifier, isStorePage]);
 
   const onOpenResourceLink = async () => {
     const targetId = requirement?._id || identifier;
     if (!targetId || !requirement) return;
     try {
       setTracking(true);
-      const res = await trackRequirementClickApi(targetId);
+      const res = await trackRequirementClickApi(targetId, expectedType);
       const targetUrl = res.url || requirement.url;
       if (targetUrl) {
         window.open(targetUrl, "_blank", "noopener,noreferrer");
@@ -166,7 +179,7 @@ export function ResourceDetailPage() {
   };
 
   const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
-  const shareUrl = requirement ? `${baseUrl}/campaign/${requirement.storeUsername || requirement._id}` : (typeof window !== "undefined" ? window.location.href : "");
+  const shareUrl = requirement ? `${baseUrl}/${expectedType}/${requirement.storeUsername || requirement._id}` : (typeof window !== "undefined" ? window.location.href : "");
 
   return (
     <div className="min-h-screen bg-[#F4F4F6] py-6 px-4 flex flex-col items-center justify-between font-sans">
@@ -201,14 +214,64 @@ export function ResourceDetailPage() {
         ) : null}
 
         {error ? (
-          <div className="rounded-3xl border border-rose-200 bg-rose-50 p-8 text-center text-rose-700 shadow-xs">
-            <p className="text-base font-semibold">{error}</p>
-            <Link
-              to={isStorePage ? "/store" : "/campaign"}
-              className="mt-4 inline-block rounded-full bg-rose-600 px-6 py-2.5 text-sm font-bold text-white shadow-xs hover:bg-rose-700 transition"
-            >
-              {isStorePage ? "Explore All Stores" : "Explore All Campaigns"}
-            </Link>
+          <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-8 sm:p-10 text-center shadow-xl shadow-slate-200/50">
+            {/* Decorative background glow */}
+            <div className={`pointer-events-none absolute -top-16 left-1/2 -translate-x-1/2 h-36 w-36 rounded-full blur-3xl opacity-30 ${isStorePage ? "bg-amber-400" : "bg-blue-400"}`} />
+
+            {/* Icon Graphic */}
+            <div className="relative mx-auto mb-5 flex h-20 w-20 items-center justify-center">
+              <div className={`flex h-20 w-20 items-center justify-center rounded-3xl ${isStorePage ? "bg-amber-50 border border-amber-200/70 text-amber-600" : "bg-blue-50 border border-blue-200/70 text-blue-600"} shadow-inner`}>
+                {isStorePage ? (
+                  <FiShoppingBag className="h-10 w-10 stroke-[1.75]" />
+                ) : (
+                  <FiCompass className="h-10 w-10 stroke-[1.75]" />
+                )}
+              </div>
+              <div className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full bg-rose-500 text-white shadow-md border-2 border-white">
+                <FiAlertCircle className="h-4 w-4 stroke-[2.5]" />
+              </div>
+            </div>
+
+            {/* Status Pill */}
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600 mb-3">
+              <span className="h-1.5 w-1.5 rounded-full bg-rose-500 animate-pulse" />
+              <span>{isStorePage ? "Store Not Found" : "Campaign Not Found"}</span>
+            </div>
+
+            {/* Heading */}
+            <h2 className="text-2xl font-black text-slate-900 tracking-tight">
+              {isStorePage ? "Store Unavailable" : "Campaign Unavailable"}
+            </h2>
+
+            {/* Subtext */}
+            <p className="mt-2 text-sm text-slate-600 leading-relaxed max-w-xs mx-auto">
+              {identifier ? (
+                <>
+                  The {isStorePage ? "store" : "campaign"} <span className="font-semibold text-slate-800 font-mono">@{identifier}</span> does not exist or is no longer active.
+                </>
+              ) : (
+                error || (isStorePage ? "This store requirement was not found." : "This campaign requirement was not found.")
+              )}
+            </p>
+
+            {/* Action Buttons */}
+            <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <Link
+                to={isStorePage ? "/store" : "/campaign"}
+                className={`w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-2xl ${isStorePage ? "bg-blue-700 hover:bg-blue-800" : "bg-blue-700 hover:bg-blue-800"} px-5 py-3 text-sm font-bold text-white shadow-md transition active:scale-95`}
+              >
+                {isStorePage ? <FiShoppingBag className="h-4 w-4" /> : <FiCompass className="h-4 w-4" />}
+                <span>{isStorePage ? "Explore All Stores" : "Explore All Campaigns"}</span>
+              </Link>
+
+              <Link
+                to="/"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 px-5 py-3 text-sm font-bold text-slate-700 transition"
+              >
+                <FiHome className="h-4 w-4" />
+                <span>Home</span>
+              </Link>
+            </div>
           </div>
         ) : null}
 

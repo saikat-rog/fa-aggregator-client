@@ -70,8 +70,9 @@ export function StoreForm() {
   useEffect(() => {
     const loadMyStore = async () => {
       try {
-        const res = await getMyRequirementApi();
+        const res = await getMyRequirementApi({ type: "store" });
         const req = res?.requirement;
+        if (req && req.type === "campaign") return;
         if (req) {
           setExistingStore(req);
           const activeFields = req.pendingEdit ? { ...req, ...req.pendingEdit } : req;
@@ -169,7 +170,7 @@ export function StoreForm() {
     try {
       setIsCheckingStoreUsername(true);
       setStoreUsernameError("");
-      const availabilityResponse = await duplicateStoreUsernameCheckApi(cleaned);
+      const availabilityResponse = await duplicateStoreUsernameCheckApi(cleaned, "store");
       const isTaken =
         availabilityResponse?.isTaken === true ||
         availabilityResponse?.exists === true ||
@@ -204,6 +205,7 @@ export function StoreForm() {
     try {
       setIsSubmitting(true);
       const payload = {
+        type: "store" as const,
         companyName: form.companyName.trim(),
         storeUsername: form.storeUsername.trim().toLowerCase(),
         businessEmail: form.businessEmail.trim().toLowerCase(),
@@ -212,18 +214,18 @@ export function StoreForm() {
       };
 
       if (existingStore) {
-        const res = await updateMyRequirementApi(payload);
+        const res = await updateMyRequirementApi({ ...payload, _id: existingStore._id });
         setSuccessMessage(
           res.msg || "Your store requirement updates have been submitted for Admin approval!"
         );
-        const updated = await getMyRequirementApi();
+        const updated = await getMyRequirementApi({ type: "store" });
         if (updated?.requirement) setExistingStore(updated.requirement);
       } else {
         const res = await submitBusinessRequirement(payload);
         setSuccessMessage(
           res.msg || "Your store application was submitted and sent for Admin review!"
         );
-        const created = await getMyRequirementApi();
+        const created = await getMyRequirementApi({ type: "store" });
         if (created?.requirement) setExistingStore(created.requirement);
       }
       setSubmitAttempted(false);

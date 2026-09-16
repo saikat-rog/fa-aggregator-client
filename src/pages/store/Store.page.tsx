@@ -59,7 +59,7 @@ export function StorePage() {
   const onOpenResourceLink = async (id: string, fallbackUrl?: string) => {
     try {
       setTrackingId(id);
-      const res = await trackRequirementClickApi(id);
+      const res = await trackRequirementClickApi(id, "store");
       const targetUrl = res.url || fallbackUrl;
       if (targetUrl) {
         window.open(targetUrl, "_blank", "noopener,noreferrer");

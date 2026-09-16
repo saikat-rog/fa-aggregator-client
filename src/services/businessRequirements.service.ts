@@ -155,8 +155,9 @@ export async function getApprovedBusinessRequirements(params: { page: number; li
   return unwrapData<ApprovedBusinessRequirementsList>(response.data);
 }
 
-export async function trackRequirementClickApi(id: string) {
-  const response = await api.post(`/business-requirements/${id}/track-click`);
+export async function trackRequirementClickApi(id: string, type?: "store" | "campaign") {
+  const typeParam = type ? `?type=${encodeURIComponent(type)}` : "";
+  const response = await api.post(`/business-requirements/${id}/track-click${typeParam}`);
   return unwrapData<{ msg: string; url: string }>(response.data);
 }
 
@@ -170,19 +171,21 @@ export async function getMyRequirementClicks(params: { page: number; limit: numb
   return unwrapData<RequirementClicksAdminList>(response.data);
 }
 
-export async function getBusinessRequirementByIdAdmin(id: string) {
-  const response = await adminApi.get(`/admin/business-requirements/${id}`);
+export async function getBusinessRequirementByIdAdmin(id: string, type?: "store" | "campaign") {
+  const typeParam = type ? `?type=${encodeURIComponent(type)}` : "";
+  const response = await adminApi.get(`/admin/business-requirements/${id}${typeParam}`);
   return unwrapRequirement(response.data);
 }
 
-export async function getApprovedBusinessRequirementByIdPublic(id: string) {
-  const response = await api.get(`/business-requirements/approved/${id}`);
+export async function getApprovedBusinessRequirementByIdPublic(id: string, type?: "store" | "campaign") {
+  const typeParam = type ? `?type=${encodeURIComponent(type)}` : "";
+  const response = await api.get(`/business-requirements/approved/${id}${typeParam}`);
   return unwrapRequirement(response.data);
 }
 
 
-export async function getMyRequirementApi() {
-  const response = await api.get("/business-requirements/my-requirement");
+export async function getMyRequirementApi(params?: { type?: "store" | "campaign" }) {
+  const response = await api.get("/business-requirements/my-requirement", { params });
   const data = response.data?.data ?? response.data;
   const single = data?.requirement ?? null;
   const list = data?.requirements ?? (single ? [single] : []);
@@ -192,7 +195,7 @@ export async function getMyRequirementApi() {
   };
 }
 
-export async function updateMyRequirementApi(payload: BusinessRequirementPayload) {
+export async function updateMyRequirementApi(payload: BusinessRequirementPayload & { _id?: string }) {
   const response = await api.put("/business-requirements/my-requirement", payload);
   const data = unwrapRequirement(response.data);
   const msg = (response.data as { msg?: string })?.msg || "Requirement updated successfully.";

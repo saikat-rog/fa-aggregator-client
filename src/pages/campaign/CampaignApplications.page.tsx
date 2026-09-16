@@ -40,7 +40,7 @@ export function CampaignApplicationsPage() {
       if (showLoading) setIsLoading(true);
 
       const [reqRes, appsRes] = await Promise.allSettled([
-        getMyRequirementApi(),
+        getMyRequirementApi({ type: "campaign" }),
         getMyReceivedCampaignApplicationsApi({ campaignId, limit: 100 }),
       ]);
 

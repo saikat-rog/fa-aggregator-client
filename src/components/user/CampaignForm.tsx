@@ -142,7 +142,7 @@ export function CampaignForm() {
   
   const loadMyCampaigns = async () => {
     try {
-      const res = await getMyRequirementApi();
+      const res = await getMyRequirementApi({ type: "campaign" });
       if (res && res.requirements) {
         setMyCampaigns(res.requirements);
       } else if (res && res.requirement) {
@@ -235,7 +235,7 @@ export function CampaignForm() {
     try {
       setIsCheckingStoreUsername(true);
       setStoreUsernameError("");
-      const availabilityResponse = await duplicateStoreUsernameCheckApi(cleaned);
+      const availabilityResponse = await duplicateStoreUsernameCheckApi(cleaned, "campaign");
       const isTaken =
         availabilityResponse?.isTaken === true ||
         availabilityResponse?.exists === true ||
