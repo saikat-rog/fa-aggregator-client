@@ -93,6 +93,7 @@ export type SavedAdvisorSocialLinks = {
   twitter?: string;
   facebook?: string;
   youtube?: string;
+  telegram?: string;
 };
 
 export type SavedAdvisor = {

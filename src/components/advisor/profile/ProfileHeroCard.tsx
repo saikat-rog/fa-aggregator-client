@@ -374,7 +374,7 @@ export function ProfileHeroCard({
                 <button
                   type="button"
                   onClick={() =>
-                    onSocialOpen(`https://t.me/${socialLinks.telegram.replace(/^@/, "")}`)
+                    onSocialOpen(`https://t.me/${socialLinks.telegram?.replace(/^@/, "")}`)
                   }
                   className={telegramButtonClassName}
                 >
