@@ -11,6 +11,7 @@ import {
   FaShareNodes,
   FaTiktok,
   FaXTwitter,
+  FaTelegram,
   FaYoutube,
 } from "react-icons/fa6";
 import {
@@ -24,12 +25,14 @@ type SocialLinks = {
   facebook?: string;
   youtube?: string;
   tiktok?: string;
+  telegram?: string;
   instagramFollowers?: number;
   linkedinFollowers?: number;
   twitterFollowers?: number;
   facebookFollowers?: number;
   youtubeSubscribers?: number;
   tiktokFollowers?: number;
+  telegramFollowers?: number;
 };
 
 type ProfileHeroCardProps = {
@@ -81,6 +84,11 @@ const facebookCountBadgeClassName =
   "rounded-full bg-indigo-700 px-2 py-0.5 text-[10px] font-bold text-white";
 const youtubeCountBadgeClassName =
   "rounded-full bg-rose-700 px-2 py-0.5 text-[10px] font-bold text-white";
+const telegramButtonClassName =
+  `${socialButtonBaseClassName} border-sky-200 bg-sky-50 text-sky-700 hover:bg-sky-100`;
+const telegramCountBadgeClassName =
+  "rounded-full bg-sky-700 px-2 py-0.5 text-[10px] font-bold text-white";
+
 const tiktokCountBadgeClassName =
   "rounded-full bg-slate-700 px-2 py-0.5 text-[10px] font-bold text-white";
 
@@ -129,7 +137,8 @@ export function ProfileHeroCard({
     socialLinks.twitter ||
     socialLinks.facebook ||
     socialLinks.youtube ||
-    socialLinks.tiktok;
+    socialLinks.tiktok ||
+    socialLinks.telegram;
 
   return (
     <div className="relative flex flex-col gap-5 rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-[0_12px_30px_rgba(15,23,42,0.04)] sm:flex-row sm:items-start">
@@ -357,6 +366,22 @@ export function ProfileHeroCard({
                   {formatCount(socialLinks.youtubeSubscribers) ? (
                     <span className={youtubeCountBadgeClassName}>
                       {formatCount(socialLinks.youtubeSubscribers)} subscribers
+                    </span>
+                  ) : null}
+                </button>
+              )}
+              {socialLinks.telegram && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    onSocialOpen(`https://t.me/${socialLinks.telegram.replace(/^@/, "")}`)
+                  }
+                  className={telegramButtonClassName}
+                >
+                  <FaTelegram /> Telegram
+                  {formatCount(socialLinks.telegramFollowers) ? (
+                    <span className={telegramCountBadgeClassName}>
+                      {formatCount(socialLinks.telegramFollowers)} members
                     </span>
                   ) : null}
                 </button>

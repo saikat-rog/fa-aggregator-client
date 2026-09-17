@@ -74,6 +74,7 @@ export function ApplicationsPanel({ params, setParam, setManyParams }: Props) {
   const [actionInfo, setActionInfo] = useState<string | null>(null);
   const [rejectDraft, setRejectDraft] = useState("");
   const [isMutating, setIsMutating] = useState(false);
+  const [activeAction, setActiveAction] = useState<"approve" | "reject" | "save" | null>(null);
   const [options, setOptions] = useState<AdvisorFormOptionsResponseData | null>(null);
   const [form, setForm] = useState<EditFormState | null>(null);
   const [initialSerialized, setInitialSerialized] = useState("");
@@ -234,6 +235,7 @@ export function ApplicationsPanel({ params, setParam, setManyParams }: Props) {
     };
 
     setIsMutating(true);
+    setActiveAction("save");
     try {
       const updated = await updateAdvisorApplication(selectedApplication._id, payload);
       setData((prev) => {
@@ -252,14 +254,16 @@ export function ApplicationsPanel({ params, setParam, setManyParams }: Props) {
       setActionError(err?.response?.data?.msg || "Failed to save changes.");
     } finally {
       setIsMutating(false);
+      setActiveAction(null);
     }
   };
 
   const onApprove = async () => {
-    if (!selectedApplication) return;
+    if (!selectedApplication || isMutating) return;
     setActionError(null);
     setActionInfo(null);
     setIsMutating(true);
+    setActiveAction("approve");
     try {
       const updated = await approveAdvisorApplication(selectedApplication._id);
       setData((prev) => prev ? ({ ...prev, applications: prev.applications.map((app) => app._id === selectedApplication._id ? { ...app, ...updated } : app) }) : prev);
@@ -269,11 +273,12 @@ export function ApplicationsPanel({ params, setParam, setManyParams }: Props) {
       setActionError(err?.response?.data?.msg || "Failed to approve.");
     } finally {
       setIsMutating(false);
+      setActiveAction(null);
     }
   };
 
   const onReject = async () => {
-    if (!selectedApplication) return;
+    if (!selectedApplication || isMutating) return;
     const reason = rejectDraft.trim();
     if (!reason) {
       setActionError("Rejection reason is required.");
@@ -282,6 +287,7 @@ export function ApplicationsPanel({ params, setParam, setManyParams }: Props) {
     setActionError(null);
     setActionInfo(null);
     setIsMutating(true);
+    setActiveAction("reject");
     try {
       const updated = await rejectAdvisorApplication(selectedApplication._id, reason);
       setData((prev) => prev ? ({ ...prev, applications: prev.applications.map((app) => app._id === selectedApplication._id ? { ...app, ...updated } : app) }) : prev);
@@ -291,6 +297,7 @@ export function ApplicationsPanel({ params, setParam, setManyParams }: Props) {
       setActionError(err?.response?.data?.msg || "Failed to reject.");
     } finally {
       setIsMutating(false);
+      setActiveAction(null);
     }
   };
 
@@ -367,9 +374,40 @@ export function ApplicationsPanel({ params, setParam, setManyParams }: Props) {
                           </div>
 
                           <div className="mt-3 flex flex-wrap gap-2">
-                            <button disabled={!isPending || isMutating} className="rounded-lg bg-blue-700 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50" onClick={submitSave}>Save Changes</button>
-                            <button disabled={!isPending || isMutating} className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50" onClick={onApprove}><FiCheckCircle /> Approve</button>
-                            <button disabled={!isPending || isMutating} className="inline-flex items-center gap-1.5 rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50" onClick={onReject}><FiXCircle /> Reject</button>
+                            <button disabled={!isPending || isMutating} className="inline-flex items-center gap-1.5 rounded-lg bg-blue-700 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-blue-800 disabled:opacity-50 cursor-pointer" onClick={submitSave}>
+                              {activeAction === "save" ? (
+                                <>
+                                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                                  <span>Saving...</span>
+                                </>
+                              ) : (
+                                "Save Changes"
+                              )}
+                            </button>
+                            <button disabled={!isPending || isMutating} className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-emerald-700 disabled:opacity-50 cursor-pointer" onClick={onApprove}>
+                              {activeAction === "approve" ? (
+                                <>
+                                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                                  <span>Approving & Syncing...</span>
+                                </>
+                              ) : (
+                                <>
+                                  <FiCheckCircle /> Approve
+                                </>
+                              )}
+                            </button>
+                            <button disabled={!isPending || isMutating} className="inline-flex items-center gap-1.5 rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-red-700 disabled:opacity-50 cursor-pointer" onClick={onReject}>
+                              {activeAction === "reject" ? (
+                                <>
+                                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                                  <span>Rejecting...</span>
+                                </>
+                              ) : (
+                                <>
+                                  <FiXCircle /> Reject
+                                </>
+                              )}
+                            </button>
                           </div>
                         </div>
                       </td>

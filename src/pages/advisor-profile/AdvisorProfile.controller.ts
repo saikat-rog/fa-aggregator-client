@@ -129,12 +129,14 @@ export function useAdvisorProfileController() {
       facebook: links.facebook,
       youtube: links.youtube,
       tiktok: links.tiktok,
+      telegram: links.telegram,
       instagramFollowers: advisor.instagramFollowers,
       linkedinFollowers: advisor.linkedinFollowers,
       twitterFollowers: advisor.twitterFollowers,
       facebookFollowers: advisor.facebookFollowers,
       youtubeSubscribers: advisor.youtubeSubscribers,
       tiktokFollowers: advisor.tiktokFollowers,
+      telegramFollowers: advisor.telegramFollowers,
     };
   }, [advisor]);
 

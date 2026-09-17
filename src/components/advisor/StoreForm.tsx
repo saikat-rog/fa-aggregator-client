@@ -1,3 +1,4 @@
+
 import { useMemo, useState, useEffect } from "react";
 import {
   FiBriefcase,
@@ -56,8 +57,29 @@ const isValidUrl = (value: string) => {
   }
 };
 
+function getLoggedInUserEmail(): string {
+  if (typeof window === 'undefined') return '';
+  const stored = localStorage.getItem('userEmail') || localStorage.getItem('email');
+  if (stored) return stored;
+  const token = localStorage.getItem('token');
+  if (!token) return '';
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    if (payload && typeof payload.email === 'string') {
+      localStorage.setItem('userEmail', payload.email);
+      return payload.email;
+    }
+  } catch {
+    // ignore
+  }
+  return '';
+}
+
 export function StoreForm() {
-  const [form, setForm] = useState<StoreFormState>(initialState);
+  const [form, setForm] = useState<StoreFormState>(() => ({
+    ...initialState,
+    businessEmail: getLoggedInUserEmail(),
+  }));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
@@ -79,7 +101,7 @@ export function StoreForm() {
           setForm({
             companyName: activeFields.companyName || "",
             storeUsername: activeFields.storeUsername || "",
-            businessEmail: activeFields.businessEmail || "",
+            businessEmail: activeFields.businessEmail || getLoggedInUserEmail() || "",
             url: activeFields.url || "",
             detailedRequirements: activeFields.detailedRequirements || "",
           });
@@ -88,6 +110,10 @@ export function StoreForm() {
         // ignore load errors
       }
     };
+    const accountEmail = getLoggedInUserEmail();
+    if (accountEmail) {
+      setForm((prev) => ({ ...prev, businessEmail: prev.businessEmail || accountEmail }));
+    }
     void loadMyStore();
   }, []);
 
