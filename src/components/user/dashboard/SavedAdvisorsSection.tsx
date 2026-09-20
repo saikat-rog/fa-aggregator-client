@@ -85,6 +85,8 @@ export function SavedAdvisorsSection({
               ppp: advisor.ppp,
               category: advisor.category,
               instagramFollowers: advisor.instagramFollowers,
+              youtubeSubscribers: advisor.youtubeSubscribers,
+              telegramFollowers: advisor.telegramFollowers,
               followersCount:
                 (advisor.instagramFollowers || 0) +
                 (advisor.youtubeSubscribers || 0) +

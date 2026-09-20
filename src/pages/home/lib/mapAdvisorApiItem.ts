@@ -12,6 +12,7 @@ export function mapAdvisorApiItem(item: AdvisorApiItem): AdvisorCardData {
     (item.twitterFollowers || 0) +
     (item.facebookFollowers || 0) +
     (item.youtubeSubscribers || 0) +
+    (item.telegramFollowers || 0) +
     (item.tiktokFollowers || 0);
 
   return {
@@ -40,6 +41,7 @@ export function mapAdvisorApiItem(item: AdvisorApiItem): AdvisorCardData {
     twitterFollowers: item.twitterFollowers ?? null,
     facebookFollowers: item.facebookFollowers ?? null,
     youtubeSubscribers: item.youtubeSubscribers ?? null,
+    telegramFollowers: item.telegramFollowers ?? null,
     tiktokFollowers: item.tiktokFollowers ?? null,
     followersCount: totalFollowers || item.instagramFollowers || null,
     instagramEngagementRateScore: item.instagramEngagementRateScore ?? null,

@@ -28,6 +28,24 @@ const handleOrUndefined = (value: FormDataEntryValue | null) => {
   return raw.startsWith("@") ? raw.slice(1) : raw;
 };
 
+function getLoggedInUserEmail(): string {
+  if (typeof window === "undefined") return "";
+  const stored = localStorage.getItem("userEmail") || localStorage.getItem("email");
+  if (stored) return stored;
+  const token = localStorage.getItem("token");
+  if (!token) return "";
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    if (payload && typeof payload.email === "string") {
+      localStorage.setItem("userEmail", payload.email);
+      return payload.email;
+    }
+  } catch {
+    // ignore
+  }
+  return "";
+}
+
 const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
   const [applicationNote, setApplicationNote] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -51,6 +69,7 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
   );
   const [categoryValue, setCategoryValue] = useState("");
   const [categoryError, setCategoryError] = useState("");
+  const [emailForContact, setEmailForContact] = useState(() => getLoggedInUserEmail());
 
   useEffect(() => {
     const loadOptions = async () => {
@@ -66,6 +85,10 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
     };
 
     loadOptions();
+    const defaultEmail = getLoggedInUserEmail();
+    if (defaultEmail) {
+      setEmailForContact((prev) => prev || defaultEmail);
+    }
   }, []);
 
   const statesForCountry = useMemo(() => {
@@ -527,6 +550,8 @@ const ApplicationForm = ({ onSubmitted }: ApplicationFormProps) => {
           required
           name="emailForContact"
           type="email"
+          value={emailForContact}
+          onChange={(event) => setEmailForContact(event.target.value)}
           placeholder="Email to be displayed on your profile"
           className="w-full rounded-xl border border-blue-100 px-4 py-3 outline-none focus:border-blue-400"
         />

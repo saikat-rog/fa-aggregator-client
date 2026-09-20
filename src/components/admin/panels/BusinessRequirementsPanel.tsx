@@ -238,7 +238,7 @@ export function BusinessRequirementsPanel({ params, setParam, setManyParams }: P
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
     anchor.href = url;
-    anchor.download = `business-requirements-page-${page}.csv`;
+    anchor.download = reqType ? `${reqType}-applications-page-${page}.csv` : `business-requirements-page-${page}.csv`;
     anchor.click();
     URL.revokeObjectURL(url);
   };
@@ -261,29 +261,57 @@ export function BusinessRequirementsPanel({ params, setParam, setManyParams }: P
         ) : null}
       </div>
 
-      <div className="mt-4 flex gap-2 border-b border-slate-200 pb-3">
+      <div className="mt-4 flex flex-wrap gap-2 border-b border-slate-200 pb-3">
         <button
           type="button"
           onClick={() => {
-            updateMany({ requirementsSubTab: undefined, requirementsPage: "1" });
+            updateMany({ requirementsSubTab: undefined, requirementsType: "campaign", requirementsPage: "1", requirementsId: undefined });
           }}
-          className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition ${
-            activeTab === "submissions"
+          className={`inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-sm font-semibold transition ${
+            activeTab === "submissions" && reqType === "campaign"
+              ? "bg-purple-700 text-white shadow-sm"
+              : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+          }`}
+        >
+          <span>📣</span>
+          Campaign Applications
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            updateMany({ requirementsSubTab: undefined, requirementsType: "store", requirementsPage: "1", requirementsId: undefined });
+          }}
+          className={`inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-sm font-semibold transition ${
+            activeTab === "submissions" && reqType === "store"
+              ? "bg-indigo-700 text-white shadow-sm"
+              : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+          }`}
+        >
+          <span>🏪</span>
+          Store Applications
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            updateMany({ requirementsSubTab: undefined, requirementsType: undefined, requirementsPage: "1", requirementsId: undefined });
+          }}
+          className={`inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-sm font-semibold transition ${
+            activeTab === "submissions" && !reqType
               ? "bg-blue-700 text-white shadow-sm"
               : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
           }`}
         >
           <FiBriefcase className="h-4 w-4" />
-          Submissions
+          All Requirements
         </button>
         <button
           type="button"
           onClick={() => {
-            updateMany({ requirementsSubTab: "clicks", requirementsPage: "1" });
+            updateMany({ requirementsSubTab: "clicks", requirementsType: undefined, requirementsPage: "1", requirementsId: undefined });
           }}
-          className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition ${
+          className={`inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-sm font-semibold transition ${
             activeTab === "clicks"
-              ? "bg-blue-700 text-white shadow-sm"
+              ? "bg-slate-800 text-white shadow-sm"
               : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
           }`}
         >
@@ -317,7 +345,13 @@ export function BusinessRequirementsPanel({ params, setParam, setManyParams }: P
       {error ? <p className={statusErrorClassName}>{error}</p> : null}
 
       {!loading && !error && activeTab === "submissions" && rows.length === 0 ? (
-        <p className={statusEmptyClassName}>No business requirements submitted yet.</p>
+        <p className={statusEmptyClassName}>
+          {reqType === "campaign"
+            ? "No campaign applications found."
+            : reqType === "store"
+              ? "No store applications found."
+              : "No business requirements submitted yet."}
+        </p>
       ) : null}
 
       {!loading && !error && activeTab === "clicks" && clickRows.length === 0 ? (
