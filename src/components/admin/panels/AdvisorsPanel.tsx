@@ -154,6 +154,7 @@ export function AdvisorsPanel({ params, setParam }: Props) {
       : detailsUser?.role === "advisor" || Object.keys(profile).length > 0;
 
   const advisorItems = [
+    { label: "Registered Account Email", value: String(detailsUser?.email ?? "-") },
     { label: "Contact Email", value: String(profile.emailForContact ?? "-") },
     { label: "Website", value: String(profile.personalWebsite ?? "-") },
     { label: "Pincode", value: pincode || "-" },
@@ -787,7 +788,12 @@ export function AdvisorsPanel({ params, setParam }: Props) {
                               ) : null}
                             </div>
                             <p className="mt-1 text-sm text-slate-600 flex flex-wrap items-center gap-3">
-                              <span>{detailsUser?.email || String(profile.emailForContact ?? "-")}</span>
+                              <span className="font-medium text-slate-900">{detailsUser?.email || "—"}</span>
+                              {profile.emailForContact && profile.emailForContact !== detailsUser?.email ? (
+                                <span className="text-xs text-slate-600 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-md">
+                                  Contact: {profile.emailForContact}
+                                </span>
+                              ) : null}
                               {((detailsUser as any)?.phone || (detailsUser as any)?.advisorProfile?.phone) ? (
                                 <span className="inline-flex items-center gap-1 font-mono text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
                                   <FiPhone className="h-3 w-3" />
