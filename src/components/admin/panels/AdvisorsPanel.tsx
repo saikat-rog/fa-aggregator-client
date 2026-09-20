@@ -789,9 +789,9 @@ export function AdvisorsPanel({ params, setParam }: Props) {
                             </div>
                             <p className="mt-1 text-sm text-slate-600 flex flex-wrap items-center gap-3">
                               <span className="font-medium text-slate-900">{detailsUser?.email || "—"}</span>
-                              {profile.emailForContact && profile.emailForContact !== detailsUser?.email ? (
+                              {profile.emailForContact && String(profile.emailForContact) !== detailsUser?.email ? (
                                 <span className="text-xs text-slate-600 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-md">
-                                  Contact: {profile.emailForContact}
+                                  Contact: {String(profile.emailForContact)}
                                 </span>
                               ) : null}
                               {((detailsUser as any)?.phone || (detailsUser as any)?.advisorProfile?.phone) ? (
