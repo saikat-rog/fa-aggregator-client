@@ -22,7 +22,6 @@ import { PincodePromptDialog } from "../dialog/PincodePromptDialog";
 import {
   getDisplayCategory,
   getDisplayEngagementRate,
-  getDisplayFollowers,
 } from "./advisorDisplay.utils";
 
 export interface AdvisorCardData {
@@ -125,36 +124,20 @@ export function AdvisorCard({ advisor }: AdvisorCardProps) {
       Boolean(localStorage.getItem("userPincode")));
 
   const socialButtonBaseClassName =
-  "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold transition shadow-xs";
-const instagramButtonClassName =
-  `${socialButtonBaseClassName} border-pink-200 bg-pink-50 text-pink-700 hover:bg-pink-100`;
-const youtubeButtonClassName =
-  `${socialButtonBaseClassName} border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100`;
-const telegramButtonClassName =
-  `${socialButtonBaseClassName} border-sky-200 bg-sky-50 text-sky-700 hover:bg-sky-100`;
-const linkedinButtonClassName =
-  `${socialButtonBaseClassName} border-sky-200 bg-sky-50 text-sky-700 hover:bg-sky-100`;
-const twitterButtonClassName =
-  `${socialButtonBaseClassName} border-black bg-black text-white hover:bg-zinc-900`;
-const facebookButtonClassName =
-  `${socialButtonBaseClassName} border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100`;
-const tiktokButtonClassName =
-  `${socialButtonBaseClassName} border-slate-300 bg-slate-100 text-slate-800 hover:bg-slate-200`;
+    "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold transition shadow-xs";
+  const instagramButtonClassName =
+    `${socialButtonBaseClassName} border-pink-200 bg-pink-50 text-pink-700 hover:bg-pink-100`;
+  const youtubeButtonClassName =
+    `${socialButtonBaseClassName} border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100`;
+  const telegramButtonClassName =
+    `${socialButtonBaseClassName} border-sky-200 bg-sky-50 text-sky-700 hover:bg-sky-100`;
 
-const instagramCountBadgeClassName =
-  "rounded-full bg-pink-700 px-2 py-0.5 text-[10px] font-bold text-white";
-const youtubeCountBadgeClassName =
-  "rounded-full bg-rose-700 px-2 py-0.5 text-[10px] font-bold text-white";
-const telegramCountBadgeClassName =
-  "rounded-full bg-sky-700 px-2 py-0.5 text-[10px] font-bold text-white";
-const linkedinCountBadgeClassName =
-  "rounded-full bg-sky-700 px-2 py-0.5 text-[10px] font-bold text-white";
-const twitterCountBadgeClassName =
-  "rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-black";
-const facebookCountBadgeClassName =
-  "rounded-full bg-indigo-700 px-2 py-0.5 text-[10px] font-bold text-white";
-const tiktokCountBadgeClassName =
-  "rounded-full bg-slate-700 px-2 py-0.5 text-[10px] font-bold text-white";
+  const instagramCountBadgeClassName =
+    "rounded-full bg-pink-700 px-2 py-0.5 text-[10px] font-bold text-white";
+  const youtubeCountBadgeClassName =
+    "rounded-full bg-rose-700 px-2 py-0.5 text-[10px] font-bold text-white";
+  const telegramCountBadgeClassName =
+    "rounded-full bg-sky-700 px-2 py-0.5 text-[10px] font-bold text-white";
 
 
   const executeLinkAction = async (type: "website" | "email" | "social", url: string) => {
