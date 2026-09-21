@@ -58,7 +58,7 @@ export function UsersPanel({ params, setParam, setManyParams }: Props) {
     <section className={panelClassName}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h3 className="inline-flex items-center gap-2 text-lg font-semibold text-slate-900"><FiUsers className="text-blue-700" /> Users</h3>
+          <h3 className="inline-flex items-center gap-2 text-lg font-semibold text-slate-900"><FiUsers className="text-blue-700" /> Businesses</h3>
           {/* <p className="text-sm text-blue-700">Directory from <code>/admin/users</code></p> */}
         </div>
         <div className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">{data?.pagination?.total ?? 0} total</div>
@@ -85,9 +85,9 @@ export function UsersPanel({ params, setParam, setManyParams }: Props) {
         </label>
       </div>
 
-      {loading ? <p className={statusInfoClassName}>Loading users...</p> : null}
+      {loading ? <p className={statusInfoClassName}>Loading businesses...</p> : null}
       {error ? <p className={statusErrorClassName}>{error}</p> : null}
-      {!loading && !error && (data?.users?.length ?? 0) === 0 ? <p className={statusEmptyClassName}>No users found for this filter set.</p> : null}
+      {!loading && !error && (data?.users?.length ?? 0) === 0 ? <p className={statusEmptyClassName}>No businesses found for this filter set.</p> : null}
 
       {!!data?.users?.length && (
         <div className="mt-4 overflow-auto rounded-2xl border border-slate-200">

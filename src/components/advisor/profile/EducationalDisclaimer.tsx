@@ -2,15 +2,13 @@ import { FaCircleInfo } from "react-icons/fa6";
 
 export function EducationalDisclaimer() {
   return (
-    <div className="border-b border-slate-200 bg-slate-50/80 px-3 py-3 sm:px-6">
-      <p className="flex items-center gap-2 text-sm font-semibold text-yellow-500">
-        <FaCircleInfo className="text-yellow-500" />
-        Educational Directory Disclaimer
+    <div className="rounded-[18px] border border-[#E7E1D6] bg-[#FFFBF0] px-4 py-3.5 sm:px-6 shadow-xs">
+      <p className="flex items-center gap-2 text-xs font-bold font-heading uppercase tracking-wider text-[#B8860B]">
+        <FaCircleInfo className="h-3.5 w-3.5 text-[#B8860B]" />
+        Creator Discovery & Awareness Directory
       </p>
-      <p className="mt-1 max-w-3xl text-xs leading-5 text-slate-600">
-        This profile is provided for educational discovery and awareness. We do
-        not endorse or verify the listed professional, and the details shown
-        here are intended for informational use only.
+      <p className="mt-1 max-w-3xl text-xs leading-relaxed text-[#7A7286]">
+        This profile is provided for hyperlocal creator discovery and collaboration. Ensure you connect directly to verify campaign terms, metrics, and deliverable agreements.
       </p>
     </div>
   );

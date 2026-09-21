@@ -3,8 +3,6 @@ import { useNavigate } from "react-router-dom";
 import {
   FaArrowRight,
   FaBookmark,
-  FaChartLine,
-  FaCircleCheck,
   FaEnvelope,
   FaGlobe,
   FaInstagram,
@@ -123,23 +121,6 @@ export function AdvisorCard({ advisor }: AdvisorCardProps) {
       localStorage.getItem("pincodeCollected") === "true" ||
       Boolean(localStorage.getItem("userPincode")));
 
-  const socialButtonBaseClassName =
-    "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold transition shadow-xs";
-  const instagramButtonClassName =
-    `${socialButtonBaseClassName} border-pink-200 bg-pink-50 text-pink-700 hover:bg-pink-100`;
-  const youtubeButtonClassName =
-    `${socialButtonBaseClassName} border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100`;
-  const telegramButtonClassName =
-    `${socialButtonBaseClassName} border-sky-200 bg-sky-50 text-sky-700 hover:bg-sky-100`;
-
-  const instagramCountBadgeClassName =
-    "rounded-full bg-pink-700 px-2 py-0.5 text-[10px] font-bold text-white";
-  const youtubeCountBadgeClassName =
-    "rounded-full bg-rose-700 px-2 py-0.5 text-[10px] font-bold text-white";
-  const telegramCountBadgeClassName =
-    "rounded-full bg-sky-700 px-2 py-0.5 text-[10px] font-bold text-white";
-
-
   const executeLinkAction = async (type: "website" | "email" | "social", url: string) => {
     const clickType =
       type === "social"
@@ -246,7 +227,7 @@ export function AdvisorCard({ advisor }: AdvisorCardProps) {
     }
   };
 
-    const formatCount = (value?: number | null) =>
+  const formatCount = (value?: number | null) =>
     typeof value === "number" && value > 0
       ? new Intl.NumberFormat("en", {
           notation: "compact",
@@ -258,262 +239,210 @@ export function AdvisorCard({ advisor }: AdvisorCardProps) {
   const saveLoading =
     isSavingByAdvisorId[advisor.id] || isUnsavingByAdvisorId[advisor.id];
 
+  const isUnknownState = !advisor.state || advisor.state === "Unknown state";
+  const isUnknownCountry = !advisor.country || advisor.country === "Unknown country";
+  const parts = [
+    !isUnknownState ? advisor.state : null,
+    !isUnknownCountry ? advisor.country : null,
+    advisor.pincode ? `PIN ${advisor.pincode}` : null,
+  ].filter(Boolean);
+  const displayLocation = parts.join(", ") || "India";
+
   return (
     <>
-      <article className="group relative h-full overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-[0_18px_60px_rgba(15,23,42,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_80px_rgba(15,23,42,0.14)]">
-        <div className="absolute right-3 top-3 z-10">
+      <article className="group relative bg-white border border-[#E7E1D6] rounded-[20px] p-5 shadow-sm hover:shadow-md transition flex flex-col justify-between">
+        {/* Save Bookmark button */}
+        <div className="absolute right-4 top-4 z-10">
           <button
             type="button"
             onClick={handleToggleSave}
             disabled={saveLoading}
-            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition disabled:cursor-not-allowed ${
+            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold transition ${
               isSavedAdvisor
-                ? "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
-                : "border-blue-200 bg-white text-blue-700 hover:bg-blue-50"
+                ? "bg-[#E4F5EC] text-[#137A50]"
+                : "bg-[#FAF8F5] border border-[#E7E1D6] text-[#7A7286] hover:text-[#201A2B]"
             }`}
           >
-            <FaBookmark className="h-3 w-3" />
+            <FaBookmark className="h-2.5 w-2.5" />
             {saveLoading ? "..." : isSavedAdvisor ? "Saved" : "Save"}
           </button>
         </div>
-        <div className="grid h-full lg:grid-cols-[280px_1fr]">
-          <div className="relative bg-linear-to-br from-blue-700 to-blue-500 p-5 text-white">
-            <div className="absolute right-0 top-0 h-24 w-24 rounded-bl-full bg-white/10" />
-            <div className="relative flex h-full flex-col justify-between gap-6">
-              <div className="space-y-4">
-                <div className="flex items-start gap-4">
-                  <div className="relative shrink-0">
-                    {advisor.profilePictureUrl ? (
-                      <img
-                        src={getProxiedImageUrl(advisor.profilePictureUrl)}
-                        alt={`${advisor.name} avatar`}
-                        loading="lazy"
-                        decoding="async"
-                        className="h-16 w-16 rounded-3xl border border-white/40 object-cover shadow-lg shadow-blue-950/20"
-                      />
-                    ) : (
-                      <div className="flex h-16 w-16 items-center justify-center rounded-3xl border border-white/40 bg-white/10 text-lg font-semibold text-white shadow-lg shadow-blue-950/20">
-                        {advisor.name
-                          .split(" ")
-                          .map((word) => word[0])
-                          .join("")
-                          .toUpperCase()
-                          .slice(0, 2)}
-                      </div>
-                    )}
-                  </div>
 
-                  <div className="min-w-0">
-                    <button
-                      type="button"
-                      onClick={openProfile}
-                      className="truncate text-xl font-semibold tracking-tight text-white hover:cursor-pointer text-left w-full"
-                    >
-                      {advisor.name}
-                    </button>
-                    <div className="mt-1 flex flex-wrap items-center gap-2">
-                      {(() => {
-                        const isUnknownState = !advisor.state || advisor.state === "Unknown state";
-                        const isUnknownCountry = !advisor.country || advisor.country === "Unknown country";
-                        const parts = [
-                          !isUnknownState ? advisor.state : null,
-                          !isUnknownCountry ? advisor.country : null,
-                          advisor.pincode ? `PIN: ${advisor.pincode}` : null,
-                        ].filter(Boolean);
-                        const displayLocation = parts.join(", ");
-                        return displayLocation ? (
-                          <p className="flex items-center gap-1.5 text-sm text-blue-100">
-                            <FaLocationDot className="text-blue-100" />
-                            {displayLocation}
-                          </p>
-                        ) : null;
-                      })()}
-                      <button
-                        type="button"
-                        onClick={openProfile}
-                        className="inline-flex items-center rounded-full border border-white/20 bg-black px-2.5 py-1 text-xs font-semibold tracking-wide text-white hover:bg-white/20 transition"
-                      >
-                        @{advisor.username}
-                      </button>
-                      {advisor.industries?.length ? (
-                        <p className="inline-flex items-center rounded-full uppercase border border-white/20 bg-white px-2.5 py-1 text-[11px] font-semibold tracking-wide text-blue-700">
-                          {advisor.industries.join(", ")}
-                        </p>
-                      ) : null}
-                    </div>
-                  </div>
+        <div>
+          {/* Header row with Avatar + Name */}
+          <div className="flex items-start gap-3.5 pr-16">
+            <div className="shrink-0">
+              {advisor.profilePictureUrl ? (
+                <img
+                  src={getProxiedImageUrl(advisor.profilePictureUrl)}
+                  alt={`${advisor.name} avatar`}
+                  loading="lazy"
+                  decoding="async"
+                  className="h-14 w-14 rounded-2xl border border-[#E7E1D6] object-cover"
+                />
+              ) : (
+                <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-[#FF5A36] to-[#6C4BFF] flex items-center justify-center font-heading font-bold text-white text-lg">
+                  {advisor.name
+                    .split(" ")
+                    .map((word) => word[0])
+                    .join("")
+                    .toUpperCase()
+                    .slice(0, 2)}
                 </div>
-              </div>
+              )}
+            </div>
 
-              <div className="rounded-2xl text-white">
-                <div className="mb-2 flex flex-wrap gap-2">
-                  {getDisplayEngagementRate(advisor.instagramEngagementRateScore) !== "N/A" ? (
-                    <span className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-[11px] font-semibold">
-                      Eng. Rate: {getDisplayEngagementRate(advisor.instagramEngagementRateScore)}
-                    </span>
-                  ) : null}
-                  
-                  <span className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-[11px] font-semibold">
-                    Category: {getDisplayCategory(advisor.category)}
-                  </span>
-                </div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.24em]">
-                  About
-                </p>
-                <p
-                  className="mt-2 text-sm leading-6"
-                  style={{
-                    display: "-webkit-box",
-                    WebkitLineClamp: 3,
-                    WebkitBoxOrient: "vertical",
-                    overflow: "hidden",
-                  }}
-                >
-                  {advisor.about}
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-blue-50">
-                  Connect
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {socialLinks.instagram ? (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        openAction(
-                          "social",
-                          `https://instagram.com/${socialLinks.instagram}`,
-                        )
-                      }
-                      className={instagramButtonClassName}
-                    >
-                      <FaInstagram /> Instagram
-                      {formatCount(advisor.instagramFollowers) ? (
-                        <span className={instagramCountBadgeClassName}>
-                          {formatCount(advisor.instagramFollowers)} followers
-                        </span>
-                      ) : null}
-                    </button>
-                  ) : null}
-                  {socialLinks.youtube ? (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        openAction(
-                          "social",
-                          `https://youtube.com/${socialLinks.youtube?.startsWith("@") ? socialLinks.youtube : `@${socialLinks.youtube}`}`,
-                        )
-                      }
-                      className={youtubeButtonClassName}
-                    >
-                      <FaYoutube /> YouTube
-                      {formatCount(advisor.youtubeSubscribers) ? (
-                        <span className={youtubeCountBadgeClassName}>
-                          {formatCount(advisor.youtubeSubscribers)} subscribers
-                        </span>
-                      ) : null}
-                    </button>
-                  ) : null}
-                  {socialLinks.telegram ? (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        openAction(
-                          "social",
-                          `https://t.me/${socialLinks.telegram?.replace(/^@/, "")}`,
-                        )
-                      }
-                      className={telegramButtonClassName}
-                    >
-                      <FaTelegram /> Telegram
-                      {formatCount(advisor.telegramFollowers) ? (
-                        <span className={telegramCountBadgeClassName}>
-                          {formatCount(advisor.telegramFollowers)} members
-                        </span>
-                      ) : null}
-                    </button>
-                  ) : null}
-                </div>
+            <div className="min-w-0">
+              <button
+                type="button"
+                onClick={openProfile}
+                className="font-heading font-bold text-base text-[#201A2B] hover:text-[#6C4BFF] transition text-left truncate block w-full"
+              >
+                {advisor.name}
+              </button>
+              <div className="font-mono-code text-xs text-[#6C4BFF] font-medium mt-0.5">
+                @{advisor.username}
               </div>
             </div>
           </div>
 
-          <div className="flex flex-col space-y-5 p-5">
-            <div className="space-y-3">
-              <div>
-                <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
-                  <FaChartLine className="mr-1.5 inline text-blue-600" />
-                  Market Focus
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {advisor.marketFocus.slice(0, 3).map((item) => (
-                    <span
-                      key={`${advisor.id}-${item}`}
-                      className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2.5 py-1 text-[11px] text-blue-700"
-                    >
-                      {item}
-                    </span>
-                  ))}
-                </div>
-              </div>
+          {/* Badges / Pill row */}
+          <div className="flex flex-wrap items-center gap-2 mt-3.5">
+            <span className="badge-pill bg-[#FFEAE3] text-[#D6431E]">
+              <FaLocationDot className="h-2.5 w-2.5" />
+              {displayLocation}
+            </span>
 
-              <div>
-                <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
-                  <FaCircleCheck className="mr-1.5 inline text-blue-600" />
-                  Expertise Indices
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {advisor.specialties.slice(0, 3).map((item) => (
-                    <span
-                      key={`${advisor.id}-${item}`}
-                      className="inline-flex items-center gap-1 rounded-full border border-blue-700 bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-700"
-                    >
-                      {item}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
+            {advisor.category && (
+              <span className="badge-pill bg-[#F1ECFF] text-[#5A3FE0]">
+                {getDisplayCategory(advisor.category)}
+              </span>
+            )}
 
-            <div className="flex flex-wrap items-center gap-3">
-              {advisor.personalWebsite ? (
-                <button
-                  type="button"
-                  onClick={() =>
-                    openAction("website", advisor.personalWebsite as string)
-                  }
-                  className="inline-flex items-center gap-2 rounded-full bg-blue-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-800"
-                >
-                  <FaGlobe /> Website
-                </button>
-              ) : null}
-              {advisor.emailForContact ? (
-                <button
-                  type="button"
-                  onClick={() =>
-                    openAction("email", `mailto:${advisor.emailForContact}`)
-                  }
-                  className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white px-4 py-2 text-sm font-semibold text-blue-700 transition hover:bg-blue-50"
-                >
-                  <FaEnvelope /> Email
-                </button>
-              ) : null}
-            </div>
-            {saveActionError ? (
-              <p className="text-xs font-medium text-rose-600">{saveActionError}</p>
-            ) : null}
+            {getDisplayEngagementRate(advisor.instagramEngagementRateScore) !== "N/A" && (
+              <span className="badge-pill bg-[#FAF8F5] border border-[#E7E1D6] text-[#201A2B] font-mono-code">
+                {getDisplayEngagementRate(advisor.instagramEngagementRateScore)} eng.
+              </span>
+            )}
+          </div>
 
-            <button
-              type="button"
-              onClick={() => navigate(`/${advisor.username}`)}
-              className="mt-auto inline-flex w-full items-center justify-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
+          {/* Bio snippet */}
+          {advisor.about && (
+            <p
+              className="text-xs text-[#7A7286] leading-relaxed mt-3"
+              style={{
+                display: "-webkit-box",
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: "vertical",
+                overflow: "hidden",
+              }}
             >
-              View more <FaArrowRight />
-            </button>
+              {advisor.about}
+            </p>
+          )}
+
+          {/* Social connection chips */}
+          <div className="flex flex-wrap gap-2 mt-4">
+            {socialLinks.instagram && (
+              <button
+                type="button"
+                onClick={() =>
+                  openAction(
+                    "social",
+                    `https://instagram.com/${socialLinks.instagram}`
+                  )
+                }
+                className="inline-flex items-center gap-1.5 rounded-full border border-[#E7E1D6] bg-[#FDFCFA] px-2.5 py-1 text-xs font-semibold text-[#201A2B] hover:bg-[#F1ECFF] hover:border-[#6C4BFF] transition cursor-pointer"
+              >
+                <FaInstagram className="text-[#FF5A36]" />
+                <span>Instagram</span>
+                {formatCount(advisor.instagramFollowers) && (
+                  <span className="font-mono-code font-bold text-[10px] text-[#6C4BFF]">
+                    {formatCount(advisor.instagramFollowers)}
+                  </span>
+                )}
+              </button>
+            )}
+
+            {socialLinks.youtube && (
+              <button
+                type="button"
+                onClick={() =>
+                  openAction(
+                    "social",
+                    `https://youtube.com/${socialLinks.youtube?.startsWith("@") ? socialLinks.youtube : `@${socialLinks.youtube}`}`
+                  )
+                }
+                className="inline-flex items-center gap-1.5 rounded-full border border-[#E7E1D6] bg-[#FDFCFA] px-2.5 py-1 text-xs font-semibold text-[#201A2B] hover:bg-[#FFEAE3] hover:border-[#FF5A36] transition cursor-pointer"
+              >
+                <FaYoutube className="text-[#D6431E]" />
+                <span>YouTube</span>
+                {formatCount(advisor.youtubeSubscribers) && (
+                  <span className="font-mono-code font-bold text-[10px] text-[#D6431E]">
+                    {formatCount(advisor.youtubeSubscribers)}
+                  </span>
+                )}
+              </button>
+            )}
+
+            {socialLinks.telegram && (
+              <button
+                type="button"
+                onClick={() =>
+                  openAction(
+                    "social",
+                    `https://t.me/${socialLinks.telegram?.replace(/^@/, "")}`
+                  )
+                }
+                className="inline-flex items-center gap-1.5 rounded-full border border-[#E7E1D6] bg-[#FDFCFA] px-2.5 py-1 text-xs font-semibold text-[#201A2B] hover:bg-[#F1ECFF] hover:border-[#6C4BFF] transition cursor-pointer"
+              >
+                <FaTelegram className="text-[#6C4BFF]" />
+                <span>Telegram</span>
+                {formatCount(advisor.telegramFollowers) && (
+                  <span className="font-mono-code font-bold text-[10px] text-[#6C4BFF]">
+                    {formatCount(advisor.telegramFollowers)}
+                  </span>
+                )}
+              </button>
+            )}
           </div>
         </div>
+
+        {/* Footer actions */}
+        <div className="pt-4 mt-4 border-t border-[#E7E1D6] flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            {advisor.personalWebsite && (
+              <button
+                type="button"
+                onClick={() => openAction("website", advisor.personalWebsite as string)}
+                className="inline-flex items-center gap-1 text-xs font-semibold text-[#7A7286] hover:text-[#201A2B] bg-[#FAF8F5] border border-[#E7E1D6] px-2.5 py-1 rounded-lg transition"
+              >
+                <FaGlobe className="h-3 w-3" /> Website
+              </button>
+            )}
+            {advisor.emailForContact && (
+              <button
+                type="button"
+                onClick={() => openAction("email", `mailto:${advisor.emailForContact}`)}
+                className="inline-flex items-center gap-1 text-xs font-semibold text-[#7A7286] hover:text-[#201A2B] bg-[#FAF8F5] border border-[#E7E1D6] px-2.5 py-1 rounded-lg transition"
+              >
+                <FaEnvelope className="h-3 w-3" /> Email
+              </button>
+            )}
+          </div>
+
+          <button
+            type="button"
+            onClick={openProfile}
+            className="inline-flex items-center gap-1.5 font-heading font-bold text-xs text-[#201A2B] hover:text-[#6C4BFF] transition ml-auto"
+          >
+            View profile <FaArrowRight className="h-3 w-3" />
+          </button>
+        </div>
+
+        {saveActionError && (
+          <p className="text-[11px] font-medium text-rose-600 mt-2">{saveActionError}</p>
+        )}
       </article>
 
       <AuthPromptDialog

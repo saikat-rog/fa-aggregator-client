@@ -36,6 +36,19 @@ export function AdminPageContent() {
     }, { replace: true });
   };
 
+  const viewLabels: Record<AdminView, string> = {
+    users: "Businesses",
+    advisors: "Creators",
+    applications: "Creator Applications",
+    industries: "Industries",
+    categories: "Categories",
+    markets: "Markets",
+    "expertise-indices": "Expertise Indices",
+    blogs: "Blogs",
+    requirements: "Requirements",
+    "campaign-applications": "Campaign Applications",
+  };
+
   return (
     <div className="space-y-4">
       <div className={`${panelClassName} p-3`}>
@@ -43,9 +56,9 @@ export function AdminPageContent() {
           {views.map((item) => {
             const Icon = viewIcons[item];
             return (
-              <button key={item} className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium capitalize transition ${view === item ? "border-blue-700 bg-blue-700 text-white shadow-sm" : "border-slate-200 bg-white text-slate-700 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"}`} onClick={() => setParam("view", item)}>
+              <button key={item} className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition ${view === item ? "border-blue-700 bg-blue-700 text-white shadow-sm" : "border-slate-200 bg-white text-slate-700 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"}`} onClick={() => setParam("view", item)}>
                 <Icon className="h-3.5 w-3.5" />
-                {item}
+                {viewLabels[item] || item}
               </button>
             );
           })}

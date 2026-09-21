@@ -16,48 +16,49 @@ export function SavedAdvisorsSection({
   onRefresh,
 }: SavedAdvisorsSectionProps) {
   return (
-    <section>
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <h2 className="inline-flex items-center gap-2 text-xl font-semibold text-slate-800">
-          <FaBookmark className="text-blue-700" />
-          Saved Advisors
-        </h2>
+    <section className="rounded-[22px] border border-[#E7E1D6] bg-white p-6 md:p-8 shadow-xs space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="inline-flex items-center gap-2 text-xl font-bold font-heading text-[#201A2B]">
+            <FaBookmark className="text-[#FF5A36] h-5 w-5" />
+            Saved Creators
+          </h2>
+          <p className="text-xs text-[#7A7286] mt-0.5">
+            Quickly access creators you bookmarked for current or future campaigns.
+          </p>
+        </div>
         <button
           type="button"
           onClick={onRefresh}
-          className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+          className="rounded-xl border border-[#E7E1D6] bg-white px-3.5 py-1.5 text-xs font-bold font-heading text-[#201A2B] hover:bg-[#FAF8F5] transition cursor-pointer"
         >
-          <FaRotateRight className="h-3.5 w-3.5" />
           Refresh
         </button>
       </div>
 
       {isLoading ? (
-        <div className="flex items-center justify-center py-8">
-          <div className="inline-flex items-center gap-3 text-sm font-medium text-blue-700">
-            <span className="h-5 w-5 animate-spin rounded-full border-2 border-blue-200 border-t-blue-700" />
-            <span>Loading advisors...</span>
+        <div className="flex items-center justify-center py-6">
+          <div className="inline-flex items-center gap-3 text-xs font-bold text-[#6C4BFF]">
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-[#E7E1D6] border-t-[#6C4BFF]" />
+            <span>Loading saved creators...</span>
           </div>
         </div>
       ) : error ? (
-        <p className="mb-4 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
+        <p className="rounded-2xl border border-[#FEE2E2] bg-[#FEF2F2] p-4 text-xs font-medium text-[#B91C1C]">
           {error}
         </p>
       ) : savedAdvisors.length === 0 ? (
-        <div className="mt-6 rounded-2xl border border-dashed border-blue-200 bg-linear-to-br from-blue-50 to-cyan-50 p-8 text-center">
-          <div className="mx-auto mb-3 inline-flex h-12 w-12 items-center justify-center rounded-full bg-white text-blue-700 shadow-sm">
-            <FaBookmark className="h-5 w-5" />
-          </div>
-          <p className="text-base font-semibold text-slate-800">No saved advisors yet</p>
-          <p className="mt-1 text-sm text-slate-600">
-            Save advisors while browsing to shortlist and compare later.
+        <div className="rounded-2xl border border-dashed border-[#E7E1D6] bg-[#FAF8F5] p-8 text-center">
+          <p className="text-sm font-bold font-heading text-[#201A2B]">No saved creators yet</p>
+          <p className="mt-1 text-xs text-[#7A7286]">
+            Bookmark creators you want to keep handy for quick reference and collaboration.
           </p>
           <button
             type="button"
             onClick={onRefresh}
-            className="mt-4 inline-flex items-center gap-2 rounded-lg border border-blue-200 bg-white px-3 py-2 text-sm font-semibold text-blue-700 transition hover:bg-blue-50"
+            className="mt-4 inline-flex items-center gap-2 rounded-xl border border-[#E7E1D6] bg-white px-3.5 py-2 text-xs font-bold font-heading text-[#201A2B] hover:bg-[#FAF8F5] transition cursor-pointer shadow-xs"
           >
-            <FaRotateRight className="h-3.5 w-3.5" />
+            <FaRotateRight className="h-3 w-3 text-[#7A7286]" />
             Refresh list
           </button>
         </div>

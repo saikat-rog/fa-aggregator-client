@@ -21,67 +21,78 @@ export function HomeResultsSection({
   onNextPage,
 }: HomeResultsSectionProps) {
   return (
-    <section>
-      <h2 className="mb-4 text-xl font-semibold text-slate-800">Available Financial Advisors</h2>
+    <section className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="font-heading font-bold text-lg text-[#201A2B]">
+          Available Creators
+        </h2>
+        {pagination.total > 0 && (
+          <span className="font-mono-code text-xs text-[#7A7286]">
+            {pagination.total} registered
+          </span>
+        )}
+      </div>
 
       {isLoading ? (
-        <div className="flex items-center justify-center py-8">
-          <div className="inline-flex items-center gap-3 text-sm font-medium text-blue-700">
-            <span className="h-5 w-5 animate-spin rounded-full border-2 border-blue-200 border-t-blue-700" />
-            <span>Loading advisors...</span>
+        <div className="flex items-center justify-center py-12 bg-white border border-[#E7E1D6] rounded-[20px]">
+          <div className="inline-flex items-center gap-3 text-sm font-semibold text-[#6C4BFF]">
+            <span className="h-5 w-5 animate-spin rounded-full border-2 border-[#E7E1D6] border-t-[#6C4BFF]" />
+            <span>Loading creators...</span>
           </div>
         </div>
       ) : null}
 
       {error ? (
-        <p className="mb-4 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
+        <p className="rounded-[16px] border border-rose-200 bg-rose-50 p-4 text-xs font-medium text-rose-700">
           {error}
         </p>
       ) : null}
 
       {!isLoading && !error ? (
         <>
-          <div className="grid auto-rows-fr gap-4 md:grid-cols-2">
+          <div className="grid auto-rows-fr gap-4 sm:grid-cols-2">
             {advisors.map((advisor) => (
               <AdvisorCard key={advisor.id} advisor={advisor} />
             ))}
           </div>
 
           {advisors.length === 0 ? (
-            <div className="mt-8 rounded-3xl p-10 text-center">
-              <div className="mx-auto inline-flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 text-blue-700">
-                <FaCompass className="h-7 w-7" />
+            <div className="bg-white border border-[#E7E1D6] rounded-[20px] p-10 text-center">
+              <div className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#F1ECFF] text-[#6C4BFF] mb-3">
+                <FaCompass className="h-6 w-6" />
               </div>
-              <p className="mt-4 text-2xl font-bold text-slate-800">No exact match yet</p>
-              <p className="mt-2 text-base text-slate-600">
-                Try widening your filters a bit. Your ideal advisor may be one step away.
+              <p className="font-heading font-bold text-lg text-[#201A2B]">No exact match yet</p>
+              <p className="mt-1 text-xs text-[#7A7286] max-w-sm mx-auto">
+                Try widening your location or category filters to discover more creators nearby.
               </p>
             </div>
           ) : null}
 
-          <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-3">
-            <p className="text-sm text-slate-600">
-              Page {pagination.page} of {pagination.totalPages} • {pagination.total} total advisors
-            </p>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                disabled={pagination.page <= 1}
-                onClick={onPreviousPage}
-                className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                Previous
-              </button>
-              <button
-                type="button"
-                disabled={pagination.page >= pagination.totalPages}
-                onClick={onNextPage}
-                className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                Next
-              </button>
+          {pagination.totalPages > 1 && (
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-[16px] border border-[#E7E1D6] bg-white p-3.5">
+              <p className="font-mono-code text-xs text-[#7A7286]">
+                Page {pagination.page} of {pagination.totalPages} • {pagination.total} total
+              </p>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  disabled={pagination.page <= 1}
+                  onClick={onPreviousPage}
+                  className="rounded-xl border border-[#E7E1D6] bg-[#FAF8F5] px-3 py-1.5 font-heading text-xs font-semibold text-[#201A2B] transition hover:bg-[#F0ECE4] disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  Previous
+                </button>
+                <button
+                  type="button"
+                  disabled={pagination.page >= pagination.totalPages}
+                  onClick={onNextPage}
+                  className="rounded-xl border border-[#E7E1D6] bg-[#FAF8F5] px-3 py-1.5 font-heading text-xs font-semibold text-[#201A2B] transition hover:bg-[#F0ECE4] disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  Next
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </>
       ) : null}
     </section>

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { FiBookOpen, FiCalendar, FiSearch, FiTag } from "react-icons/fi";
+import { FiBookOpen, FiCalendar, FiSearch, FiTag, FiArrowRight } from "react-icons/fi";
 import { useDebouncedValue } from "../../hooks/useDebouncedValue";
 import { publicListBlogs, type Blog } from "../../services/blog.service";
 
@@ -29,9 +29,9 @@ export function BlogListPage() {
   };
 
   useEffect(() => {
-    document.title = "Blog | Folksmint";
+    document.title = "Blog & Insights | Folksmint";
     const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute("content", "Read market insights and finance blogs.");
+    if (meta) meta.setAttribute("content", "Read market insights, creator strategies, and hyperlocal marketing playbooks on Folksmint.");
   }, []);
 
   useEffect(() => {
@@ -50,53 +50,122 @@ export function BlogListPage() {
   }, [data]);
 
   return (
-    <div className="space-y-5">
-      
-      <div className="grid gap-2 sm:grid-cols-2">
+    <div className="mx-auto max-w-6xl space-y-8 pb-12">
+      {/* Header Banner */}
+      <section className="relative overflow-hidden rounded-[24px] bg-[#201A2B] px-6 py-12 text-center text-white lg:px-10 shadow-sm border border-[#E7E1D6]">
+        <div className="pointer-events-none absolute -left-16 -top-20 h-56 w-56 rounded-full bg-[#FF5A36]/20 blur-3xl" />
+        <div className="pointer-events-none absolute -right-12 bottom-0 h-52 w-52 rounded-full bg-[#6C4BFF]/20 blur-3xl" />
+        
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3.5 py-1 text-[11px] font-bold font-mono-code uppercase tracking-wider text-white/90 backdrop-blur-md">
+          <FiBookOpen className="h-3.5 w-3.5 text-[#FF5A36]" />
+          Folksmint Journal &amp; Guides
+        </span>
+        <h1 className="relative mt-3 text-3xl font-extrabold font-heading lg:text-5xl tracking-tight">
+          Insights &amp; Creator Playbooks
+        </h1>
+        <p className="relative mx-auto mt-3 max-w-xl text-sm text-white/80 font-medium">
+          Hyperlocal growth marketing strategies, creator monetization tips, and community case studies.
+        </p>
+      </section>
+
+      {/* Search and Filters */}
+      <div className="grid gap-3 sm:grid-cols-[1fr_220px]">
         <div className="relative">
-          <FiSearch className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-700" />
-          <input className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 pl-9 text-sm" placeholder="Search blogs" value={search} onChange={(e) => setParam("search", e.target.value)} />
+          <FiSearch className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7A7286]" />
+          <input
+            className="w-full rounded-xl border border-[#E7E1D6] bg-white px-3.5 py-2.5 pl-10 text-xs font-semibold text-[#201A2B] placeholder:text-[#7A7286]/60 outline-none transition focus:border-[#FF5A36] focus:ring-2 focus:ring-[#FF5A36]/10"
+            placeholder="Search articles & guides..."
+            value={search}
+            onChange={(e) => setParam("search", e.target.value)}
+          />
         </div>
-        <select className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm" value={tag} onChange={(e) => setParam("tag", e.target.value || undefined)}>
-          <option value="">All tags</option>
+        <select
+          className="rounded-xl border border-[#E7E1D6] bg-white px-3.5 py-2.5 text-xs font-semibold text-[#201A2B] outline-none transition focus:border-[#FF5A36]"
+          value={tag}
+          onChange={(e) => setParam("tag", e.target.value || undefined)}
+        >
+          <option value="">All Topics & Tags</option>
           {tags.map((t) => <option key={t} value={t}>{t}</option>)}
         </select>
       </div>
-      {loading ? <p className="rounded border border-blue-100 bg-blue-50 p-2 text-sm text-blue-700">Loading blogs...</p> : null}
-      {error ? <p className="rounded border border-red-100 bg-red-50 p-2 text-sm text-red-700">{error}</p> : null}
+
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <div className="inline-flex items-center gap-3 text-xs font-bold text-[#6C4BFF]">
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-[#E7E1D6] border-t-[#6C4BFF]" />
+            Loading articles...
+          </div>
+        </div>
+      ) : null}
+
+      {error ? (
+        <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-xs font-semibold text-rose-700">
+          {error}
+        </div>
+      ) : null}
+
       {!loading && !error && (data?.blogs?.length ?? 0) === 0 ? (
-        <section className="flex min-h-[65vh] flex-col items-center justify-center rounded-3xl border border-slate-200 bg-slate-50/80 px-6 text-center">
-          <span className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 text-blue-700">
-            <FiBookOpen className="h-7 w-7" />
+        <section className="flex min-h-[40vh] flex-col items-center justify-center rounded-[24px] border border-dashed border-[#E7E1D6] bg-[#FAF8F5] px-6 text-center">
+          <span className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-[#FF5A36]/10 text-[#FF5A36]">
+            <FiBookOpen className="h-6 w-6" />
           </span>
-          <h2 className="mt-4 text-xl font-semibold text-slate-800">No blogs found</h2>
-          <p className="mt-1 max-w-md text-sm text-slate-600">
-            Try changing your search or tag filter to discover more blog posts.
+          <h2 className="mt-4 text-xl font-bold font-heading text-[#201A2B]">No articles found</h2>
+          <p className="mt-1 max-w-md text-xs text-[#7A7286]">
+            Try adjusting your search query or choosing another topic tag.
           </p>
         </section>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-6 md:grid-cols-2">
           {data?.blogs?.map((b) => {
             const coverImageUrl = b.coverImageUrl?.trim() || "";
 
             return (
-              <Link key={b._id} to={`/blog/${b.slug}`} className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_10px_30px_rgba(15,23,42,0.05)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(15,23,42,0.1)]">
+              <Link
+                key={b._id}
+                to={`/blog/${b.slug}`}
+                className="group flex flex-col overflow-hidden rounded-[24px] border border-[#E7E1D6] bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+              >
                 {coverImageUrl ? (
-                  <div className="aspect-video w-full overflow-hidden bg-slate-100">
-                    <img src={coverImageUrl} alt={b.title} className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]" />
+                  <div className="aspect-[16/9] w-full overflow-hidden bg-[#FAF8F5] border-b border-[#E7E1D6]">
+                    <img
+                      src={coverImageUrl}
+                      alt={b.title}
+                      className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
+                    />
                   </div>
-                ) : null}
-                <div className="p-4">
-                  <p className="inline-flex items-center gap-1.5 text-xs text-slate-500"><FiCalendar className="text-blue-700" /> {b.publishedAt ? new Date(b.publishedAt).toLocaleDateString("en-GB") : "-"}</p>
-                  <h2 className="mt-1 text-lg font-semibold text-slate-900">{b.title}</h2>
-                  <p className="mt-1 line-clamp-3 text-sm text-slate-600">{b.excerpt || ""}</p>
-                  <div className="mt-3 flex flex-wrap gap-1.5">
+                ) : (
+                  <div className="aspect-[16/9] w-full bg-gradient-to-br from-[#FF5A36]/10 via-[#FAF8F5] to-[#6C4BFF]/10 flex items-center justify-center border-b border-[#E7E1D6]">
+                    <FiBookOpen className="h-10 w-10 text-[#7A7286]/40" />
+                  </div>
+                )}
+                <div className="flex flex-1 flex-col p-6">
+                  <p className="inline-flex items-center gap-1.5 font-mono-code text-[11px] font-bold text-[#7A7286]">
+                    <FiCalendar className="text-[#FF5A36]" />
+                    {b.publishedAt ? new Date(b.publishedAt).toLocaleDateString("en-GB") : "Recently Published"}
+                  </p>
+
+                  <h2 className="mt-2 text-xl font-bold font-heading text-[#201A2B] group-hover:text-[#FF5A36] transition line-clamp-2">
+                    {b.title}
+                  </h2>
+                  <p className="mt-2 line-clamp-3 text-xs leading-relaxed text-[#7A7286]">
+                    {b.excerpt || ""}
+                  </p>
+
+                  <div className="mt-4 flex flex-wrap gap-1.5">
                     {(b.tags || []).map((t) => (
-                      <span key={t} className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700">
+                      <span
+                        key={t}
+                        className="inline-flex items-center gap-1 rounded-full border border-[#6C4BFF]/20 bg-[#F1ECFF] px-2.5 py-0.5 text-[11px] font-bold font-mono-code text-[#6C4BFF]"
+                      >
                         <FiTag className="h-3 w-3" />
                         {t}
                       </span>
                     ))}
+                  </div>
+
+                  <div className="mt-auto pt-4 flex items-center gap-1 text-xs font-bold font-heading text-[#FF5A36] group-hover:translate-x-0.5 transition">
+                    <span>Read Article</span>
+                    <FiArrowRight className="h-3.5 w-3.5" />
                   </div>
                 </div>
               </Link>
@@ -104,12 +173,27 @@ export function BlogListPage() {
           })}
         </div>
       )}
-      {data?.pagination ? (
-        <div className="flex items-center justify-between text-sm">
-          <p>Page {data.pagination.page} of {Math.max(1, data.pagination.totalPages)}</p>
+
+      {data?.pagination && data.pagination.totalPages > 1 ? (
+        <div className="flex items-center justify-between border-t border-[#E7E1D6] pt-6 text-xs text-[#7A7286]">
+          <p>
+            Page {data.pagination.page} of {Math.max(1, data.pagination.totalPages)}
+          </p>
           <div className="flex gap-2">
-            <button className="rounded border px-3 py-1 disabled:opacity-50" disabled={data.pagination.page <= 1} onClick={() => setParam("page", String(data.pagination.page - 1))}>Prev</button>
-            <button className="rounded border px-3 py-1 disabled:opacity-50" disabled={data.pagination.page >= data.pagination.totalPages} onClick={() => setParam("page", String(data.pagination.page + 1))}>Next</button>
+            <button
+              className="rounded-xl border border-[#E7E1D6] bg-white px-4 py-2 font-bold text-[#201A2B] disabled:opacity-40 hover:bg-[#FAF8F5] transition"
+              disabled={data.pagination.page <= 1}
+              onClick={() => setParam("page", String(data.pagination.page - 1))}
+            >
+              Prev
+            </button>
+            <button
+              className="rounded-xl border border-[#E7E1D6] bg-white px-4 py-2 font-bold text-[#201A2B] disabled:opacity-40 hover:bg-[#FAF8F5] transition"
+              disabled={data.pagination.page >= data.pagination.totalPages}
+              onClick={() => setParam("page", String(data.pagination.page + 1))}
+            >
+              Next
+            </button>
           </div>
         </div>
       ) : null}

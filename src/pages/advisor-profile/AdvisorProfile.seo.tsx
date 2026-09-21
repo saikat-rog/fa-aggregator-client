@@ -6,18 +6,18 @@ type Props = {
 };
 
 export function AdvisorProfileSeo({ advisor }: Props) {
-  const advisorName = advisor.name?.trim() || advisor.username || "Financial Advisor";
+  const advisorName = advisor.name?.trim() || advisor.username || "Creator";
   const advisorLocation = [advisor.state, advisor.country].filter(Boolean).join(", ");
   const pageUrl = typeof window !== "undefined" ? window.location.href : "";
-  const pageTitle = `${advisorName} | Financial Advisor${advisorLocation ? ` in ${advisorLocation}` : ""} | Folksmint`;
+  const pageTitle = `${advisorName} | Creator${advisorLocation ? ` in ${advisorLocation}` : ""} | Folksmint`;
   const pageDescription =
     advisor.about?.trim() ||
-    `View ${advisorName}'s advisor profile${advisorLocation ? ` in ${advisorLocation}` : ""} on Folksmint.`;
+    `View ${advisorName}'s creator profile${advisorLocation ? ` in ${advisorLocation}` : ""} on Folksmint.`;
   const pageKeywords = [
     advisorName,
     advisor.username,
-    "financial advisor",
-    "investment advisor",
+    "creator",
+    "influencer",
     advisor.country,
     advisor.state,
     ...(advisor.industries || []),

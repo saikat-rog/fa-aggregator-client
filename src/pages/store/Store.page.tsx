@@ -8,6 +8,7 @@ import {
   type ApprovedBusinessRequirementItem,
 } from "../../services/businessRequirements.service";
 import { SocialShareButtons } from "../../components/resources/SocialShareButtons";
+import { ReachRadar } from "../../components/home/ReachRadar";
 
 const PAGE_SIZE = 10;
 const getProxiedImageUrl = (url: string) =>
@@ -75,83 +76,118 @@ export function StorePage() {
 
   return (
     <div className="space-y-8">
-      <section className="relative overflow-hidden rounded-3xl bg-linear-to-br from-slate-900 via-blue-900 to-indigo-900 px-6 py-16 text-center text-white lg:px-10 shadow-lg">
-        <div className="pointer-events-none absolute -left-16 -top-20 h-56 w-56 rounded-full bg-blue-400/20 blur-3xl" />
-        <div className="pointer-events-none absolute -right-12 bottom-0 h-52 w-52 rounded-full bg-indigo-600/30 blur-3xl" />
-        <h1 className="relative text-4xl font-extrabold lg:text-6xl tracking-tight">Approved Stores</h1>
-        <p className="relative mx-auto mt-4 max-w-2xl text-lg text-blue-100 font-medium">
-          Explore store listings and requirements posted by verified advisors.
-        </p>
-        {showApplyStoreButton ? (
-          <button
-            type="button"
-            onClick={onApplyStoreClick}
-            className="relative mt-6 inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-extrabold text-indigo-900 shadow-lg hover:bg-blue-50 transition cursor-pointer"
-          >
-            <FiFileText className="h-4.5 w-4.5 text-indigo-700" />
-            Apply for Store Listing
-          </button>
-        ) : null}
+      {/* Mohalla Header */}
+      <section className="bg-white border border-[#E7E1D6] rounded-[22px] p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-8 shadow-sm">
+        <div className="max-w-xl">
+          <h1 className="font-heading text-3xl md:text-4xl font-extrabold text-[#201A2B] tracking-tight">
+            Discover verified creator storefronts.
+          </h1>
+          <p className="mt-3 text-sm md:text-base text-[#7A7286] leading-relaxed">
+            Explore dedicated store profiles, exclusive services, and direct partnerships posted by verified local creators.
+          </p>
+          <div className="flex flex-wrap items-center gap-4 mt-6">
+            <span className="font-mono-code text-xs text-[#201A2B] bg-[#F1ECFF] px-3.5 py-1.5 rounded-full font-semibold">
+              <b className="text-[#6C4BFF]">{requirements.length}</b> stores active
+            </span>
+            {showApplyStoreButton && (
+              <button
+                type="button"
+                onClick={onApplyStoreClick}
+                className="btn-violet inline-flex items-center gap-2 rounded-full px-5 py-2 text-xs font-bold shadow-xs cursor-pointer"
+              >
+                <FiFileText className="h-4 w-4" />
+                Apply for store listing
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="shrink-0">
+          <ReachRadar size={180} pulsing />
+        </div>
       </section>
 
-      {isLoading ? <p role="status" className="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-600">Loading approved store listings...</p> : null}
-      {error ? <p role="alert" className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">{error}</p> : null}
-      {!isLoading && !error && requirements.length === 0 ? <p className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-slate-600">No approved store listings are available yet.</p> : null}
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12 bg-white border border-[#E7E1D6] rounded-[20px]">
+          <div className="inline-flex items-center gap-3 text-sm font-semibold text-[#6C4BFF]">
+            <span className="h-5 w-5 animate-spin rounded-full border-2 border-[#E7E1D6] border-t-[#6C4BFF]" />
+            <span>Loading store listings...</span>
+          </div>
+        </div>
+      ) : null}
+
+      {error ? (
+        <p role="alert" className="rounded-[16px] border border-rose-200 bg-rose-50 p-4 text-xs font-medium text-rose-700">
+          {error}
+        </p>
+      ) : null}
+
+      {!isLoading && !error && requirements.length === 0 ? (
+        <div className="bg-white border border-[#E7E1D6] rounded-[20px] p-10 text-center">
+          <p className="font-heading font-bold text-lg text-[#201A2B]">No store listings available yet</p>
+          <p className="text-xs text-[#7A7286] mt-1">Check back soon for new creator drops and store listings.</p>
+        </div>
+      ) : null}
 
       {!isLoading && !error && requirements.length > 0 ? (
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-2">
           {requirements.map((item) => {
             const itemSlug = item.storeUsername || item._id;
             const itemShareUrl = `${baseUrl}/store/${itemSlug}`;
             return (
-              <article key={item._id} className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <article
+                key={item._id}
+                className="bg-white border border-[#E7E1D6] rounded-[20px] p-6 shadow-sm flex flex-col justify-between"
+              >
                 <div>
-                  <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-start justify-between gap-3">
                     <Link to={`/store/${itemSlug}`} className="group">
-                      <h2 className="text-2xl font-semibold text-slate-900 group-hover:text-blue-700 transition">{item.companyName}</h2>
+                      <h2 className="font-heading text-lg font-bold text-[#201A2B] group-hover:text-[#6C4BFF] transition">
+                        {item.companyName}
+                      </h2>
                     </Link>
                     <Link
                       to={`/store/${itemSlug}`}
-                      className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-blue-50 hover:text-blue-700 shrink-0"
+                      className="inline-flex items-center gap-1 font-heading text-xs font-semibold text-[#7A7286] hover:text-[#201A2B] bg-[#FAF8F5] border border-[#E7E1D6] px-2.5 py-1 rounded-lg shrink-0 transition"
                     >
-                      <FiEye className="h-3.5 w-3.5" />
+                      <FiEye className="h-3 w-3" />
                       Details
                     </Link>
                   </div>
 
                   {item.postedByAdvisorName ? (
-                    <div className="mt-2 flex items-center gap-2 text-xs text-slate-500">
+                    <div className="mt-2 flex items-center gap-2 text-xs text-[#7A7286]">
                       {item.instagramProfilePictureUrl ? (
                         <img
                           src={getProxiedImageUrl(item.instagramProfilePictureUrl)}
                           alt={item.postedByAdvisorName}
-                          className="h-5 w-5 rounded-full object-cover border border-slate-200"
+                          className="h-5 w-5 rounded-full object-cover border border-[#E7E1D6]"
                           onError={(e) => {
                             (e.target as HTMLElement).style.display = "none";
                           }}
                         />
                       ) : (
-                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-[10px] font-bold text-blue-700">
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#F1ECFF] text-[10px] font-bold text-[#5A3FE0]">
                           {item.postedByAdvisorName.charAt(0).toUpperCase()}
                         </div>
                       )}
                       <span>
                         Posted by{" "}
                         {item.postedByAdvisorUsername ? (
-                          <Link to={`/${item.postedByAdvisorUsername}`} className="font-semibold text-slate-700 hover:text-blue-700 hover:underline">
+                          <Link to={`/${item.postedByAdvisorUsername}`} className="font-semibold text-[#201A2B] hover:text-[#6C4BFF]">
                             {item.postedByAdvisorName}
                           </Link>
                         ) : (
-                          <span className="font-semibold text-slate-700">{item.postedByAdvisorName}</span>
+                          <span className="font-semibold text-[#201A2B]">{item.postedByAdvisorName}</span>
                         )}
                       </span>
                     </div>
                   ) : null}
 
                   {item.businessEmail ? (
-                    <p className="mt-3 text-sm text-slate-600">
-                      <span className="font-semibold text-slate-700">Business Email:</span>{" "}
-                      <a href={`mailto:${item.businessEmail}`} className="text-blue-700 hover:underline">
+                    <p className="mt-3 text-xs text-[#7A7286]">
+                      <span className="font-semibold text-[#201A2B]">Business Email:</span>{" "}
+                      <a href={`mailto:${item.businessEmail}`} className="text-[#6C4BFF] hover:underline">
                         {item.businessEmail}
                       </a>
                     </p>
@@ -159,15 +195,15 @@ export function StorePage() {
 
                   {item.socialLinks && (item.socialLinks.instagram || item.socialLinks.youtube || item.socialLinks.telegram) ? (
                     <div className="mt-3 flex flex-wrap gap-2 items-center">
-                      <span className="text-xs font-semibold text-slate-500">Social Links:</span>
+                      <span className="text-xs font-semibold text-[#7A7286]">Social Links:</span>
                       {item.socialLinks.instagram ? (
                         <a
                           href={`https://instagram.com/${item.socialLinks.instagram}`}
                           target="_blank"
                           rel="noreferrer"
-                          className="inline-flex items-center gap-1 rounded-full border border-pink-200 bg-pink-50 px-2.5 py-0.5 text-xs font-semibold text-pink-800 hover:bg-pink-100"
+                          className="inline-flex items-center gap-1 rounded-full border border-[#E7E1D6] bg-[#FDFCFA] px-2.5 py-0.5 text-xs font-semibold text-[#201A2B] hover:border-[#6C4BFF]"
                         >
-                          <FaInstagram /> Instagram
+                          <FaInstagram className="text-[#FF5A36]" /> Instagram
                         </a>
                       ) : null}
                       {item.socialLinks.youtube ? (
@@ -175,9 +211,9 @@ export function StorePage() {
                           href={`https://youtube.com/${item.socialLinks.youtube.startsWith("@") ? item.socialLinks.youtube : `@${item.socialLinks.youtube}`}`}
                           target="_blank"
                           rel="noreferrer"
-                          className="inline-flex items-center gap-1 rounded-full border border-red-200 bg-red-50 px-2.5 py-0.5 text-xs font-semibold text-red-800 hover:bg-red-100"
+                          className="inline-flex items-center gap-1 rounded-full border border-[#E7E1D6] bg-[#FDFCFA] px-2.5 py-0.5 text-xs font-semibold text-[#201A2B] hover:border-[#FF5A36]"
                         >
-                          <FaYoutube /> YouTube
+                          <FaYoutube className="text-[#D6431E]" /> YouTube
                         </a>
                       ) : null}
                       {item.socialLinks.telegram ? (
@@ -185,27 +221,29 @@ export function StorePage() {
                           href={`https://t.me/${item.socialLinks.telegram.replace(/^@/, "")}`}
                           target="_blank"
                           rel="noreferrer"
-                          className="inline-flex items-center gap-1 rounded-full border border-sky-200 bg-sky-50 px-2.5 py-0.5 text-xs font-semibold text-sky-800 hover:bg-sky-100"
+                          className="inline-flex items-center gap-1 rounded-full border border-[#E7E1D6] bg-[#FDFCFA] px-2.5 py-0.5 text-xs font-semibold text-[#201A2B] hover:border-[#6C4BFF]"
                         >
-                          <FaTelegram /> Telegram
+                          <FaTelegram className="text-[#6C4BFF]" /> Telegram
                         </a>
                       ) : null}
                     </div>
                   ) : null}
 
                   {item.detailedRequirements ? (
-                    <p className="mt-3 text-sm text-slate-600 line-clamp-3"><span className="font-semibold text-slate-700">Store Details:</span> {item.detailedRequirements}</p>
+                    <p className="mt-3 text-xs text-[#7A7286] line-clamp-3">
+                      <span className="font-semibold text-[#201A2B]">Store Details:</span> {item.detailedRequirements}
+                    </p>
                   ) : null}
                 </div>
 
-                <div className="mt-6 pt-4 border-t border-slate-100 space-y-3">
+                <div className="mt-6 pt-4 border-t border-[#E7E1D6] space-y-3">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     {isAuthenticated && item.url ? (
                       <button
                         type="button"
                         disabled={trackingId === item._id}
                         onClick={() => void onOpenResourceLink(item._id, item.url)}
-                        className="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-700 hover:text-blue-800 disabled:opacity-60 cursor-pointer"
+                        className="inline-flex items-center gap-1.5 font-heading text-xs font-bold text-[#6C4BFF] hover:text-[#5A3FE0] disabled:opacity-60 cursor-pointer"
                       >
                         {trackingId === item._id ? "Opening..." : "View Store Link"}
                         <FiExternalLink aria-hidden="true" />
@@ -213,18 +251,18 @@ export function StorePage() {
                     ) : !isAuthenticated ? (
                       <Link
                         to="/auth"
-                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-700 hover:underline"
+                        className="inline-flex items-center gap-1.5 font-heading text-xs font-semibold text-[#6C4BFF] hover:underline"
                       >
-                        <FiLock className="h-3.5 w-3.5 text-slate-400" />
+                        <FiLock className="h-3.5 w-3.5 text-[#7A7286]" />
                         Log in to access link
                       </Link>
                     ) : null}
 
                     <Link
                       to={`/store/${itemSlug}`}
-                      className="text-xs font-semibold text-slate-500 hover:text-blue-700 underline"
+                      className="font-heading text-xs font-bold text-[#201A2B] hover:text-[#6C4BFF]"
                     >
-                      Full Details & Store Link
+                      Store Details →
                     </Link>
                   </div>
 
@@ -240,14 +278,28 @@ export function StorePage() {
       ) : null}
 
       {!isLoading && !error && totalPages > 1 ? (
-        <nav aria-label="Store pagination" className="flex items-center justify-center gap-3">
-          <button type="button" disabled={page === 1} onClick={() => setPage((value) => value - 1)} className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold disabled:opacity-50">Previous</button>
-          <span className="text-sm text-slate-600">Page {page} of {totalPages}</span>
-          <button type="button" disabled={page >= totalPages} onClick={() => setPage((value) => value + 1)} className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold disabled:opacity-50">Next</button>
+        <nav aria-label="Store pagination" className="flex items-center justify-center gap-3 pt-4">
+          <button
+            type="button"
+            disabled={page === 1}
+            onClick={() => setPage((value) => value - 1)}
+            className="rounded-xl border border-[#E7E1D6] bg-white px-4 py-2 font-heading text-xs font-semibold text-[#201A2B] disabled:opacity-50 hover:bg-[#F0ECE4] transition"
+          >
+            Previous
+          </button>
+          <span className="font-mono-code text-xs text-[#7A7286]">
+            Page {page} of {totalPages}
+          </span>
+          <button
+            type="button"
+            disabled={page >= totalPages}
+            onClick={() => setPage((value) => value + 1)}
+            className="rounded-xl border border-[#E7E1D6] bg-white px-4 py-2 font-heading text-xs font-semibold text-[#201A2B] disabled:opacity-50 hover:bg-[#F0ECE4] transition"
+          >
+            Next
+          </button>
         </nav>
       ) : null}
-    
-      
     </div>
   );
 }

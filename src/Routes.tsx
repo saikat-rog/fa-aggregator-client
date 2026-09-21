@@ -23,6 +23,14 @@ import { StorePage } from "./pages/store/Store.page";
 import { StoreApplyPage } from "./pages/store/StoreApply.page";
 import { CampaignApplyPage } from "./pages/resources/CampaignApply.page";
 import CampaignApplicationsPage from "./pages/campaign/CampaignApplications.page";
+import {
+  PricingPage,
+  TestimonialsPage,
+  RevenueModelPage,
+  TermsPage,
+  PrivacyPage,
+} from "./pages/info/InfoPages";
+import { DiscoverCreatorsPage } from "./pages/discover/DiscoverCreators.page";
 
 function ResourceDetailRedirect() {
   const { id } = useParams<{ id: string }>();
@@ -43,67 +51,70 @@ function App() {
       <SavedAdvisorsProvider>
         <AppShell>
           <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route
-            path="/auth"
-            element={
-              <PublicOnlyRoute>
-                <AuthPage />
-              </PublicOnlyRoute>
-            }
-          />
-          <Route
-            path="/u"
-            element={
-              <ProtectedRoute allowedRoles={["user"]}>
-                <UserLayout />
-              </ProtectedRoute>
-            }
-          >
+            <Route path="/" element={<HomePage />} />
+            <Route
+              path="/auth"
+              element={
+                <PublicOnlyRoute>
+                  <AuthPage />
+                </PublicOnlyRoute>
+              }
+            />
+            <Route
+              path="/u"
+              element={
+                <ProtectedRoute allowedRoles={["user"]}>
+                  <UserLayout />
+                </ProtectedRoute>
+              }
+            >
               <Route index element={<Navigate to="/" replace />} />
               <Route path="dashboard" element={<UserDashboard />} />
               <Route path="campaigns/:campaignId/applications" element={<CampaignApplicationsPage />} />
-          </Route>
-          <Route
-            path="/a"
-            element={
-              <ProtectedRoute allowedRoles={["advisor"]}>
-                <AdvisorLayout />
-              </ProtectedRoute>
-            }
-          >
+            </Route>
+            <Route
+              path="/a"
+              element={
+                <ProtectedRoute allowedRoles={["advisor"]}>
+                  <AdvisorLayout />
+                </ProtectedRoute>
+              }
+            >
               <Route index element={<Navigate to="/" replace />} />
               <Route path="dashboard" element={<AdvisorDashboardPage />} />
               <Route path="campaigns/:campaignId/applications" element={<CampaignApplicationsPage />} />
-          </Route>
-          <Route
-            path="/admin"
-            element={<AdminPage />}
-          />
-          <Route path="/lol" element={<Navigate to="/admin" replace />} />
-          <Route path="/campaign" element={<ResourcesPage />} />
-          <Route path="/campaign/apply" element={<CampaignApplyPage />} />
-          <Route path="/campaigns/:campaignId/applications" element={<CampaignApplicationsPage />} />
-          <Route path="/campaign/:storeUsername" element={<ResourceDetailPage />} />
-          <Route path="/store" element={<StorePage />} />
-          <Route path="/store/apply" element={<StoreApplyPage />} />
-          <Route path="/store/:storeUsername" element={<ResourceDetailPage />} />
-          <Route path="/resources" element={<Navigate to="/campaign" replace />} />
-          <Route path="/resources/:id" element={<ResourceDetailRedirect />} />
-          <Route path="/contact" element={<ContactPage />} />
-          <Route path="/:slug" element={<SlugRouteResolver />} />
-          <Route path="/blogs" element={<BlogListPage />} />
-          <Route path="/blog/:slug" element={<BlogDetailPage />} />
-          <Route
-            path="*"
-            element={<NotFoundState onButtonClick={() => window.location.assign("/")} />}
-          />
+            </Route>
+            <Route path="/admin" element={<AdminPage />} />
+            <Route path="/lol" element={<Navigate to="/admin" replace />} />
+            <Route path="/campaign" element={<ResourcesPage />} />
+            <Route path="/campaign/apply" element={<CampaignApplyPage />} />
+            <Route path="/campaigns/:campaignId/applications" element={<CampaignApplicationsPage />} />
+            <Route path="/campaign/:storeUsername" element={<ResourceDetailPage />} />
+            <Route path="/store" element={<StorePage />} />
+            <Route path="/store/apply" element={<StoreApplyPage />} />
+            <Route path="/store/:storeUsername" element={<ResourceDetailPage />} />
+            <Route path="/resources" element={<Navigate to="/campaign" replace />} />
+            <Route path="/resources/:id" element={<ResourceDetailRedirect />} />
+            <Route path="/creators" element={<DiscoverCreatorsPage />} />
+            <Route path="/discover" element={<DiscoverCreatorsPage />} />
+            <Route path="/pricing" element={<PricingPage />} />
+            <Route path="/stories" element={<TestimonialsPage />} />
+            <Route path="/how-we-make-money" element={<RevenueModelPage />} />
+            <Route path="/terms" element={<TermsPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/:slug" element={<SlugRouteResolver />} />
+            <Route path="/blogs" element={<BlogListPage />} />
+            <Route path="/blog/:slug" element={<BlogDetailPage />} />
+            <Route
+              path="*"
+              element={<NotFoundState onButtonClick={() => window.location.assign("/")} />}
+            />
           </Routes>
         </AppShell>
       </SavedAdvisorsProvider>
     </BrowserRouter>
   );
-
 }
 
 export default App;

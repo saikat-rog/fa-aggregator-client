@@ -20,53 +20,57 @@ export function UserStatsCards({
   totalAdvisorsApplied = 0,
 }: UserStatsCardsProps) {
   return (
-    <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      {/* 1. Total Campaigns Applied / Posted by user */}
-      <article className="rounded-2xl border border-indigo-100 bg-white p-4 shadow-sm hover:border-indigo-200 transition">
-        <p className="inline-flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-slate-500">
-          <FaBullhorn className="text-indigo-600" />
-          Total Campaigns
-        </p>
-        <p className="mt-2 text-3xl font-bold text-slate-900">
-          {campaignsLoading ? "..." : totalCampaigns}
-        </p>
-        <p className="mt-1 text-xs text-slate-500">Campaigns posted by you</p>
+    <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+      {/* 1. Total Campaigns */}
+      <article className="bg-white border border-[#E7E1D6] rounded-[18px] p-4.5 flex items-center gap-3.5 shadow-xs">
+        <div className="h-11 w-11 rounded-[12px] bg-[#FFEAE3] text-[#D6431E] flex items-center justify-center shrink-0">
+          <FaBullhorn className="h-5 w-5" />
+        </div>
+        <div>
+          <p className="font-heading font-extrabold text-2xl text-[#201A2B] leading-none">
+            {campaignsLoading ? "..." : totalCampaigns}
+          </p>
+          <p className="text-xs text-[#7A7286] font-medium mt-1">Campaigns posted</p>
+        </div>
       </article>
 
-      {/* 2. Total Advisors Applied to user campaigns */}
-      <article className="rounded-2xl border border-blue-100 bg-white p-4 shadow-sm hover:border-blue-200 transition">
-        <p className="inline-flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-slate-500">
-          <FaUsers className="text-blue-600" />
-          Advisors Applied
-        </p>
-        <p className="mt-2 text-3xl font-bold text-slate-900">
-          {campaignsLoading ? "..." : totalAdvisorsApplied}
-        </p>
-        <p className="mt-1 text-xs text-slate-500">Unique advisors per campaign</p>
+      {/* 2. Total Creators Applied */}
+      <article className="bg-white border border-[#E7E1D6] rounded-[18px] p-4.5 flex items-center gap-3.5 shadow-xs">
+        <div className="h-11 w-11 rounded-[12px] bg-[#F1ECFF] text-[#5A3FE0] flex items-center justify-center shrink-0">
+          <FaUsers className="h-5 w-5" />
+        </div>
+        <div>
+          <p className="font-heading font-extrabold text-2xl text-[#201A2B] leading-none">
+            {campaignsLoading ? "..." : totalAdvisorsApplied}
+          </p>
+          <p className="text-xs text-[#7A7286] font-medium mt-1">Creators applied</p>
+        </div>
       </article>
 
       {/* 3. Total Enquiries */}
-      <article className="rounded-2xl border border-emerald-100 bg-white p-4 shadow-sm hover:border-emerald-200 transition">
-        <p className="inline-flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-slate-500">
-          <FaInbox className="text-emerald-600" />
-          Total Enquiries
-        </p>
-        <p className="mt-2 text-3xl font-bold text-slate-900">
-          {enquiriesLoading ? "..." : totalEnquiries}
-        </p>
-        <p className="mt-1 text-xs text-slate-500">All direct enquiries sent</p>
+      <article className="bg-white border border-[#E7E1D6] rounded-[18px] p-4.5 flex items-center gap-3.5 shadow-xs">
+        <div className="h-11 w-11 rounded-[12px] bg-[#E4F5EC] text-[#137A50] flex items-center justify-center shrink-0">
+          <FaInbox className="h-5 w-5" />
+        </div>
+        <div>
+          <p className="font-heading font-extrabold text-2xl text-[#201A2B] leading-none">
+            {enquiriesLoading ? "..." : totalEnquiries}
+          </p>
+          <p className="text-xs text-[#7A7286] font-medium mt-1">Direct enquiries</p>
+        </div>
       </article>
 
-      {/* 4. Total Saved Advisors */}
-      <article className="rounded-2xl border border-amber-100 bg-white p-4 shadow-sm hover:border-amber-200 transition">
-        <p className="inline-flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-slate-500">
-          <FaBookmark className="text-amber-600" />
-          Saved Advisors
-        </p>
-        <p className="mt-2 text-3xl font-bold text-slate-900">
-          {savedLoading ? "..." : totalSavedAdvisors}
-        </p>
-        <p className="mt-1 text-xs text-slate-500">Your shortlisted advisors</p>
+      {/* 4. Total Saved Creators */}
+      <article className="bg-white border border-[#E7E1D6] rounded-[18px] p-4.5 flex items-center gap-3.5 shadow-xs">
+        <div className="h-11 w-11 rounded-[12px] bg-[#FFF8E6] text-[#B8860B] flex items-center justify-center shrink-0">
+          <FaBookmark className="h-5 w-5" />
+        </div>
+        <div>
+          <p className="font-heading font-extrabold text-2xl text-[#201A2B] leading-none">
+            {savedLoading ? "..." : totalSavedAdvisors}
+          </p>
+          <p className="text-xs text-[#7A7286] font-medium mt-1">Saved creators</p>
+        </div>
       </article>
     </section>
   );

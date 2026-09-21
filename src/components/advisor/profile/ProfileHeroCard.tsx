@@ -61,19 +61,22 @@ type ProfileHeroCardProps = {
 };
 
 const socialButtonBaseClassName =
-  "inline-flex min-w-[150px] cursor-pointer items-center justify-center gap-1.5 rounded-full border p-2 text-xs font-semibold transition";
+  "inline-flex min-w-[140px] cursor-pointer items-center justify-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-bold transition shadow-2xs";
 const instagramButtonClassName =
   `${socialButtonBaseClassName} border-pink-200 bg-pink-50 text-pink-700 hover:bg-pink-100`;
 const linkedinButtonClassName =
   `${socialButtonBaseClassName} border-sky-200 bg-sky-50 text-sky-700 hover:bg-sky-100`;
 const twitterButtonClassName =
-  `${socialButtonBaseClassName} border-black bg-black text-white hover:bg-zinc-900`;
+  `${socialButtonBaseClassName} border-[#201A2B] bg-[#201A2B] text-white hover:bg-black`;
 const facebookButtonClassName =
   `${socialButtonBaseClassName} border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100`;
 const youtubeButtonClassName =
   `${socialButtonBaseClassName} border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100`;
 const tiktokButtonClassName =
-  `${socialButtonBaseClassName} border-slate-300 bg-slate-100 text-slate-800 hover:bg-slate-200`;
+  `${socialButtonBaseClassName} border-[#E7E1D6] bg-[#FAF8F5] text-[#201A2B] hover:bg-[#F0ECE4]`;
+const telegramButtonClassName =
+  `${socialButtonBaseClassName} border-sky-200 bg-sky-50 text-sky-700 hover:bg-sky-100`;
+
 const instagramCountBadgeClassName =
   "rounded-full bg-pink-700 px-2 py-0.5 text-[10px] font-bold text-white";
 const linkedinCountBadgeClassName =
@@ -84,13 +87,10 @@ const facebookCountBadgeClassName =
   "rounded-full bg-indigo-700 px-2 py-0.5 text-[10px] font-bold text-white";
 const youtubeCountBadgeClassName =
   "rounded-full bg-rose-700 px-2 py-0.5 text-[10px] font-bold text-white";
-const telegramButtonClassName =
-  `${socialButtonBaseClassName} border-sky-200 bg-sky-50 text-sky-700 hover:bg-sky-100`;
 const telegramCountBadgeClassName =
   "rounded-full bg-sky-700 px-2 py-0.5 text-[10px] font-bold text-white";
-
 const tiktokCountBadgeClassName =
-  "rounded-full bg-slate-700 px-2 py-0.5 text-[10px] font-bold text-white";
+  "rounded-full bg-[#201A2B] px-2 py-0.5 text-[10px] font-bold text-white";
 
 export function ProfileHeroCard({
   name,
@@ -123,6 +123,7 @@ export function ProfileHeroCard({
           maximumFractionDigits: 1,
         }).format(value)
       : null;
+
   const formattedInstagramEngagementRateScore =
     typeof instagramEngagementRateScore === "number" &&
     Number.isFinite(instagramEngagementRateScore)
@@ -141,16 +142,17 @@ export function ProfileHeroCard({
     socialLinks.telegram;
 
   return (
-    <div className="relative flex flex-col gap-5 rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-[0_12px_30px_rgba(15,23,42,0.04)] sm:flex-row sm:items-start">
-      <div className="absolute right-4 top-4 inline-flex items-center gap-2">
+    <div className="relative flex flex-col gap-6 rounded-[24px] border border-[#E7E1D6] bg-white p-6 sm:p-8 shadow-sm sm:flex-row sm:items-start">
+      {/* Save and Share Top Right Actions */}
+      <div className="absolute right-5 top-5 inline-flex items-center gap-2">
         <button
           type="button"
           onClick={onToggleSave}
           disabled={saveLoading}
-          className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition disabled:cursor-not-allowed ${
+          className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-bold transition disabled:cursor-not-allowed ${
             isSaved
-              ? "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
-              : "border-blue-200 bg-white text-blue-700 hover:bg-blue-50"
+              ? "border-[#1F9D6B]/30 bg-[#1F9D6B]/10 text-[#1F9D6B]"
+              : "border-[#E7E1D6] bg-white text-[#201A2B] hover:bg-[#FAF8F5]"
           }`}
         >
           <FaBookmark className="h-3 w-3" />
@@ -159,23 +161,25 @@ export function ProfileHeroCard({
         <button
           type="button"
           onClick={onShareProfile}
-          className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
+          className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-[#E7E1D6] bg-white px-3 py-1.5 text-xs font-bold text-[#201A2B] transition hover:bg-[#FAF8F5]"
         >
-          <FaShareNodes />
+          <FaShareNodes className="h-3 w-3 text-[#7A7286]" />
           Share
         </button>
       </div>
-      <div className="shrink-0">
+
+      {/* Profile Image / Avatar */}
+      <div className="shrink-0 pt-1">
         {profilePictureUrl ? (
           <img
             src={getProxiedImageUrl(profilePictureUrl)}
             alt={`${name} avatar`}
             loading="lazy"
             decoding="async"
-            className="h-28 w-28 rounded-3xl object-cover ring-1 ring-slate-200"
+            className="h-28 w-28 rounded-[20px] object-cover ring-1 ring-[#E7E1D6] shadow-xs"
           />
         ) : (
-          <div className="flex h-28 w-28 items-center justify-center rounded-3xl bg-linear-to-br from-blue-700 to-cyan-500 text-3xl font-semibold text-white ring-1 ring-slate-200">
+          <div className="flex h-28 w-28 items-center justify-center rounded-[20px] bg-gradient-to-br from-[#FF5A36] to-[#6C4BFF] text-3xl font-extrabold font-heading text-white ring-1 ring-[#E7E1D6] shadow-xs">
             {name
               .split(" ")
               .map((word) => word[0])
@@ -186,28 +190,33 @@ export function ProfileHeroCard({
         )}
       </div>
 
-      <div className="min-w-0 flex-1 space-x-2 pt-5">
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
-          {name}
-        </h1>
-        <div className="mt-3 flex flex-wrap items-center gap-2">
-          <p className="inline-flex items-center rounded-full border border-blue-700 bg-blue-700 px-3 py-1 text-xs font-semibold tracking-wide text-white">
-            @{username}
-          </p>
-          {industry ? (
-            <p className="inline-flex items-center rounded-full bg-green-700 px-3 py-1 text-xs font-semibold tracking-wide text-white">
-              Industry: {industry}
-            </p>
-          ) : null}
-          <p className="inline-flex items-center rounded-full bg-cyan-700 px-3 py-1 text-xs font-semibold tracking-wide text-white">
-            Category: {getDisplayCategory(category)}
-          </p>
-          {formattedInstagramEngagementRateScore ? (
-            <p className="uppercase inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold tracking-wide text-black underline decoration-dotted underline-offset-4">
-              Engagement Rate: {formattedInstagramEngagementRateScore}
-            </p>
-          ) : null}
+      {/* Main Info */}
+      <div className="min-w-0 flex-1 space-y-3.5 pt-1">
+        <div>
+          <h1 className="text-2xl font-extrabold font-heading tracking-tight text-[#201A2B] sm:text-3xl">
+            {name}
+          </h1>
+          <div className="mt-2.5 flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center rounded-full border border-[#6C4BFF]/20 bg-[#6C4BFF]/10 px-3 py-1 text-xs font-mono-code font-bold text-[#6C4BFF]">
+              @{username}
+            </span>
+            {industry ? (
+              <span className="inline-flex items-center rounded-full border border-[#1F9D6B]/20 bg-[#1F9D6B]/10 px-3 py-1 text-xs font-bold text-[#1F9D6B]">
+                {industry}
+              </span>
+            ) : null}
+            <span className="inline-flex items-center rounded-full border border-[#FF5A36]/20 bg-[#FF5A36]/10 px-3 py-1 text-xs font-bold text-[#FF5A36]">
+              {getDisplayCategory(category)}
+            </span>
+            {formattedInstagramEngagementRateScore ? (
+              <span className="inline-flex items-center rounded-full border border-[#E7E1D6] bg-[#FAF8F5] px-3 py-1 text-xs font-mono-code font-bold text-[#201A2B]">
+                ⚡ {formattedInstagramEngagementRateScore}% ER
+              </span>
+            ) : null}
+          </div>
         </div>
+
+        {/* Location Info */}
         {(() => {
           const isUnknownState = !state || state === "Unknown state" || state === "-";
           const isUnknownCountry = !country || country === "Unknown country" || country === "-";
@@ -218,69 +227,70 @@ export function ProfileHeroCard({
           ].filter(Boolean);
           const displayLocation = parts.join(", ");
           return displayLocation ? (
-            <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-slate-50 px-3 py-1 text-xs text-slate-600">
-              <FaLocationDot className="text-blue-600" />
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-[#E7E1D6] bg-[#FAF8F5] px-3 py-1 text-xs font-medium text-[#7A7286]">
+              <FaLocationDot className="text-[#FF5A36]" />
               {displayLocation}
             </div>
           ) : null;
         })()}
+
+        {/* Website & Email quick access cards */}
         {(personalWebsite || emailForContact) ? (
-          <div className="mt-4 grid gap-2 sm:grid-cols-2">
+          <div className="mt-2 grid gap-2.5 sm:grid-cols-2">
             {personalWebsite ? (
               <button
                 type="button"
                 onClick={() => onWebsiteOpen(personalWebsite)}
-                className="group cursor-pointer rounded-xl border border-slate-200 bg-slate-50 p-2 text-left transition hover:border-blue-300 hover:bg-blue-50/60"
+                className="group cursor-pointer rounded-2xl border border-[#E7E1D6] bg-[#FAF8F5] p-3 text-left transition hover:border-[#6C4BFF]/40 hover:bg-[#F1ECFF]/30 shadow-2xs"
               >
-                <p className="inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-blue-700">
+                <p className="inline-flex items-center gap-1.5 text-[10px] font-bold font-mono-code uppercase tracking-wider text-[#6C4BFF]">
                   <FaGlobe />
-                  Website
+                  Creator Website
                 </p>
                 <div className="mt-1 flex items-center justify-between gap-2">
                   <p
-                    className={`truncate text-xs ${
+                    className={`truncate text-xs font-semibold ${
                       userCanOpenLinks
-                        ? "text-slate-700"
-                        : "select-none text-slate-700 blur-sm"
+                        ? "text-[#201A2B]"
+                        : "select-none text-[#7A7286] blur-xs"
                     }`}
                   >
                     {personalWebsite}
                   </p>
                   {userCanOpenLinks ? (
-                    <span className="shrink-0 text-slate-500 transition group-hover:text-blue-700">
-                      <FaArrowUpRightFromSquare />
+                    <span className="shrink-0 text-[#7A7286] transition group-hover:text-[#6C4BFF]">
+                      <FaArrowUpRightFromSquare className="h-3 w-3" />
                     </span>
                   ) : (
-                    <span className="shrink-0 text-slate-500">
-                      <FaEyeSlash />
+                    <span className="shrink-0 text-[#7A7286]">
+                      <FaEyeSlash className="h-3 w-3" />
                     </span>
                   )}
                 </div>
               </button>
             ) : null}
+
             {emailForContact ? (
               <button
                 type="button"
                 onClick={() => onEmailOpen(`mailto:${emailForContact}`)}
-                className="group cursor-pointer rounded-xl border border-slate-200 bg-slate-50 p-2 text-left transition hover:border-blue-300 hover:bg-blue-50/60"
+                className="group cursor-pointer rounded-2xl border border-[#E7E1D6] bg-[#FAF8F5] p-3 text-left transition hover:border-[#FF5A36]/40 hover:bg-[#FFEAE3]/30 shadow-2xs"
               >
-                <p className="inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-blue-700">
+                <p className="inline-flex items-center gap-1.5 text-[10px] font-bold font-mono-code uppercase tracking-wider text-[#FF5A36]">
                   <FaEnvelope />
-                  Email
+                  Direct Email
                 </p>
                 <div className="mt-1 flex items-center justify-between gap-2">
-                  <p
-                    className="truncate text-xs text-slate-700"
-                  >
-                    {emailVisible ? emailForContact : "View Email"}
+                  <p className="truncate text-xs font-semibold text-[#201A2B]">
+                    {emailVisible ? emailForContact : "Unlock Email"}
                   </p>
                   {emailVisible ? (
-                    <span className="shrink-0 text-slate-500 transition group-hover:text-blue-700">
-                      <FaArrowUpRightFromSquare />
+                    <span className="shrink-0 text-[#7A7286] transition group-hover:text-[#FF5A36]">
+                      <FaArrowUpRightFromSquare className="h-3 w-3" />
                     </span>
                   ) : (
-                    <span className="shrink-0 text-slate-500">
-                      <FaEyeSlash />
+                    <span className="shrink-0 text-[#7A7286]">
+                      <FaEyeSlash className="h-3 w-3" />
                     </span>
                   )}
                 </div>
@@ -289,9 +299,10 @@ export function ProfileHeroCard({
           </div>
         ) : null}
 
-        <div className="mt-5">
+        {/* Social Links */}
+        <div className="pt-2">
           {hasSocial ? (
-            <div className="mt-3 flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-2.5">
               {socialLinks.instagram && (
                 <button
                   type="button"
@@ -303,53 +314,7 @@ export function ProfileHeroCard({
                   <FaInstagram /> Instagram
                   {formatCount(socialLinks.instagramFollowers) ? (
                     <span className={instagramCountBadgeClassName}>
-                      {formatCount(socialLinks.instagramFollowers)} followers
-                    </span>
-                  ) : null}
-                </button>
-              )}
-              {socialLinks.linkedin && (
-                <button
-                  type="button"
-                  onClick={() =>
-                    onSocialOpen(`https://linkedin.com/in/${socialLinks.linkedin}`)
-                  }
-                  className={linkedinButtonClassName}
-                >
-                  <FaLinkedin /> LinkedIn
-                  {formatCount(socialLinks.linkedinFollowers) ? (
-                    <span className={linkedinCountBadgeClassName}>
-                      {formatCount(socialLinks.linkedinFollowers)} followers
-                    </span>
-                  ) : null}
-                </button>
-              )}
-              {socialLinks.twitter && (
-                <button
-                  type="button"
-                  onClick={() => onSocialOpen(`https://x.com/${socialLinks.twitter}`)}
-                  className={twitterButtonClassName}
-                >
-                  <FaXTwitter /> Twitter
-                  {formatCount(socialLinks.twitterFollowers) ? (
-                    <span className={twitterCountBadgeClassName}>
-                      {formatCount(socialLinks.twitterFollowers)} followers
-                    </span>
-                  ) : null}
-                </button>
-              )}
-              {socialLinks.facebook && (
-                <button
-                  type="button"
-                  onClick={() =>
-                    onSocialOpen(`https://facebook.com/${socialLinks.facebook}`)
-                  }
-                  className={facebookButtonClassName}
-                >
-                  <FaFacebook /> Facebook
-                  {formatCount(socialLinks.facebookFollowers) ? (
-                    <span className={facebookCountBadgeClassName}>
-                      {formatCount(socialLinks.facebookFollowers)} followers
+                      {formatCount(socialLinks.instagramFollowers)}
                     </span>
                   ) : null}
                 </button>
@@ -365,7 +330,53 @@ export function ProfileHeroCard({
                   <FaYoutube /> YouTube
                   {formatCount(socialLinks.youtubeSubscribers) ? (
                     <span className={youtubeCountBadgeClassName}>
-                      {formatCount(socialLinks.youtubeSubscribers)} subscribers
+                      {formatCount(socialLinks.youtubeSubscribers)}
+                    </span>
+                  ) : null}
+                </button>
+              )}
+              {socialLinks.linkedin && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    onSocialOpen(`https://linkedin.com/in/${socialLinks.linkedin}`)
+                  }
+                  className={linkedinButtonClassName}
+                >
+                  <FaLinkedin /> LinkedIn
+                  {formatCount(socialLinks.linkedinFollowers) ? (
+                    <span className={linkedinCountBadgeClassName}>
+                      {formatCount(socialLinks.linkedinFollowers)}
+                    </span>
+                  ) : null}
+                </button>
+              )}
+              {socialLinks.twitter && (
+                <button
+                  type="button"
+                  onClick={() => onSocialOpen(`https://x.com/${socialLinks.twitter}`)}
+                  className={twitterButtonClassName}
+                >
+                  <FaXTwitter /> Twitter
+                  {formatCount(socialLinks.twitterFollowers) ? (
+                    <span className={twitterCountBadgeClassName}>
+                      {formatCount(socialLinks.twitterFollowers)}
+                    </span>
+                  ) : null}
+                </button>
+              )}
+              {socialLinks.facebook && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    onSocialOpen(`https://facebook.com/${socialLinks.facebook}`)
+                  }
+                  className={facebookButtonClassName}
+                >
+                  <FaFacebook /> Facebook
+                  {formatCount(socialLinks.facebookFollowers) ? (
+                    <span className={facebookCountBadgeClassName}>
+                      {formatCount(socialLinks.facebookFollowers)}
                     </span>
                   ) : null}
                 </button>
@@ -381,7 +392,7 @@ export function ProfileHeroCard({
                   <FaTelegram /> Telegram
                   {formatCount(socialLinks.telegramFollowers) ? (
                     <span className={telegramCountBadgeClassName}>
-                      {formatCount(socialLinks.telegramFollowers)} members
+                      {formatCount(socialLinks.telegramFollowers)}
                     </span>
                   ) : null}
                 </button>
@@ -397,14 +408,14 @@ export function ProfileHeroCard({
                   <FaTiktok /> TikTok
                   {formatCount(socialLinks.tiktokFollowers) ? (
                     <span className={tiktokCountBadgeClassName}>
-                      {formatCount(socialLinks.tiktokFollowers)} followers
+                      {formatCount(socialLinks.tiktokFollowers)}
                     </span>
                   ) : null}
                 </button>
               )}
             </div>
           ) : (
-            <p className="mt-3 text-sm text-slate-500">No social links available.</p>
+            <p className="text-xs text-[#7A7286]">No social channels connected.</p>
           )}
         </div>
       </div>

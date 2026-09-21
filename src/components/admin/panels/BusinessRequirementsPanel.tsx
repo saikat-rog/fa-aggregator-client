@@ -446,10 +446,10 @@ export function BusinessRequirementsPanel({ params, setParam, setManyParams }: P
           <table className="min-w-full text-left text-sm">
             <thead className="bg-slate-50">
               <tr className="border-b border-slate-200 text-xs uppercase tracking-wide text-blue-700">
-                <th className="px-4 py-3">User (Who Clicked)</th>
-                <th className="px-4 py-3">User Email</th>
+                <th className="px-4 py-3">Business (Who Clicked)</th>
+                <th className="px-4 py-3">Business Email</th>
                 <th className="px-4 py-3">Requirement Company</th>
-                <th className="px-4 py-3">Posted By Advisor</th>
+                <th className="px-4 py-3">Posted By Creator</th>
                 <th className="px-4 py-3">Resource Link</th>
                 <th className="px-4 py-3">Clicked At</th>
               </tr>
@@ -553,7 +553,7 @@ export function BusinessRequirementsPanel({ params, setParam, setManyParams }: P
                 <p><span className="font-semibold text-slate-900">URL:</span> {detail.url ? <a href={detail.url} target="_blank" rel="noopener noreferrer" className="text-blue-700 underline">{detail.url}</a> : "—"}</p>
                 <p><span className="font-semibold text-slate-900">Status:</span> <span className="capitalize">{detail.status || "—"}</span></p>
                 <p><span className="font-semibold text-slate-900">Approved At:</span> {formatDate(detail.approvedAt ?? undefined)}</p>
-                <p><span className="font-semibold text-slate-900">Posted By Advisor:</span> {detail.postedByAdvisorName || "—"} {detail.postedByAdvisorUsername ? `(@${detail.postedByAdvisorUsername})` : ""}</p>
+                <p><span className="font-semibold text-slate-900">Posted By Creator:</span> {detail.postedByAdvisorName || "—"} {detail.postedByAdvisorUsername ? `(@${detail.postedByAdvisorUsername})` : ""}</p>
                 <p className="md:col-span-2"><span className="font-semibold text-slate-900">Detailed Requirements:</span></p>
                 <p className="md:col-span-2 whitespace-pre-wrap rounded-xl border border-slate-200 bg-white p-3 text-slate-700">
                   {detail.detailedRequirements || "—"}

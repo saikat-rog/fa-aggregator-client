@@ -248,22 +248,22 @@ const UserDashboard = () => {
       />
 
       {showFirstStepPanel ? (
-        <section className="rounded-3xl border border-blue-200 bg-linear-to-r from-blue-600 to-indigo-600 p-6 text-white shadow-md">
-          <p className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-wide">
+        <section className="rounded-[22px] bg-gradient-to-r from-[#FF5A36] to-[#6C4BFF] p-6 text-white shadow-sm">
+          <p className="inline-flex items-center gap-2 rounded-full bg-white/20 px-3 py-1 text-xs font-semibold uppercase tracking-wide">
             <FiCompass className="h-3.5 w-3.5" />
             Start Here
           </p>
-          <h2 className="mt-3 text-2xl font-bold">Let’s build your advisor shortlist</h2>
-          <p className="mt-1 text-sm text-blue-100">
-            Explore verified advisors, save your favorites, and send your first enquiry to get matched faster.
+          <h2 className="mt-3 text-2xl font-bold font-heading">Let’s build your creator shortlist</h2>
+          <p className="mt-1 text-sm text-white/90">
+            Explore verified creators, save your favorites, and send your first enquiry to get matched faster.
           </p>
           <button
             type="button"
-            onClick={() => navigate("/")}
-            className="mt-4 inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-blue-700 transition hover:bg-blue-50"
+            onClick={() => navigate("/creators")}
+            className="mt-4 inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-xs font-bold text-[#6C4BFF] shadow-xs hover:bg-[#F1ECFF] transition"
           >
             <FiSearch className="h-4 w-4" />
-            Discover Advisors
+            Browse Creators
           </button>
         </section>
       ) : null}
@@ -294,18 +294,18 @@ const UserDashboard = () => {
       />
 
       {/* Your Posted Campaigns Section */}
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 md:p-8 shadow-sm space-y-4">
+      <section className="rounded-[22px] border border-[#E7E1D6] bg-white p-6 md:p-8 shadow-xs space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h3 className="text-xl font-bold text-slate-900">Your Posted Campaigns</h3>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <h3 className="text-xl font-bold font-heading text-[#201A2B]">Your Posted Campaigns</h3>
+            <p className="text-xs text-[#7A7286] mt-0.5">
               Click any campaign below to view its full details and live page link.
             </p>
           </div>
           <button
             type="button"
             onClick={() => navigate("/campaign/apply")}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-orange-600 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-orange-700 transition cursor-pointer"
+            className="btn-coral inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold shadow-xs cursor-pointer"
           >
             <FiPlusCircle className="h-4 w-4" />
             Post New Campaign
@@ -313,14 +313,14 @@ const UserDashboard = () => {
         </div>
 
         {campaignsLoading ? (
-          <p className="text-xs text-slate-500 py-2">Loading your posted campaigns...</p>
+          <p className="text-xs text-[#7A7286] py-2">Loading your posted campaigns...</p>
         ) : myCampaigns.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 p-6 text-center space-y-2">
-            <p className="text-xs font-semibold text-slate-600">You have not posted any campaigns yet.</p>
+          <div className="rounded-2xl border border-dashed border-[#E7E1D6] bg-[#FAF8F5] p-6 text-center space-y-2">
+            <p className="text-xs font-semibold text-[#7A7286]">You have not posted any campaigns yet.</p>
             <button
               type="button"
               onClick={() => navigate("/campaign/apply")}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-orange-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-orange-700 transition cursor-pointer"
+              className="btn-coral inline-flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-xs font-bold shadow-xs cursor-pointer"
             >
               <FiPlusCircle className="h-3.5 w-3.5" />
               Post a Campaign Now
@@ -338,36 +338,36 @@ const UserDashboard = () => {
               return (
                 <div
                   key={camp._id}
-                  className="rounded-2xl border border-slate-200/80 bg-slate-50/50 overflow-hidden transition-all shadow-2xs"
+                  className="rounded-2xl border border-[#E7E1D6] bg-white overflow-hidden transition-all shadow-xs"
                 >
                   {/* Card Header */}
                   <div className="p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                     <div className="space-y-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <h4 className="text-lg font-bold text-slate-900">
+                        <h4 className="font-heading text-lg font-bold text-[#201A2B]">
                           {camp.companyName}
                         </h4>
                         {camp.storeUsername ? (
-                          <span className="text-xs font-bold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200">
+                          <span className="font-mono-code text-xs font-bold text-[#6C4BFF] bg-[#F1ECFF] px-2.5 py-0.5 rounded-full">
                             @{camp.storeUsername}
                           </span>
                         ) : null}
                         <span
-                          className={`rounded-full px-2.5 py-0.5 text-xs font-bold uppercase ${
+                          className={`badge-pill text-[11px] font-bold uppercase ${
                             camp.status === "approved"
-                              ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
-                              : "bg-amber-100 text-amber-800 border border-amber-200"
+                              ? "bg-[#E4F5EC] text-[#137A50]"
+                              : "bg-[#FFF8E6] text-[#B8860B]"
                           }`}
                         >
                           {camp.status === "approved" ? "Live / Approved" : "Pending Review"}
                         </span>
-                        <span className="text-xs font-bold text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-full border border-indigo-200">
+                        <span className="badge-pill bg-[#F1ECFF] text-[#5A3FE0] text-[11px]">
                           📩 {campApps.length} Application{campApps.length === 1 ? "" : "s"}
                         </span>
                       </div>
 
-                      <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600 pt-1">
-                        {camp.category ? <span className="font-semibold text-slate-800">🏷️ {camp.category}</span> : null}
+                      <div className="flex flex-wrap items-center gap-2 text-xs text-[#7A7286] pt-1">
+                        {camp.category ? <span className="font-semibold text-[#201A2B]">🏷️ {camp.category}</span> : null}
                         {camp.category && camp.campaignGoal ? <span>•</span> : null}
                         {camp.campaignGoal ? <span>🎯 Goal: <strong>{camp.campaignGoal}</strong></span> : null}
                         {camp.rewardType ? (
@@ -385,10 +385,10 @@ const UserDashboard = () => {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto justify-end pt-2 sm:pt-0 border-t sm:border-0 border-slate-200">
+                    <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto justify-end pt-2 sm:pt-0 border-t sm:border-0 border-[#E7E1D6]">
                       <Link
                         to={`/u/campaigns/${camp._id}/applications`}
-                        className="inline-flex items-center gap-1.5 rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-700 transition hover:bg-indigo-100"
+                        className="inline-flex items-center gap-1.5 rounded-xl bg-[#F1ECFF] text-[#5A3FE0] px-3 py-1.5 font-heading text-xs font-bold transition hover:bg-[#EAE2FF]"
                       >
                         📩 Applications ({campApps.length})
                       </Link>
@@ -397,7 +397,7 @@ const UserDashboard = () => {
                           href={`/campaign/${camp.storeUsername}`}
                           target="_blank"
                           rel="noreferrer"
-                          className="inline-flex items-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-700 transition hover:bg-blue-100"
+                          className="inline-flex items-center gap-1.5 rounded-xl border border-[#E7E1D6] bg-[#FAF8F5] px-3 py-1.5 font-heading text-xs font-bold text-[#201A2B] hover:text-[#6C4BFF] transition"
                         >
                           <FiExternalLink className="h-3.5 w-3.5" />
                           Live Page
@@ -407,10 +407,10 @@ const UserDashboard = () => {
                       <button
                         type="button"
                         onClick={() => setExpandedCampId(isExpanded ? null : camp._id)}
-                        className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                        className="btn-ghost inline-flex items-center gap-1 rounded-xl px-3 py-1.5 text-xs font-bold"
                       >
                         <FiEye className="h-3.5 w-3.5" />
-                        {isExpanded ? "Hide Details" : "View Full Details"}
+                        {isExpanded ? "Hide" : "Details"}
                         {isExpanded ? (
                           <FiChevronUp className="h-4 w-4 ml-0.5" />
                         ) : (
@@ -422,88 +422,88 @@ const UserDashboard = () => {
 
                   {/* Expanded Detailed View */}
                   {isExpanded ? (
-                    <div className="border-t border-slate-200/80 bg-white p-5 space-y-4 text-sm text-slate-800">
-                      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                        <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3">
-                          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Company / Brand</p>
-                          <p className="text-sm font-bold text-slate-900 mt-0.5">{camp.companyName}</p>
+                    <div className="border-t border-[#E7E1D6] bg-[#FAF8F5] p-5 space-y-4 text-xs text-[#201A2B]">
+                      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                        <div className="rounded-xl border border-[#E7E1D6] bg-white p-3">
+                          <p className="font-mono-code text-[11px] font-bold text-[#7A7286] uppercase tracking-wider">Company / Brand</p>
+                          <p className="font-heading font-bold text-sm text-[#201A2B] mt-0.5">{camp.companyName}</p>
                         </div>
 
-                        <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3">
-                          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Campaign Handle</p>
-                          <p className="text-sm font-bold text-blue-700 mt-0.5">@{camp.storeUsername || "—"}</p>
+                        <div className="rounded-xl border border-[#E7E1D6] bg-white p-3">
+                          <p className="font-mono-code text-[11px] font-bold text-[#7A7286] uppercase tracking-wider">Campaign Handle</p>
+                          <p className="font-mono-code font-bold text-sm text-[#6C4BFF] mt-0.5">@{camp.storeUsername || "—"}</p>
                         </div>
 
                         {camp.category ? (
-                          <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3">
-                            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Category</p>
-                            <p className="text-sm font-semibold text-slate-800 mt-0.5">🏷️ {camp.category}</p>
+                          <div className="rounded-xl border border-[#E7E1D6] bg-white p-3">
+                            <p className="font-mono-code text-[11px] font-bold text-[#7A7286] uppercase tracking-wider">Category</p>
+                            <p className="font-semibold text-[#201A2B] mt-0.5">🏷️ {camp.category}</p>
                           </div>
                         ) : null}
 
                         {camp.campaignGoal ? (
-                          <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3">
-                            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Campaign Goal</p>
-                            <p className="text-sm font-semibold text-slate-800 mt-0.5">🎯 {camp.campaignGoal}</p>
+                          <div className="rounded-xl border border-[#E7E1D6] bg-white p-3">
+                            <p className="font-mono-code text-[11px] font-bold text-[#7A7286] uppercase tracking-wider">Campaign Goal</p>
+                            <p className="font-semibold text-[#201A2B] mt-0.5">🎯 {camp.campaignGoal}</p>
                           </div>
                         ) : null}
 
                         {camp.rewardType ? (
-                          <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3">
-                            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Reward Type</p>
-                            <p className="text-sm font-semibold text-slate-800 mt-0.5">🎁 {camp.rewardType}</p>
+                          <div className="rounded-xl border border-[#E7E1D6] bg-white p-3">
+                            <p className="font-mono-code text-[11px] font-bold text-[#7A7286] uppercase tracking-wider">Reward Type</p>
+                            <p className="font-semibold text-[#201A2B] mt-0.5">🎁 {camp.rewardType}</p>
                           </div>
                         ) : null}
 
                         {camp.budget ? (
-                          <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3">
-                            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Budget</p>
-                            <p className="text-sm font-semibold text-slate-800 mt-0.5">💰 {camp.budget}</p>
+                          <div className="rounded-xl border border-[#E7E1D6] bg-white p-3">
+                            <p className="font-mono-code text-[11px] font-bold text-[#7A7286] uppercase tracking-wider">Budget</p>
+                            <p className="font-semibold text-[#201A2B] mt-0.5">💰 {camp.budget}</p>
                           </div>
                         ) : null}
                       </div>
 
                       {/* What Creators Should Do / Detailed Requirements */}
-                      <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-4">
-                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
+                      <div className="rounded-xl border border-[#E7E1D6] bg-white p-4">
+                        <p className="font-mono-code text-[11px] font-bold text-[#7A7286] uppercase tracking-wider mb-1">
                           What Creators Should Do
                         </p>
-                        <p className="text-sm font-medium text-slate-800 leading-relaxed whitespace-pre-wrap">
+                        <p className="text-xs font-medium text-[#201A2B] leading-relaxed whitespace-pre-wrap">
                           {camp.detailedRequirements || "No detailed instructions provided."}
                         </p>
                       </div>
 
                       {/* Contact & URL Row */}
-                      <div className="grid gap-4 sm:grid-cols-2 pt-2 border-t border-slate-100 text-xs">
+                      <div className="grid gap-4 sm:grid-cols-2 pt-2 border-t border-[#E7E1D6] text-xs">
                         <div>
-                          <p className="font-bold text-slate-400 uppercase tracking-wider">Contact / Business Email</p>
-                          <p className="text-sm font-semibold text-slate-800 mt-0.5">{camp.businessEmail || "—"}</p>
+                          <p className="font-mono-code font-bold text-[#7A7286] uppercase tracking-wider text-[11px]">Contact / Business Email</p>
+                          <p className="font-semibold text-[#201A2B] mt-0.5">{camp.businessEmail || "—"}</p>
                         </div>
                         <div>
-                          <p className="font-bold text-slate-400 uppercase tracking-wider">Website / Target Link</p>
-                          <p className="text-sm font-semibold text-blue-700 truncate mt-0.5">{camp.url || "—"}</p>
+                          <p className="font-mono-code font-bold text-[#7A7286] uppercase tracking-wider text-[11px]">Website / Target Link</p>
+                          <p className="font-semibold text-[#6C4BFF] truncate mt-0.5">{camp.url || "—"}</p>
                         </div>
                       </div>
 
                       {/* Dedicated Applications Section Link */}
-                      <div className="pt-4 border-t border-slate-200/80">
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-2xl border border-indigo-100 bg-linear-to-r from-indigo-50/80 via-blue-50/40 to-indigo-50/80 p-4">
+                      <div className="pt-4 border-t border-[#E7E1D6]">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-2xl border border-[#E7E1D6] bg-[#FAF8F5] p-4">
                           <div className="space-y-0.5">
-                            <h5 className="text-xs font-bold text-indigo-950 uppercase tracking-wider flex items-center gap-1.5">
-                              <span>📩 Received Advisor Applications</span>
-                              <span className="rounded-full bg-indigo-600 text-white text-[10px] font-extrabold px-2 py-0.5">
+                            <h5 className="text-xs font-bold font-heading text-[#201A2B] uppercase tracking-wider flex items-center gap-1.5">
+                              <span>📩 Received Creator Applications</span>
+                              <span className="rounded-full bg-[#6C4BFF] text-white font-mono-code text-[10px] font-bold px-2 py-0.5">
                                 {campApps.length}
                               </span>
                             </h5>
-                            <p className="text-xs text-indigo-800/80 font-medium">
+                            <p className="text-xs text-[#7A7286]">
                               {campApps.length === 0
-                                ? "No advisor proposals received yet for this campaign."
-                                : `Review and manage ${campApps.length} received advisor pitch proposal${campApps.length === 1 ? "" : "s"}.`}
+                                ? "No creator proposals received yet for this campaign."
+                                : `Review and manage ${campApps.length} received creator pitch proposal${campApps.length === 1 ? "" : "s"}.`}
                             </p>
                           </div>
                           <Link
                             to={`/u/campaigns/${camp._id}/applications`}
-                            className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-bold text-white shadow-2xs hover:bg-indigo-700 transition shrink-0"
+                            className="btn-coral inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold text-white shadow-xs shrink-0"
                           >
                             View Applications ({campApps.length}) →
                           </Link>

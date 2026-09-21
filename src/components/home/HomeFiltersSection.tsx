@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
-import { FaFilter, FaLayerGroup, FaRotateRight, FaTags } from "react-icons/fa6";
+import { FaFilter, FaRotateRight } from "react-icons/fa6";
 import {
   followerCountOptions,
   followerFieldPlatformLabels,
-  followerFieldUi,
   followerFields,
   type FollowerField,
 } from "../../pages/home/Home.constants";
@@ -26,12 +25,8 @@ export function HomeFiltersSection({
   filters,
   countries,
   states,
-  industryOptions,
   categoryOptions = [],
-  disableUrlSync,
   onSetFilters,
-  onSetSearchParams,
-  onSetFilterValue,
   onResetFilters,
 }: HomeFiltersSectionProps) {
   const appliedFollowerField =
@@ -43,9 +38,6 @@ export function HomeFiltersSection({
   const selectedFollowerCount = selectedFollowerField
     ? String(filters[`${selectedFollowerField}Gte` as keyof AdvisorFilters])
     : "";
-  const selectedFollowerUi = selectedFollowerField
-    ? followerFieldUi[selectedFollowerField]
-    : null;
 
   useEffect(() => {
     if (appliedFollowerField) {
@@ -77,225 +69,146 @@ export function HomeFiltersSection({
   };
 
   return (
-    <section className="overflow-hidden rounded-3xl border border-blue-100 bg-linear-to-r from-blue-700 to-blue-500 p-8 text-white shadow-lg shadow-blue-100">
-      <h1 className="text-3xl font-bold">Find Trusted Financial Advisors Near You</h1>
-      <p className="mt-2 max-w-2xl text-blue-100">
-        Filter advisors by location, category, and follower thresholds.
-      </p>
+    <section className="bg-white border border-[#E7E1D6] rounded-[20px] p-6 shadow-sm">
+      <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-[#E7E1D6]">
+        <div>
+          <h2 className="font-heading font-bold text-lg text-[#201A2B] flex items-center gap-2">
+            <FaFilter className="text-[#6C4BFF] h-4 w-4" /> Browse Creators
+          </h2>
+          <p className="text-xs text-[#7A7286] mt-0.5">
+            Search and filter by location, niche category, and audience size.
+          </p>
+        </div>
 
-      <div className="mt-6 grid gap-2 lg:grid-cols-[1fr_1fr_auto]">
-        <select
-          value={filters.country}
-          onChange={(event) => {
-            onSetFilters((prev) => ({
-              ...prev,
-              country: event.target.value,
-              state: "",
-              page: 1,
-            }));
-          }}
-          className="w-full rounded-xl border border-blue-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none focus:border-blue-400"
+        <button
+          type="button"
+          onClick={onResetFilters}
+          className="inline-flex items-center gap-1.5 font-heading text-xs font-semibold text-[#7A7286] hover:text-[#201A2B] bg-[#FAF8F5] border border-[#E7E1D6] px-3 py-1.5 rounded-full transition cursor-pointer"
         >
-          <option value="">All countries</option>
-          {countries.map((country) => (
-            <option key={country} value={country}>
-              {country}
-            </option>
-          ))}
-        </select>
+          <FaRotateRight className="h-3 w-3" /> Reset filters
+        </button>
+      </div>
 
-        <select
-          value={filters.state}
-          onChange={(event) => onSetFilterValue("state", event.target.value)}
-          disabled={!filters.country || states.length === 0}
-          className="w-full rounded-xl border border-blue-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400 disabled:opacity-100 focus:border-blue-400"
-        >
-          <option value="">All states</option>
-          {states.map((state) => (
-            <option key={state} value={state}>
-              {state}
-            </option>
-          ))}
-        </select>
-
-        <div className="flex items-center justify-end gap-2">
-          <button
-            type="button"
-            onClick={() => {
-              setSelectedFollowerField("");
-              onResetFilters();
-              if (!disableUrlSync) {
-                onSetSearchParams("");
-              }
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-5">
+        {/* Country */}
+        <div>
+          <label className="block font-heading text-xs font-semibold text-[#4C4557] mb-1.5">
+            Country
+          </label>
+          <select
+            value={filters.country}
+            onChange={(event) => {
+              onSetFilters((prev) => ({
+                ...prev,
+                country: event.target.value,
+                state: "",
+                page: 1,
+              }));
             }}
-            aria-label="Reset filters"
-            title="Reset filters"
-            className="hidden rounded-xl border border-blue-200 bg-white px-3 py-3 text-sm font-semibold text-blue-700 transition hover:bg-blue-50 sm:inline-flex"
+            className="w-full rounded-xl border border-[#E7E1D6] bg-[#FDFCFA] px-3 py-2 text-xs text-[#201A2B] outline-none focus:border-[#6C4BFF]"
           >
-            <FaRotateRight />
-          </button>
+            <option value="">All countries</option>
+            {countries.map((country) => (
+              <option key={country} value={country}>
+                {country}
+              </option>
+            ))}
+          </select>
         </div>
-      </div>
 
-      <div className="mt-4">
-        <p className="mb-2 inline-flex items-center gap-1.5 text-md text-white">
-          <FaTags />
-          Select Industries
-        </p>
-        <div className="flex flex-wrap gap-2">
-          {industryOptions.map((industry) => {
-            const isSelected = filters.industries.includes(industry);
-            return (
-              <button
-                key={industry}
-                type="button"
-                onClick={() =>
-                  onSetFilters((prev) => ({
-                    ...prev,
-                    industries: isSelected
-                      ? prev.industries.filter((item) => item !== industry)
-                      : [...prev.industries, industry],
-                    page: 1,
-                  }))
-                }
-                className={`rounded-full border px-3 py-1.5 text-xs lg:text-sm font-semibold transition ${
-                  isSelected
-                    ? "border-white bg-white text-blue-700"
-                    : "border-white/40 bg-white/10 text-white hover:bg-white/20"
-                }`}
-              >
-                {industry}
-              </button>
-            );
-          })}
+        {/* State */}
+        <div>
+          <label className="block font-heading text-xs font-semibold text-[#4C4557] mb-1.5">
+            State / Region
+          </label>
+          <select
+            value={filters.state}
+            disabled={!filters.country}
+            onChange={(event) => {
+              onSetFilters((prev) => ({
+                ...prev,
+                state: event.target.value,
+                page: 1,
+              }));
+            }}
+            className="w-full rounded-xl border border-[#E7E1D6] bg-[#FDFCFA] px-3 py-2 text-xs text-[#201A2B] outline-none focus:border-[#6C4BFF] disabled:opacity-50"
+          >
+            <option value="">All states</option>
+            {states.map((state) => (
+              <option key={state} value={state}>
+                {state}
+              </option>
+            ))}
+          </select>
         </div>
-      </div>
 
-      <div className="mt-4">
-        <p className="mb-2 inline-flex items-center gap-1.5 text-md text-white">
-          <FaLayerGroup />
-          Select Category
-        </p>
-        <div className="max-w-md">
-          {categoryOptions.length > 0 ? (
+        {/* Category */}
+        <div>
+          <label className="block font-heading text-xs font-semibold text-[#4C4557] mb-1.5">
+            Category
+          </label>
+          <select
+            value={filters.category || ""}
+            onChange={(event) => {
+              onSetFilters((prev) => ({
+                ...prev,
+                category: event.target.value,
+                page: 1,
+              }));
+            }}
+            className="w-full rounded-xl border border-[#E7E1D6] bg-[#FDFCFA] px-3 py-2 text-xs text-[#201A2B] outline-none focus:border-[#6C4BFF]"
+          >
+            <option value="">All categories</option>
+            {categoryOptions.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Audience / Followers */}
+        <div className="sm:col-span-2 lg:col-span-3">
+          <label className="block font-heading text-xs font-semibold text-[#4C4557] mb-1.5">
+            Audience threshold
+          </label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg">
             <select
-              value={filters.category}
-              onChange={(event) => onSetFilterValue("category", event.target.value)}
-              className="w-full rounded-xl border border-blue-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none focus:border-blue-400"
+              value={selectedFollowerField}
+              onChange={(e) => {
+                const nextField = e.target.value as FollowerField | "";
+                setSelectedFollowerField(nextField);
+                onSetFilters((prev) =>
+                  setFollowerFilter(nextField, selectedFollowerCount, prev),
+                );
+              }}
+              className="rounded-xl border border-[#E7E1D6] bg-[#FDFCFA] px-3 py-2 text-xs text-[#201A2B] outline-none focus:border-[#6C4BFF]"
             >
-              <option value="">All categories</option>
-              {categoryOptions.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
+              <option value="">Choose Platform</option>
+              {followerFields.map((field) => (
+                <option key={field} value={field}>
+                  {followerFieldPlatformLabels[field]}
                 </option>
               ))}
             </select>
-          ) : (
-            <input
-              value={filters.category}
-              onChange={(event) => onSetFilterValue("category", event.target.value)}
-              placeholder="Category (type to search)"
-              className="w-full rounded-xl border border-blue-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none focus:border-blue-400"
-            />
-          )}
-        </div>
-      </div>
-
-      <button
-        type="button"
-        onClick={() => {
-          setSelectedFollowerField("");
-          onResetFilters();
-          if (!disableUrlSync) {
-            onSetSearchParams("");
-          }
-        }}
-        className="my-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-blue-200 bg-white px-4 py-2.5 text-sm font-semibold text-blue-700 transition hover:bg-blue-50 sm:hidden"
-      >
-        <FaRotateRight />
-        Reset Filters
-      </button>
-
-      <div className="mt-4">
-        <p className="mb-2 inline-flex items-center gap-1.5 text-md text-white">
-          <FaFilter />
-          Search by followers and subscribers count
-        </p>
-        <div
-          className={`rounded-2xl border border-white/40 bg-white/90 p-3 text-slate-700 shadow-[0_10px_20px_rgba(15,23,42,0.08)] ring-1 ${
-            selectedFollowerUi?.ringClass ?? "ring-blue-200"
-          } backdrop-blur`}
-        >
-          <div className="grid gap-3 md:grid-cols-[1fr_1fr_auto]">
-            <label className="block">
-              <span className="mb-1 block text-xs font-semibold text-slate-600">
-                Platform
-              </span>
-              <select
-                value={selectedFollowerField}
-                onChange={(event) => {
-                  const nextField = event.target.value as FollowerField | "";
-                  setSelectedFollowerField(nextField);
-                  onSetFilters((prev) =>
-                    setFollowerFilter(
-                      nextField,
-                      selectedFollowerCount,
-                      prev,
-                    ),
-                  );
-                }}
-                className={`h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 outline-none transition ${
-                  selectedFollowerUi?.inputFocusClass ?? "focus:border-blue-400"
-                }`}
-              >
-                <option value="">Select platform</option>
-                {followerFields.map((field) => (
-                  <option key={field} value={field}>
-                    {followerFieldPlatformLabels[field]}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label className="block">
-              <span className="mb-1 block text-xs font-semibold text-slate-600">
-                Followers / Subscribers
-              </span>
-              <select
-                value={selectedFollowerCount}
-                disabled={!selectedFollowerField}
-                onChange={(event) =>
-                  onSetFilters((prev) =>
-                    setFollowerFilter(
-                      selectedFollowerField as FollowerField,
-                      event.target.value,
-                      prev,
-                    ),
-                  )
-                }
-                className={`h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 outline-none transition disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 ${
-                  selectedFollowerUi?.inputFocusClass ?? "focus:border-blue-400"
-                }`}
-              >
-                <option value="">Select count</option>
-                {followerCountOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            {selectedFollowerUi ? (
-              <div className="flex items-end">
-                <span
-                  className={`inline-flex h-10 items-center gap-2 rounded-lg border px-3 text-sm font-semibold ${selectedFollowerUi.badgeClass}`}
-                >
-                  {selectedFollowerUi.icon}
-                  {followerFieldPlatformLabels[selectedFollowerField as FollowerField]}
-                </span>
-              </div>
-            ) : null}
+            <select
+              value={selectedFollowerCount}
+              disabled={!selectedFollowerField}
+              onChange={(e) => {
+                const count = e.target.value;
+                onSetFilters((prev) =>
+                  setFollowerFilter(selectedFollowerField, count, prev),
+                );
+              }}
+              className="rounded-xl border border-[#E7E1D6] bg-[#FDFCFA] px-3 py-2 text-xs text-[#201A2B] outline-none focus:border-[#6C4BFF] disabled:opacity-50"
+            >
+              <option value="">Followers Threshold</option>
+              {followerCountOptions.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
       </div>

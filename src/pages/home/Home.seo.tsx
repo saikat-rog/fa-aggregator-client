@@ -6,14 +6,14 @@ export function HomeSeo() {
   const { landingSlug, slug } = useParams();
   const activeSlug = landingSlug ?? slug;
   const landing = activeSlug ? seoLandings[activeSlug] : undefined;
-  const title = landing?.title || "Find Trusted Financial Advisors | Folksmint";
+  const title = landing?.title || "Find Local Creators & Businesses | Folksmint";
   const description =
     landing?.description ||
-    "Discover verified financial advisors by country, state, industries, and audience signals on Folksmint.";
+    "Discover verified nano and micro creators by location, category, and audience signals on Folksmint.";
   const keywords =
     landing?.slug
-      ? `${landing.slug.replaceAll("-", ", ")}, financial advisor, investment advisor, folksmint`
-      : "financial advisor, investment advisor, wealth advisor, stock market advisor, folksmint";
+      ? `${landing.slug.replaceAll("-", ", ")}, local creators, influencer marketing, folksmint`
+      : "local creators, nano creators, micro influencers, hyperlocal marketing, folksmint";
   const pageUrl =
     landing?.canonicalUrl ||
     (typeof window !== "undefined" ? window.location.href : "");

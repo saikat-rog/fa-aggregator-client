@@ -132,9 +132,9 @@ export function CampaignApplicationsPage() {
   if (isLoading) {
     return (
       <div className="mx-auto max-w-6xl px-4 py-12 space-y-6">
-        <div className="flex items-center gap-3 text-slate-500">
-          <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
-          <p className="text-sm font-medium">Loading campaign applications...</p>
+        <div className="flex items-center gap-3 text-[#7A7286]">
+          <div className="h-5 w-5 animate-spin rounded-full border-2 border-[#E7E1D6] border-t-[#6C4BFF]" />
+          <p className="text-xs font-bold text-[#6C4BFF]">Loading campaign applications...</p>
         </div>
       </div>
     );
@@ -148,15 +148,15 @@ export function CampaignApplicationsPage() {
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 shadow-2xs hover:bg-slate-50 transition cursor-pointer"
+            className="inline-flex items-center gap-2 rounded-xl border border-[#E7E1D6] bg-white px-3.5 py-2 text-xs font-bold font-heading text-[#201A2B] shadow-xs hover:bg-[#FAF8F5] transition cursor-pointer"
           >
-            <FiArrowLeft className="h-4 w-4 text-slate-500" />
+            <FiArrowLeft className="h-4 w-4 text-[#7A7286]" />
             Back
           </button>
-          <div className="text-xs text-slate-500 font-medium">
-            <Link to="/u/dashboard" className="hover:text-blue-700 transition">Dashboard</Link>
-            <span className="mx-1.5">/</span>
-            <span className="text-slate-900 font-bold">Advisor Applications</span>
+          <div className="text-xs text-[#7A7286] font-medium">
+            <Link to="/u/dashboard" className="hover:text-[#6C4BFF] transition font-bold">Dashboard</Link>
+            <span className="mx-1.5 text-[#E7E1D6]">/</span>
+            <span className="text-[#201A2B] font-bold">Creator Applications</span>
           </div>
         </div>
 
@@ -167,41 +167,42 @@ export function CampaignApplicationsPage() {
             setIsRefreshing(true);
             void loadCampaignAndApplications(false);
           }}
-          className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 shadow-2xs hover:bg-slate-50 transition cursor-pointer disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 rounded-xl border border-[#E7E1D6] bg-white px-3.5 py-2 text-xs font-bold font-heading text-[#201A2B] shadow-xs hover:bg-[#FAF8F5] transition cursor-pointer disabled:opacity-50"
         >
-          <FiRefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? "animate-spin text-blue-600" : "text-slate-500"}`} />
+          <FiRefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? "animate-spin text-[#6C4BFF]" : "text-[#7A7286]"}`} />
           {isRefreshing ? "Refreshing..." : "Refresh List"}
         </button>
       </div>
 
       {/* Campaign Summary Card */}
       {campaign ? (
-        <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-linear-to-br from-slate-900 via-slate-800 to-slate-900 p-6 md:p-8 text-white shadow-md">
-          <div className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-blue-500/10 blur-3xl" />
+        <div className="relative overflow-hidden rounded-[24px] bg-[#201A2B] p-6 md:p-8 text-white shadow-sm">
+          <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-[#6C4BFF]/20 blur-3xl" />
+          <div className="pointer-events-none absolute right-1/3 -bottom-16 h-56 w-56 rounded-full bg-[#FF5A36]/15 blur-3xl" />
           <div className="relative space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="space-y-1">
                 <div className="flex flex-wrap items-center gap-2.5">
-                  <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">
+                  <h1 className="text-2xl md:text-3xl font-extrabold font-heading text-white">
                     {campaign.companyName}
                   </h1>
                   {campaign.storeUsername ? (
-                    <span className="rounded-full border border-blue-400/30 bg-blue-500/20 px-2.5 py-0.5 text-xs font-bold text-blue-300">
+                    <span className="font-mono-code rounded-full bg-[#F1ECFF] px-2.5 py-0.5 text-xs font-bold text-[#6C4BFF]">
                       @{campaign.storeUsername}
                     </span>
                   ) : null}
                   <span
-                    className={`rounded-full px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider ${
+                    className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider ${
                       campaign.status === "approved"
-                        ? "border border-emerald-500/30 bg-emerald-500/20 text-emerald-300"
-                        : "border border-amber-500/30 bg-amber-500/20 text-amber-300"
+                        ? "bg-[#E4F5EC] text-[#137A50]"
+                        : "bg-[#FFF8E6] text-[#B8860B]"
                     }`}
                   >
                     {campaign.status === "approved" ? "Live / Approved" : "Pending Admin Review"}
                   </span>
                 </div>
-                <p className="text-xs text-slate-300">
-                  Manage received advisor proposals for this campaign requirement.
+                <p className="text-xs text-white/80">
+                  Manage received creator proposals for this campaign requirement.
                 </p>
               </div>
 
@@ -210,7 +211,7 @@ export function CampaignApplicationsPage() {
                   href={`/campaign/${campaign.storeUsername}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-xs font-bold text-white hover:bg-white/20 transition backdrop-blur-xs"
+                  className="btn-coral inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold shadow-xs transition"
                 >
                   <FiExternalLink className="h-4 w-4" />
                   View Live Campaign Page
@@ -219,32 +220,32 @@ export function CampaignApplicationsPage() {
             </div>
 
             {/* Campaign Meta Highlights */}
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 pt-2 text-xs text-slate-200">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 pt-2 text-xs text-white/90">
               <div className="rounded-2xl border border-white/10 bg-white/5 p-3 backdrop-blur-xs">
-                <p className="font-bold text-slate-400 uppercase tracking-wider text-[10px]">Category</p>
-                <p className="font-semibold text-white mt-0.5">🏷️ {campaign.category || "General"}</p>
+                <p className="font-mono-code font-bold text-white/60 uppercase tracking-wider text-[10px]">Category</p>
+                <p className="font-heading font-bold text-white mt-0.5">🏷️ {campaign.category || "General"}</p>
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/5 p-3 backdrop-blur-xs">
-                <p className="font-bold text-slate-400 uppercase tracking-wider text-[10px]">Campaign Goal</p>
-                <p className="font-semibold text-white mt-0.5">🎯 {campaign.campaignGoal || "Brand Awareness"}</p>
+                <p className="font-mono-code font-bold text-white/60 uppercase tracking-wider text-[10px]">Campaign Goal</p>
+                <p className="font-heading font-bold text-white mt-0.5">🎯 {campaign.campaignGoal || "Brand Awareness"}</p>
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/5 p-3 backdrop-blur-xs">
-                <p className="font-bold text-slate-400 uppercase tracking-wider text-[10px]">Reward Type</p>
-                <p className="font-semibold text-white mt-0.5">🎁 {campaign.rewardType || "Both"}</p>
+                <p className="font-mono-code font-bold text-white/60 uppercase tracking-wider text-[10px]">Reward Type</p>
+                <p className="font-heading font-bold text-white mt-0.5">🎁 {campaign.rewardType || "Both"}</p>
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/5 p-3 backdrop-blur-xs">
-                <p className="font-bold text-slate-400 uppercase tracking-wider text-[10px]">Budget</p>
-                <p className="font-semibold text-white mt-0.5">💰 {campaign.budget || "Flexible"}</p>
+                <p className="font-mono-code font-bold text-white/60 uppercase tracking-wider text-[10px]">Budget</p>
+                <p className="font-heading font-bold text-white mt-0.5">💰 {campaign.budget || "Flexible"}</p>
               </div>
             </div>
 
             {/* What Creators Should Do Snippet */}
             {campaign.detailedRequirements ? (
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-xs text-slate-200 backdrop-blur-xs">
-                <p className="font-bold uppercase tracking-wider text-slate-400 text-[10px] mb-1">
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-xs text-white/90 backdrop-blur-xs">
+                <p className="font-mono-code font-bold uppercase tracking-wider text-white/60 text-[10px] mb-1">
                   What Creators Should Do / Campaign Brief
                 </p>
-                <p className="leading-relaxed whitespace-pre-wrap text-slate-100">
+                <p className="leading-relaxed whitespace-pre-wrap text-white">
                   {campaign.detailedRequirements}
                 </p>
               </div>
@@ -255,28 +256,28 @@ export function CampaignApplicationsPage() {
 
       {/* Main Applications Section */}
       <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E7E1D6] pb-4">
           <div>
-            <h2 className="text-xl font-extrabold text-slate-900 flex items-center gap-2">
-              <span>Received Advisor Applications</span>
-              <span className="rounded-full bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-0.5">
+            <h2 className="text-xl font-bold font-heading text-[#201A2B] flex items-center gap-2">
+              <span>Received Creator Applications</span>
+              <span className="font-mono-code rounded-full bg-[#F1ECFF] text-[#5A3FE0] text-xs font-bold px-2.5 py-0.5">
                 {applications.length}
               </span>
             </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Review proposals from creators and advisors. Contact them or approve their pitch to start collaborating.
+            <p className="text-xs text-[#7A7286] mt-0.5">
+              Review proposals from creators. Contact them or approve their pitch to start collaborating.
             </p>
           </div>
 
           {/* Filter Pills */}
-          <div className="flex items-center gap-1.5 rounded-2xl bg-slate-100 p-1">
+          <div className="flex items-center gap-1.5 rounded-2xl bg-[#FAF8F5] border border-[#E7E1D6] p-1">
             <button
               type="button"
               onClick={() => setStatusFilter("all")}
-              className={`rounded-xl px-3 py-1.5 text-xs font-bold transition cursor-pointer ${
+              className={`rounded-xl px-3 py-1.5 text-xs font-bold font-heading transition cursor-pointer ${
                 statusFilter === "all"
-                  ? "bg-white text-slate-900 shadow-2xs"
-                  : "text-slate-600 hover:text-slate-900"
+                  ? "bg-[#201A2B] text-white shadow-xs"
+                  : "text-[#7A7286] hover:text-[#201A2B]"
               }`}
             >
               All ({counts.all})
@@ -284,10 +285,10 @@ export function CampaignApplicationsPage() {
             <button
               type="button"
               onClick={() => setStatusFilter("pending")}
-              className={`rounded-xl px-3 py-1.5 text-xs font-bold transition cursor-pointer ${
+              className={`rounded-xl px-3 py-1.5 text-xs font-bold font-heading transition cursor-pointer ${
                 statusFilter === "pending"
-                  ? "bg-amber-500 text-white shadow-2xs"
-                  : "text-slate-600 hover:text-amber-700"
+                  ? "bg-[#D97706] text-white shadow-xs"
+                  : "text-[#7A7286] hover:text-[#B8860B]"
               }`}
             >
               Pending ({counts.pending})
@@ -295,10 +296,10 @@ export function CampaignApplicationsPage() {
             <button
               type="button"
               onClick={() => setStatusFilter("approved")}
-              className={`rounded-xl px-3 py-1.5 text-xs font-bold transition cursor-pointer ${
+              className={`rounded-xl px-3 py-1.5 text-xs font-bold font-heading transition cursor-pointer ${
                 statusFilter === "approved"
-                  ? "bg-emerald-600 text-white shadow-2xs"
-                  : "text-slate-600 hover:text-emerald-700"
+                  ? "bg-[#1F9D6B] text-white shadow-xs"
+                  : "text-[#7A7286] hover:text-[#137A50]"
               }`}
             >
               Approved ({counts.approved})
@@ -306,10 +307,10 @@ export function CampaignApplicationsPage() {
             <button
               type="button"
               onClick={() => setStatusFilter("rejected")}
-              className={`rounded-xl px-3 py-1.5 text-xs font-bold transition cursor-pointer ${
+              className={`rounded-xl px-3 py-1.5 text-xs font-bold font-heading transition cursor-pointer ${
                 statusFilter === "rejected"
-                  ? "bg-rose-600 text-white shadow-2xs"
-                  : "text-slate-600 hover:text-rose-700"
+                  ? "bg-[#DC2626] text-white shadow-xs"
+                  : "text-[#7A7286] hover:text-[#B91C1C]"
               }`}
             >
               Rejected ({counts.rejected})
@@ -319,16 +320,16 @@ export function CampaignApplicationsPage() {
 
         {/* Applications List */}
         {filteredApplications.length === 0 ? (
-          <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-12 text-center shadow-2xs">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
+          <div className="rounded-[22px] border border-dashed border-[#E7E1D6] bg-[#FAF8F5] p-12 text-center shadow-xs">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-[#7A7286] border border-[#E7E1D6]">
               <FiUser className="h-7 w-7" />
             </div>
-            <h3 className="mt-4 text-base font-bold text-slate-900">
+            <h3 className="mt-4 text-base font-bold font-heading text-[#201A2B]">
               {applications.length === 0
                 ? "No applications received yet"
                 : `No ${statusFilter} applications`}
             </h3>
-            <p className="mt-1 text-xs text-slate-500 max-w-sm mx-auto">
+            <p className="mt-1 text-xs text-[#7A7286] max-w-sm mx-auto">
               {applications.length === 0
                 ? "When creators apply to your campaign, their detailed pitches and contact info will appear here."
                 : "Try switching filter tabs above to see all proposals."}
@@ -345,26 +346,26 @@ export function CampaignApplicationsPage() {
               return (
                 <div
                   key={app._id}
-                  className="rounded-3xl border border-slate-200 bg-white p-6 shadow-xs hover:border-slate-300 transition-all space-y-4"
+                  className="rounded-[22px] border border-[#E7E1D6] bg-white p-6 shadow-xs hover:border-[#6C4BFF]/40 transition-all space-y-4"
                 >
                   {/* Top Bar: Applicant Info & Status */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E7E1D6] pb-4">
                     <div className="flex items-start sm:items-center gap-3.5">
                       {app.applicant?.advisorProfile?.instagramProfilePictureUrl ? (
                         <img
                           src={app.applicant.advisorProfile.instagramProfilePictureUrl}
                           alt={app.applicantName}
-                          className="h-12 w-12 rounded-full object-cover border border-slate-200"
+                          className="h-12 w-12 rounded-full object-cover border border-[#E7E1D6]"
                         />
                       ) : (
-                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-50 text-blue-700 font-bold text-base border border-blue-100">
-                          {app.applicantName?.charAt(0)?.toUpperCase() || "A"}
+                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#F1ECFF] text-[#5A3FE0] font-heading font-extrabold text-base border border-[#E7E1D6]">
+                          {app.applicantName?.charAt(0)?.toUpperCase() || "C"}
                         </div>
                       )}
 
                       <div>
                         <div className="flex items-center gap-2">
-                          <h4 className="text-base font-bold text-slate-900">
+                          <h4 className="text-base font-bold font-heading text-[#201A2B]">
                             {app.applicantName}
                           </h4>
                           {app.applicant?.advisorProfile?.username ? (
@@ -372,7 +373,7 @@ export function CampaignApplicationsPage() {
                               to={`/${app.applicant.advisorProfile.username}`}
                               target="_blank"
                               rel="noreferrer"
-                              className="text-xs font-bold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200 hover:bg-blue-100 transition inline-flex items-center gap-1"
+                              className="font-mono-code text-xs font-bold text-[#6C4BFF] bg-[#F1ECFF] px-2.5 py-0.5 rounded-full hover:bg-[#EAE2FF] transition inline-flex items-center gap-1"
                             >
                               @{app.applicant.advisorProfile.username}
                               <FiExternalLink className="h-3 w-3" />
@@ -380,24 +381,24 @@ export function CampaignApplicationsPage() {
                           ) : null}
                         </div>
 
-                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 mt-1">
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[#7A7286] mt-1">
                           <span className="inline-flex items-center gap-1 font-medium">
-                            <FiMail className="h-3.5 w-3.5 text-slate-400" />
-                            <a href={`mailto:${app.applicantEmail}`} className="hover:text-blue-700 underline decoration-slate-300">
+                            <FiMail className="h-3.5 w-3.5 text-[#7A7286]" />
+                            <a href={`mailto:${app.applicantEmail}`} className="hover:text-[#6C4BFF] underline decoration-[#E7E1D6]">
                               {app.applicantEmail}
                             </a>
                           </span>
 
                           {app.applicantPhone ? (
-                            <span className="inline-flex items-center gap-1 font-semibold text-slate-700">
-                              <FiPhone className="h-3.5 w-3.5 text-emerald-600" />
-                              <a href={`tel:${app.applicantPhone}`} className="hover:text-emerald-700">
+                            <span className="inline-flex items-center gap-1 font-semibold text-[#201A2B]">
+                              <FiPhone className="h-3.5 w-3.5 text-[#137A50]" />
+                              <a href={`tel:${app.applicantPhone}`} className="hover:text-[#137A50]">
                                 {app.applicantPhone}
                               </a>
                             </span>
                           ) : null}
 
-                          <span className="inline-flex items-center gap-1 text-slate-400">
+                          <span className="inline-flex items-center gap-1 text-[#7A7286]">
                             <FiCalendar className="h-3.5 w-3.5" />
                             {new Date(app.createdAt).toLocaleDateString("en-US", {
                               month: "short",
@@ -412,12 +413,12 @@ export function CampaignApplicationsPage() {
                     {/* Status Badge & Action Buttons */}
                     <div className="flex flex-wrap items-center gap-2 self-end sm:self-center">
                       <span
-                        className={`rounded-full px-3 py-1 text-xs font-extrabold uppercase tracking-wider ${
+                        className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider ${
                           isApproved
-                            ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
+                            ? "bg-[#E4F5EC] text-[#137A50]"
                             : isRejected
-                            ? "bg-rose-100 text-rose-800 border border-rose-200"
-                            : "bg-amber-100 text-amber-800 border border-amber-200"
+                            ? "bg-[#FEE2E2] text-[#B91C1C]"
+                            : "bg-[#FFF8E6] text-[#B8860B]"
                         }`}
                       >
                         {isApproved ? "Approved" : app.status}
@@ -429,7 +430,7 @@ export function CampaignApplicationsPage() {
                             type="button"
                             disabled={isUpdating}
                             onClick={() => void handleUpdateStatus(app._id, "approved")}
-                            className="rounded-xl bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white shadow-2xs hover:bg-emerald-700 transition disabled:opacity-50 cursor-pointer inline-flex items-center gap-1"
+                            className="rounded-xl bg-[#1F9D6B] px-3.5 py-1.5 text-xs font-bold font-heading text-white shadow-xs hover:bg-[#137A50] transition disabled:opacity-50 cursor-pointer inline-flex items-center gap-1"
                           >
                             <FiCheckCircle className="h-3.5 w-3.5" />
                             Approve
@@ -439,7 +440,7 @@ export function CampaignApplicationsPage() {
                             type="button"
                             disabled={isUpdating}
                             onClick={() => void handleUpdateStatus(app._id, "rejected")}
-                            className="rounded-xl bg-rose-600 px-3 py-1.5 text-xs font-bold text-white shadow-2xs hover:bg-rose-700 transition disabled:opacity-50 cursor-pointer inline-flex items-center gap-1"
+                            className="rounded-xl bg-[#DC2626] px-3.5 py-1.5 text-xs font-bold font-heading text-white shadow-xs hover:bg-[#B91C1C] transition disabled:opacity-50 cursor-pointer inline-flex items-center gap-1"
                           >
                             <FiXCircle className="h-3.5 w-3.5" />
                             Reject
@@ -450,11 +451,11 @@ export function CampaignApplicationsPage() {
                   </div>
 
                   {/* Proposal Message Section */}
-                  <div className="rounded-2xl border border-slate-100 bg-slate-50/80 p-4 space-y-1.5">
-                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                  <div className="rounded-xl border border-[#E7E1D6] bg-[#FAF8F5] p-4 space-y-1.5">
+                    <p className="font-mono-code text-[11px] font-bold text-[#7A7286] uppercase tracking-wider">
                       Proposal / Application Message
                     </p>
-                    <p className="text-sm font-medium text-slate-800 leading-relaxed whitespace-pre-wrap">
+                    <p className="text-sm font-medium text-[#201A2B] leading-relaxed whitespace-pre-wrap">
                       {app.message}
                     </p>
                   </div>

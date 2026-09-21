@@ -96,65 +96,74 @@ export function BlogForm({ initialValues, loading, onSubmit, submitLabel }: Prop
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 rounded-3xl">
-      {error ? <p className="rounded border border-red-200 bg-red-50 p-2 text-sm text-red-700">{error}</p> : null}
-      <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-3">
-        <p className="mb-2 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-blue-700"><FiEdit3 /> Content</p>
-        <div className="space-y-2">
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {error ? <p className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs font-semibold text-rose-700">{error}</p> : null}
+      <div className="rounded-2xl border border-[#E7E1D6] bg-white p-5 shadow-sm space-y-3">
+        <p className="inline-flex items-center gap-1.5 font-mono-code text-xs font-bold uppercase tracking-wider text-[#FF5A36]"><FiEdit3 /> Content Details</p>
+        <div className="space-y-3">
           <div className="relative">
-            <FiEdit3 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-700" />
-            <input className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 pl-9 text-sm" placeholder="Title" value={values.title} onChange={(e) => update("title", e.target.value)} />
+            <FiEdit3 className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7A7286]" />
+            <input className="w-full rounded-xl border border-[#E7E1D6] bg-[#FAF8F5] px-3 py-2.5 pl-10 text-xs font-semibold text-[#201A2B] placeholder:text-[#7A7286]/60 outline-none transition focus:border-[#FF5A36] focus:bg-white" placeholder="Article Title" value={values.title} onChange={(e) => update("title", e.target.value)} />
           </div>
           <div className="relative">
-            <FiHash className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-700" />
-            <input className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 pl-9 text-sm" placeholder="Slug (optional)" value={values.slug} onChange={(e) => update("slug", e.target.value.toLowerCase())} />
+            <FiHash className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7A7286]" />
+            <input className="w-full rounded-xl border border-[#E7E1D6] bg-[#FAF8F5] px-3 py-2.5 pl-10 text-xs font-semibold text-[#201A2B] placeholder:text-[#7A7286]/60 outline-none transition focus:border-[#FF5A36] focus:bg-white" placeholder="Custom Slug (optional)" value={values.slug} onChange={(e) => update("slug", e.target.value.toLowerCase())} />
           </div>
-          <textarea className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm" placeholder="Excerpt" value={values.excerpt} onChange={(e) => update("excerpt", e.target.value)} rows={2} />
+          <textarea className="w-full rounded-xl border border-[#E7E1D6] bg-[#FAF8F5] px-3.5 py-2.5 text-xs font-semibold text-[#201A2B] placeholder:text-[#7A7286]/60 outline-none transition focus:border-[#FF5A36] focus:bg-white" placeholder="Short Excerpt" value={values.excerpt} onChange={(e) => update("excerpt", e.target.value)} rows={2} />
           <div className="relative">
-            <FiAlignLeft className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-blue-700" />
-            <textarea className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 pl-9 text-sm" placeholder="Write your blog content..." value={values.content} onChange={(e) => update("content", e.target.value)} rows={12} />
+            <FiAlignLeft className="pointer-events-none absolute left-3.5 top-3.5 h-4 w-4 text-[#7A7286]" />
+            <textarea className="w-full rounded-xl border border-[#E7E1D6] bg-[#FAF8F5] px-3.5 py-2.5 pl-10 text-xs font-semibold text-[#201A2B] placeholder:text-[#7A7286]/60 outline-none transition focus:border-[#FF5A36] focus:bg-white font-body leading-relaxed" placeholder="Write your blog content..." value={values.content} onChange={(e) => update("content", e.target.value)} rows={12} />
           </div>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-3">
-        <p className="mb-2 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-blue-700"><FiImage /> Media & Tags</p>
-        <div className="space-y-2">
+      <div className="rounded-2xl border border-[#E7E1D6] bg-white p-5 shadow-sm space-y-3">
+        <p className="inline-flex items-center gap-1.5 font-mono-code text-xs font-bold uppercase tracking-wider text-[#6C4BFF]"><FiImage /> Media & Tags</p>
+        <div className="space-y-3">
           <div className="relative">
-            <FiLink className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-700" />
-            <input className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 pl-9 text-sm" placeholder="Cover Image URL (optional)" value={values.coverImageUrl} onChange={(e) => update("coverImageUrl", e.target.value)} />
+            <FiLink className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7A7286]" />
+            <input className="w-full rounded-xl border border-[#E7E1D6] bg-[#FAF8F5] px-3 py-2.5 pl-10 text-xs font-semibold text-[#201A2B] placeholder:text-[#7A7286]/60 outline-none transition focus:border-[#FF5A36] focus:bg-white" placeholder="Cover Image URL (optional)" value={values.coverImageUrl} onChange={(e) => update("coverImageUrl", e.target.value)} />
           </div>
           <div className="relative">
-            <FiTag className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-700" />
-            <input className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 pl-9 text-sm" placeholder="Tags (comma-separated)" value={values.tags} onChange={(e) => update("tags", e.target.value)} />
+            <FiTag className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7A7286]" />
+            <input className="w-full rounded-xl border border-[#E7E1D6] bg-[#FAF8F5] px-3 py-2.5 pl-10 text-xs font-semibold text-[#201A2B] placeholder:text-[#7A7286]/60 outline-none transition focus:border-[#FF5A36] focus:bg-white" placeholder="Tags (comma-separated, e.g. marketing, playbook)" value={values.tags} onChange={(e) => update("tags", e.target.value)} />
           </div>
-          <select className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm" value={values.status} onChange={(e) => update("status", e.target.value as BlogStatus)}>
+          <select className="w-full rounded-xl border border-[#E7E1D6] bg-[#FAF8F5] px-3.5 py-2.5 text-xs font-semibold text-[#201A2B] outline-none transition focus:border-[#FF5A36] focus:bg-white" value={values.status} onChange={(e) => update("status", e.target.value as BlogStatus)}>
             <option value="draft">Draft</option>
             <option value="published">Published</option>
           </select>
         </div>
+
+        {tagsPreview.length ? (
+          <div className="flex flex-wrap gap-1.5 pt-2">
+            {tagsPreview.map((t) => (
+              <span key={t} className="inline-flex items-center gap-1 rounded-full border border-[#6C4BFF]/20 bg-[#F1ECFF] px-2.5 py-0.5 text-[11px] font-bold font-mono-code text-[#6C4BFF]">
+                <FiTag className="h-2.5 w-2.5" />
+                {t}
+              </span>
+            ))}
+          </div>
+        ) : null}
       </div>
 
-      {tagsPreview.length ? <div className="flex flex-wrap gap-1">{tagsPreview.map((t) => <span key={t} className="rounded-full bg-blue-50 px-2 py-0.5 text-xs text-blue-700">{t}</span>)}</div> : null}
-
-      <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-3">
-        <p className="mb-2 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-blue-700"><FiSearch /> SEO</p>
-        <div className="space-y-2">
-          <input className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm" placeholder="Meta Title (max 60)" value={values.seo.metaTitle || ""} onChange={(e) => updateSeo("metaTitle", e.target.value)} />
-          <textarea className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm" placeholder="Meta Description (max 160)" value={values.seo.metaDescription || ""} onChange={(e) => updateSeo("metaDescription", e.target.value)} rows={2} />
+      <div className="rounded-2xl border border-[#E7E1D6] bg-white p-5 shadow-sm space-y-3">
+        <p className="inline-flex items-center gap-1.5 font-mono-code text-xs font-bold uppercase tracking-wider text-[#1F9D6B]"><FiSearch /> Search Optimization (SEO)</p>
+        <div className="space-y-3">
+          <input className="w-full rounded-xl border border-[#E7E1D6] bg-[#FAF8F5] px-3.5 py-2.5 text-xs font-semibold text-[#201A2B] placeholder:text-[#7A7286]/60 outline-none transition focus:border-[#FF5A36] focus:bg-white" placeholder="Meta Title (max 60 chars)" value={values.seo.metaTitle || ""} onChange={(e) => updateSeo("metaTitle", e.target.value)} />
+          <textarea className="w-full rounded-xl border border-[#E7E1D6] bg-[#FAF8F5] px-3.5 py-2.5 text-xs font-semibold text-[#201A2B] placeholder:text-[#7A7286]/60 outline-none transition focus:border-[#FF5A36] focus:bg-white" placeholder="Meta Description (max 160 chars)" value={values.seo.metaDescription || ""} onChange={(e) => updateSeo("metaDescription", e.target.value)} rows={2} />
 
           <div className="relative">
-            <FiImage className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-700" />
-            <input className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 pl-9 text-sm" placeholder="OG Image URL" value={values.seo.ogImageUrl || ""} onChange={(e) => updateSeo("ogImageUrl", e.target.value)} />
+            <FiImage className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7A7286]" />
+            <input className="w-full rounded-xl border border-[#E7E1D6] bg-[#FAF8F5] px-3 py-2.5 pl-10 text-xs font-semibold text-[#201A2B] placeholder:text-[#7A7286]/60 outline-none transition focus:border-[#FF5A36] focus:bg-white" placeholder="OG Social Image URL" value={values.seo.ogImageUrl || ""} onChange={(e) => updateSeo("ogImageUrl", e.target.value)} />
           </div>
         </div>
-        <label className="mt-2 inline-flex items-center gap-2 text-sm text-slate-700">
-          <input type="checkbox" checked={!!values.seo.noIndex} onChange={(e) => updateSeo("noIndex", e.target.checked)} />
-          No Index
+        <label className="mt-2 inline-flex items-center gap-2 text-xs font-semibold text-[#201A2B] cursor-pointer">
+          <input type="checkbox" checked={!!values.seo.noIndex} onChange={(e) => updateSeo("noIndex", e.target.checked)} className="rounded text-[#FF5A36] focus:ring-[#FF5A36]" />
+          No Index (Hide from search engines)
         </label>
       </div>
 
-      <button disabled={loading} className="inline-flex items-center gap-2 rounded-xl bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 disabled:opacity-50">
+      <button disabled={loading} className="inline-flex items-center gap-2 rounded-xl bg-[#FF5A36] px-5 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-[#FF5A36]/90 disabled:opacity-50">
         <FiEdit3 />
         {submitLabel}
       </button>

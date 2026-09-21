@@ -328,49 +328,49 @@ const RightAuthForms = () => {
   }, []);
 
   return (
-    <section className="relative flex flex-col justify-between rounded-3xl border border-slate-200/80 bg-white p-6 md:p-8 shadow-xl shadow-slate-200/40">
+    <section className="relative flex flex-col justify-between rounded-[24px] border border-[#E7E1D6] bg-white p-6 md:p-8 shadow-sm">
       <div>
         {/* Header Title */}
         <div className="mb-6">
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-600">
-            <FiShield className="h-4 w-4" />
+          <div className="flex items-center gap-2 text-[10px] font-bold font-mono-code uppercase tracking-wider text-[#FF5A36]">
+            <FiShield className="h-3.5 w-3.5 text-[#FF5A36]" />
             <span>Fast & Secure Google Login</span>
           </div>
-          <h2 className="mt-1.5 text-2xl font-extrabold text-slate-900 sm:text-3xl">
+          <h2 className="mt-2 text-2xl font-extrabold font-heading text-[#201A2B] sm:text-3xl">
             Get started in seconds
           </h2>
-          <p className="mt-1 text-sm text-slate-500">
-            Choose your role below to continue with your Google account.
+          <p className="mt-1 text-xs text-[#7A7286]">
+            Choose your persona below to continue with your Google account.
           </p>
         </div>
 
         {/* Role Selector Tabs */}
-        <div className="mb-6 rounded-2xl bg-slate-100/90 p-1.5 backdrop-blur-xs">
+        <div className="mb-6 rounded-2xl border border-[#E7E1D6] bg-[#FAF8F5] p-1.5">
           <div className="grid grid-cols-2 gap-2">
             <button
               type="button"
               onClick={() => changeRole("user")}
-              className={`flex items-center justify-center gap-2.5 rounded-xl px-4 py-3 text-sm font-bold transition-all duration-200 ${
+              className={`flex items-center justify-center gap-2.5 rounded-xl px-4 py-2.5 text-xs font-bold font-heading transition-all duration-200 cursor-pointer ${
                 formRole === "user"
-                  ? "bg-white text-blue-700 shadow-md shadow-slate-200/60 ring-1 ring-blue-500/20"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
+                  ? "bg-white text-[#FF5A36] shadow-sm ring-1 ring-[#FF5A36]/30"
+                  : "text-[#7A7286] hover:text-[#201A2B] hover:bg-white/50"
               }`}
             >
-              <FiUser className={`h-4 w-4 ${formRole === "user" ? "text-blue-600" : "text-slate-400"}`} />
-              <span>User</span>
+              <FiBriefcase className={`h-4 w-4 ${formRole === "user" ? "text-[#FF5A36]" : "text-[#7A7286]"}`} />
+              <span>Business</span>
             </button>
 
             <button
               type="button"
               onClick={() => changeRole("advisor")}
-              className={`flex items-center justify-center gap-2.5 rounded-xl px-4 py-3 text-sm font-bold transition-all duration-200 ${
+              className={`flex items-center justify-center gap-2.5 rounded-xl px-4 py-2.5 text-xs font-bold font-heading transition-all duration-200 cursor-pointer ${
                 formRole === "advisor"
-                  ? "bg-white text-cyan-800 shadow-md shadow-slate-200/60 ring-1 ring-cyan-500/20"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
+                  ? "bg-white text-[#6C4BFF] shadow-sm ring-1 ring-[#6C4BFF]/30"
+                  : "text-[#7A7286] hover:text-[#201A2B] hover:bg-white/50"
               }`}
             >
-              <FiBriefcase className={`h-4 w-4 ${formRole === "advisor" ? "text-cyan-600" : "text-slate-400"}`} />
-              <span>Financial Advisor</span>
+              <FiUser className={`h-4 w-4 ${formRole === "advisor" ? "text-[#6C4BFF]" : "text-[#7A7286]"}`} />
+              <span>Creator</span>
             </button>
           </div>
         </div>
@@ -383,29 +383,33 @@ const RightAuthForms = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.18 }}
-            className="mb-6 rounded-2xl border border-blue-100 bg-blue-50/60 p-4"
+            className={`mb-6 rounded-2xl border p-4 ${
+              formRole === "user"
+                ? "border-[#FF5A36]/20 bg-[#FFFBF0]"
+                : "border-[#6C4BFF]/20 bg-[#F1ECFF]/40"
+            }`}
           >
             {formRole === "user" ? (
-              <div className="flex items-start gap-3 text-xs text-blue-950">
-                <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white font-bold">
+              <div className="flex items-start gap-3 text-xs">
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#FF5A36] text-white font-bold text-[10px]">
                   ✓
                 </span>
                 <div>
-                  <p className="font-bold text-sm text-blue-900">Looking for Financial Advice</p>
-                  <p className="mt-0.5 text-slate-600">
-                    Discover top SEBI registered and verified financial advisors, view profiles, and send direct enquiries.
+                  <p className="font-bold font-heading text-sm text-[#201A2B]">Business & Brand Portal</p>
+                  <p className="mt-0.5 text-xs text-[#7A7286]">
+                    Discover verified local creators, post hyperlocal marketing campaigns, view creator profiles, and send direct collaboration proposals.
                   </p>
                 </div>
               </div>
             ) : (
-              <div className="flex items-start gap-3 text-xs text-cyan-950">
-                <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-cyan-600 text-white font-bold">
+              <div className="flex items-start gap-3 text-xs">
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#6C4BFF] text-white font-bold text-[10px]">
                   ✓
                 </span>
                 <div>
-                  <p className="font-bold text-sm text-cyan-900">Financial Advisor Portal</p>
-                  <p className="mt-0.5 text-slate-600">
-                    Set up your advisor profile, showcase credentials, track analytics, and manage client enquiries.
+                  <p className="font-bold font-heading text-sm text-[#201A2B]">Creator Workspace</p>
+                  <p className="mt-0.5 text-xs text-[#7A7286]">
+                    Set up your creator profile, showcase engagement metrics, apply to live brand campaigns, and manage local partnership requests.
                   </p>
                 </div>
               </div>
@@ -413,18 +417,18 @@ const RightAuthForms = () => {
           </motion.div>
         </AnimatePresence>
 
-        {/* Advisor Declaration Checkbox if Advisor is selected */}
+        {/* Creator Declaration Checkbox if Creator is selected */}
         {formRole === "advisor" && (
           <div className="mb-6">
-            <label className="flex items-start gap-3 rounded-xl border border-amber-200/80 bg-amber-50/70 p-3.5 text-xs text-amber-900 cursor-pointer transition hover:bg-amber-50">
+            <label className="flex items-start gap-3 rounded-2xl border border-[#E7E1D6] bg-[#FAF8F5] p-3.5 text-xs text-[#201A2B] cursor-pointer transition hover:bg-[#F3EFEA]">
               <input
                 type="checkbox"
                 checked={advisorDeclarationChecked}
                 onChange={(e) => setAdvisorDeclarationChecked(e.target.checked)}
-                className="mt-0.5 h-4 w-4 rounded accent-cyan-600"
+                className="mt-0.5 h-4 w-4 rounded accent-[#6C4BFF]"
               />
-              <span className="leading-relaxed">
-                I confirm that I am a legitimate financial advisor / financial content creator and will provide accurate information.
+              <span className="leading-relaxed text-[#7A7286]">
+                I confirm that I am an authentic content creator / influencer and agree to provide genuine metrics and links.
               </span>
             </label>
           </div>
@@ -436,13 +440,13 @@ const RightAuthForms = () => {
             type="button"
             onClick={handleGoogleAuthClick}
             disabled={isGoogleSubmitting}
-            className="group relative flex w-full items-center justify-center gap-3.5 rounded-2xl border border-slate-300 bg-white px-5 py-4 text-base font-bold text-slate-800 shadow-md shadow-slate-200/50 transition-all hover:border-blue-400 hover:bg-slate-50 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500/40 disabled:cursor-not-allowed disabled:opacity-60"
+            className="group relative flex w-full items-center justify-center gap-3 rounded-xl border border-[#E7E1D6] bg-white px-5 py-3.5 text-sm font-bold font-heading text-[#201A2B] shadow-sm transition hover:border-[#201A2B]/40 hover:bg-[#FAF8F5] focus:outline-none focus:ring-2 focus:ring-[#FF5A36]/20 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
           >
             {/* Google SVG Icon */}
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 48 48"
-              className="h-6 w-6 shrink-0 transition-transform group-hover:scale-105"
+              className="h-5 w-5 shrink-0 transition-transform group-hover:scale-105"
               aria-hidden="true"
             >
               <path
@@ -463,7 +467,7 @@ const RightAuthForms = () => {
               />
             </svg>
 
-            <span className="hover:cursor-pointer">
+            <span>
               {isGoogleSubmitting
                 ? "Authenticating with Google..."
                 : `Continue with Google`}
@@ -485,19 +489,19 @@ const RightAuthForms = () => {
       </div>
 
       {/* Trust & Guarantee Badges */}
-      <div className="mt-8 border-t border-slate-100 pt-5">
-        <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">
+      <div className="mt-8 border-t border-[#E7E1D6] pt-5">
+        <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-[#7A7286]">
           <div className="flex items-center gap-1.5">
-            <FiCheck className="h-3.5 w-3.5 text-emerald-500" />
+            <FiCheck className="h-3.5 w-3.5 text-[#1F9D6B]" />
             <span>No password needed</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <FiCheck className="h-3.5 w-3.5 text-emerald-500" />
+            <FiCheck className="h-3.5 w-3.5 text-[#1F9D6B]" />
             <span>Instant profile setup</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <FiCheck className="h-3.5 w-3.5 text-emerald-500" />
-            <span>256-bit OAuth security</span>
+            <FiCheck className="h-3.5 w-3.5 text-[#1F9D6B]" />
+            <span>OAuth 2.0 Security</span>
           </div>
         </div>
       </div>
@@ -509,25 +513,25 @@ const RightAuthForms = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-[#201A2B]/60 backdrop-blur-xs p-4"
           >
             <motion.form
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               onSubmit={onGooglePhoneSubmit}
-              className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl"
+              className="w-full max-w-md rounded-[24px] border border-[#E7E1D6] bg-white p-6 shadow-2xl"
             >
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 mb-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#FF5A36]/10 text-[#FF5A36] mb-4">
                 <FiPhone className="h-6 w-6" />
               </div>
-              <h3 className="text-xl font-bold text-slate-900">Add Phone Number (Optional)</h3>
-              <p className="mt-1 text-xs leading-relaxed text-slate-500">
-                Provide your mobile number to receive updates and connect with {googlePhone.role === "advisor" ? "clients" : "advisors"}, or click Skip to continue as <span className="font-semibold text-slate-700">{googlePhone.role}</span>.
+              <h3 className="text-xl font-bold font-heading text-[#201A2B]">Add Phone Number (Optional)</h3>
+              <p className="mt-1 text-xs leading-relaxed text-[#7A7286]">
+                Provide your mobile number to receive updates and connect with {googlePhone.role === "advisor" ? "businesses" : "creators"}, or click Skip to continue as <span className="font-bold text-[#201A2B] capitalize">{googlePhone.role === "advisor" ? "creator" : "business"}</span>.
               </p>
 
               <div className="mt-5 flex flex-col gap-2">
-                <div className="flex h-12 gap-2">
+                <div className="flex h-11 gap-2">
                   <select
                     value={googlePhoneForm.countryCode}
                     onChange={(event) => {
@@ -541,17 +545,14 @@ const RightAuthForms = () => {
                       }));
                     }}
                     aria-label="Select Country Code"
-                    className="rounded-xl border border-slate-300 bg-slate-50 px-3 text-xs font-bold text-slate-800 outline-none focus:border-blue-500"
+                    className="rounded-xl border border-[#E7E1D6] bg-[#FAF8F5] px-3 text-xs font-bold text-[#201A2B] outline-none focus:border-[#FF5A36]"
                   >
                     {COUNTRY_CODE_OPTIONS.map((opt) => (
                       <option key={opt.code} value={opt.code}>
                         {opt.label}
                       </option>
                     ))}
-                    
                   </select>
-
-                  
 
                   <input
                     value={googlePhoneForm.phone}
@@ -571,7 +572,7 @@ const RightAuthForms = () => {
                       COUNTRY_CODE_OPTIONS.find((c) => c.code === googlePhoneForm.countryCode)?.placeholder ??
                       "Mobile number (Optional)"
                     }
-                    className="flex-1 rounded-xl border border-slate-300 px-4 text-sm font-medium outline-none focus:border-blue-500"
+                    className="flex-1 rounded-xl border border-[#E7E1D6] bg-[#FAF8F5] px-4 text-xs font-semibold text-[#201A2B] outline-none focus:border-[#FF5A36] focus:bg-white"
                     autoFocus
                   />
                 </div>
@@ -586,14 +587,14 @@ const RightAuthForms = () => {
                   type="button"
                   disabled={isGoogleSubmitting}
                   onClick={onGooglePhoneSkip}
-                  className="rounded-xl border border-slate-300 px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-60 transition"
+                  className="rounded-xl border border-[#E7E1D6] bg-white px-4 py-2.5 text-xs font-bold text-[#201A2B] hover:bg-[#FAF8F5] disabled:opacity-60 transition"
                 >
                   Skip
                 </button>
                 <button
                   type="submit"
                   disabled={isGoogleSubmitting}
-                  className="rounded-xl bg-blue-700 px-5 py-2.5 text-xs font-bold text-white shadow-md shadow-blue-500/20 hover:bg-blue-800 disabled:opacity-60 transition"
+                  className="rounded-xl bg-[#FF5A36] px-5 py-2.5 text-xs font-bold font-heading text-white shadow-sm hover:brightness-110 disabled:opacity-60 transition cursor-pointer"
                 >
                   {isGoogleSubmitting ? "Completing..." : "Continue"}
                 </button>
@@ -607,3 +608,4 @@ const RightAuthForms = () => {
 };
 
 export default RightAuthForms;
+

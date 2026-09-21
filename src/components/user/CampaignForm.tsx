@@ -780,15 +780,15 @@ export function CampaignForm() {
                             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-2xl border border-indigo-100 bg-linear-to-r from-indigo-50/80 via-blue-50/40 to-indigo-50/80 p-4">
                               <div className="space-y-0.5">
                                 <h5 className="text-xs font-bold text-indigo-950 uppercase tracking-wider flex items-center gap-1.5">
-                                  <span>📩 Received Advisor Applications</span>
+                                  <span>📩 Received Creator Applications</span>
                                   <span className="rounded-full bg-indigo-600 text-white text-[10px] font-extrabold px-2 py-0.5">
                                     {campApps.length}
                                   </span>
                                 </h5>
                                 <p className="text-xs text-indigo-800/80 font-medium">
                                   {campApps.length === 0
-                                    ? "No advisor proposals received yet for this campaign."
-                                    : `Review and manage ${campApps.length} received advisor pitch proposal${campApps.length === 1 ? "" : "s"}.`}
+                                    ? "No creator proposals received yet for this campaign."
+                                    : `Review and manage ${campApps.length} received creator pitch proposal${campApps.length === 1 ? "" : "s"}.`}
                                 </p>
                               </div>
                               <Link

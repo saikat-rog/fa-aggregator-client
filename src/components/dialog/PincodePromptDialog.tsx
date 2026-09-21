@@ -48,7 +48,7 @@ export function PincodePromptDialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#201A2B]/60 backdrop-blur-xs p-4"
       role="dialog"
       aria-modal="true"
       onMouseDown={(e) => {
@@ -57,15 +57,15 @@ export function PincodePromptDialog({
     >
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl"
+        className="w-full max-w-sm rounded-[24px] border border-[#E7E1D6] bg-[#FFFFFF] p-6 shadow-2xl"
       >
-        <h2 className="text-xl font-bold text-slate-900">
+        <h2 className="text-xl font-bold font-heading text-[#201A2B]">
           Enter your PIN code
         </h2>
-        <p className="mt-2 text-xs leading-relaxed text-slate-600">
-          Please provide your 6-digit PIN code to access protected advisor contact details and info.
+        <p className="mt-2 text-xs leading-relaxed text-[#7A7286]">
+          Please provide your 6-digit PIN code to access protected creator contact details and info.
         </p>
-        <label className="mt-4 block text-xs font-semibold text-slate-700">
+        <label className="mt-4 block text-xs font-semibold text-[#201A2B]">
           PIN code
           <input
             value={pincode}
@@ -79,7 +79,7 @@ export function PincodePromptDialog({
             autoFocus
             required
             placeholder="e.g. 400001"
-            className="mt-1.5 w-full rounded-xl border border-slate-300 px-4 py-2.5 text-base font-semibold text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            className="mt-1.5 w-full rounded-[12px] border border-[#E7E1D6] bg-[#FAF8F5] px-4 py-2.5 text-base font-semibold text-[#201A2B] outline-none transition focus:border-[#FF5A36] focus:bg-[#FFFFFF] focus:ring-2 focus:ring-[#FF5A36]/10"
           />
         </label>
         {error ? (
@@ -92,14 +92,14 @@ export function PincodePromptDialog({
             type="button"
             disabled={submitting}
             onClick={onClose}
-            className="rounded-xl border border-slate-300 px-4 py-2.5 text-xs font-bold text-slate-700 transition hover:bg-slate-50 disabled:opacity-60"
+            className="rounded-[12px] border border-[#E7E1D6] bg-[#FFFFFF] px-4 py-2.5 text-xs font-bold text-[#201A2B] transition hover:bg-[#F3EFEA] disabled:opacity-60"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={submitting}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-blue-700 px-5 py-2.5 text-xs font-bold text-white shadow-md shadow-blue-500/20 transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex items-center gap-1.5 rounded-[12px] bg-[#FF5A36] px-5 py-2.5 text-xs font-bold text-white shadow-sm transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <FiUnlock className="h-3.5 w-3.5" />
             {submitting ? "Saving..." : "Unlock Info"}

@@ -1,4 +1,4 @@
-import { FaCircleCheck, FaLock } from "react-icons/fa6";
+import { FaCircleCheck, FaLock, FaPaperPlane } from "react-icons/fa6";
 
 type FormData = {
   subject: string;
@@ -32,23 +32,25 @@ export function ContactFormCard({
   onSubmit,
 }: ContactFormCardProps) {
   return (
-    <section className="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-[0_12px_30px_rgba(15,23,42,0.04)]">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-blue-700">
-        Contact
-      </p>
-      <h2 className="mt-2 text-xl font-semibold text-slate-950">
-        Contact {advisorName}
-      </h2>
-      <p className="mt-2 text-sm leading-6 text-slate-600">
-        Send a direct inquiry. You will receive a response via email.
-      </p>
+    <section className="rounded-[24px] border border-[#E7E1D6] bg-white p-6 sm:p-7 shadow-sm">
+      <div className="space-y-1">
+        <p className="text-[10px] font-bold font-mono-code uppercase tracking-wider text-[#FF5A36]">
+          Direct Connection
+        </p>
+        <h2 className="text-xl font-extrabold font-heading text-[#201A2B]">
+          Collaborate with {advisorName}
+        </h2>
+        <p className="text-xs leading-relaxed text-[#7A7286]">
+          Send a direct campaign proposal or collaboration inquiry. The creator will receive your message instantly.
+        </p>
+      </div>
 
       {formMessage && (
         <div
-          className={`mt-4 rounded-2xl border p-4 text-sm ${
+          className={`mt-4 rounded-xl border p-3.5 text-xs font-semibold ${
             formMessage.type === "success"
-              ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-              : "border-red-200 bg-red-50 text-red-800"
+              ? "border-[#1F9D6B]/30 bg-[#1F9D6B]/10 text-[#1F9D6B]"
+              : "border-[#FEE2E2] bg-[#FEF2F2] text-[#B91C1C]"
           }`}
         >
           <div className="inline-flex items-center gap-2">
@@ -61,43 +63,42 @@ export function ContactFormCard({
       )}
 
       <form onSubmit={onSubmit} className="mt-5 space-y-4">
-
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-700">
-            Category
+          <label className="mb-1.5 block text-xs font-bold text-[#201A2B]">
+            Inquiry Category
           </label>
           <select
             name="category"
             value={formData.category}
             onChange={onChange}
-            className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-blue-400 focus:bg-white"
+            className="w-full rounded-xl border border-[#E7E1D6] bg-[#FAF8F5] px-3.5 py-2.5 text-xs font-semibold text-[#201A2B] outline-none transition focus:border-[#FF5A36] focus:bg-white focus:ring-2 focus:ring-[#FF5A36]/10"
           >
-            <option value="general">General Inquiry</option>
-            <option value="consultation">Consultation Request</option>
-            <option value="mentoring">Mentoring Program</option>
-            <option value="partnership">Partnership Opportunity</option>
-            <option value="other">Other</option>
+            <option value="general">General Collaboration</option>
+            <option value="consultation">Paid Campaign Pitch</option>
+            <option value="mentoring">Barter / Gifting Deal</option>
+            <option value="partnership">Brand Sponsorship</option>
+            <option value="other">Store Visit & Review</option>
           </select>
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-700">
-            Subject
+          <label className="mb-1.5 block text-xs font-bold text-[#201A2B]">
+            Subject / Deal Title
           </label>
           <input
             type="text"
             name="subject"
             value={formData.subject}
             onChange={onChange}
-            placeholder="Subject of your enquiry"
+            placeholder="e.g. Hyperlocal promo for cafe opening"
             required
-            className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:bg-white"
+            className="w-full rounded-xl border border-[#E7E1D6] bg-[#FAF8F5] px-3.5 py-2.5 text-xs font-semibold text-[#201A2B] outline-none transition placeholder:text-[#7A7286]/60 focus:border-[#FF5A36] focus:bg-white focus:ring-2 focus:ring-[#FF5A36]/10"
           />
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-700">
-            Message
+          <label className="mb-1.5 block text-xs font-bold text-[#201A2B]">
+            Message &amp; Offer Details
           </label>
           <textarea
             name="message"
@@ -105,12 +106,10 @@ export function ContactFormCard({
             onChange={onChange}
             rows={5}
             required
-            placeholder="Enter your message"
-            className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:bg-white"
+            placeholder="Describe your brand, deliverables expected, and timeline..."
+            className="w-full rounded-xl border border-[#E7E1D6] bg-[#FAF8F5] px-3.5 py-2.5 text-xs font-semibold text-[#201A2B] outline-none transition placeholder:text-[#7A7286]/60 focus:border-[#FF5A36] focus:bg-white focus:ring-2 focus:ring-[#FF5A36]/10"
           />
         </div>
-
-        
 
         <button
           type="submit"
@@ -121,13 +120,17 @@ export function ContactFormCard({
               onLockedSubmit();
             }
           }}
-          className="inline-flex w-full items-center justify-center rounded-full bg-blue-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-blue-400"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#FF5A36] px-5 py-3 text-xs font-bold font-heading text-white shadow-sm transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
         >
           {formSubmitting ? (
-            "Sending..."
+            "Sending inquiry..."
           ) : (
             <>
-              {!canSubmitEnquiry ? <FaLock className="mr-2 h-3.5 w-3.5" /> : null}
+              {!canSubmitEnquiry ? (
+                <FaLock className="h-3.5 w-3.5" />
+              ) : (
+                <FaPaperPlane className="h-3.5 w-3.5" />
+              )}
               Send Inquiry
             </>
           )}

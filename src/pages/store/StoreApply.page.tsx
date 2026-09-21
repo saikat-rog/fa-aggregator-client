@@ -19,56 +19,56 @@ export function StoreApplyPage() {
       <div>
         <Link
           to="/store"
-          className="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-blue-700 transition"
+          className="inline-flex items-center gap-2 text-sm font-semibold text-[#7A7286] hover:text-[#6C4BFF] transition"
         >
           <FiArrowLeft className="h-4 w-4" /> Back to Stores
         </Link>
       </div>
 
       {/* Header Banner */}
-      <section className="relative overflow-hidden rounded-3xl bg-linear-to-br from-slate-900 via-blue-900 to-indigo-900 px-6 py-12 text-center text-white lg:px-10 shadow-lg">
-        <div className="pointer-events-none absolute -left-16 -top-20 h-56 w-56 rounded-full bg-blue-400/20 blur-3xl" />
-        <div className="pointer-events-none absolute -right-12 bottom-0 h-52 w-52 rounded-full bg-indigo-600/30 blur-3xl" />
-        <h1 className="relative text-3xl font-extrabold lg:text-5xl tracking-tight">
+      <section className="relative overflow-hidden rounded-[24px] bg-[#201A2B] px-6 py-12 text-center text-white lg:px-10 shadow-sm border border-[#E7E1D6]">
+        <div className="pointer-events-none absolute -left-16 -top-20 h-56 w-56 rounded-full bg-[#6C4BFF]/20 blur-3xl" />
+        <div className="pointer-events-none absolute -right-12 bottom-0 h-52 w-52 rounded-full bg-[#FF5A36]/20 blur-3xl" />
+        <h1 className="relative text-3xl font-extrabold font-heading lg:text-5xl tracking-tight">
           Store Listing Application
         </h1>
-        <p className="relative mx-auto mt-3 max-w-xl text-base text-blue-100 font-medium">
+        <p className="relative mx-auto mt-3 max-w-xl text-base text-white/80 font-medium">
           Fill out your store details & requirement information. Once approved by an Admin, your store listing will be published live.
         </p>
       </section>
 
       {/* Content area based on Auth & Role */}
       {!token ? (
-        <div className="rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-blue-50 text-blue-700">
+        <div className="rounded-[24px] border border-[#E7E1D6] bg-[#FFFFFF] p-8 text-center shadow-sm">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#6C4BFF]/10 text-[#6C4BFF]">
             <FiLock className="h-7 w-7" />
           </div>
-          <h2 className="mt-4 text-xl font-bold text-slate-900">Advisor Authentication Required</h2>
-          <p className="mt-2 text-sm text-slate-600 max-w-md mx-auto">
-            You must be logged in as an Advisor to submit a Store Listing application.
+          <h2 className="mt-4 text-xl font-bold font-heading text-[#201A2B]">Creator Authentication Required</h2>
+          <p className="mt-2 text-sm text-[#7A7286] max-w-md mx-auto">
+            You must be logged in as a Creator to submit a Store Listing application.
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-4">
             <button
-              onClick={() => navigate("/auth")}
-              className="rounded-xl bg-blue-700 px-6 py-3 text-sm font-bold text-white shadow-md hover:bg-blue-800 transition cursor-pointer"
+              onClick={() => navigate("/auth?role=advisor")}
+              className="rounded-[12px] bg-[#6C4BFF] px-6 py-3 text-sm font-bold text-white shadow-sm hover:brightness-110 transition cursor-pointer font-heading"
             >
-              Log In / Sign Up as Advisor
+              Log In / Sign Up as Creator
             </button>
           </div>
         </div>
       ) : role === "user" ? (
-        <div className="rounded-3xl border border-amber-200 bg-amber-50 p-8 text-center shadow-sm">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-amber-100 text-amber-700">
+        <div className="rounded-[24px] border border-[#FF5A36]/20 bg-[#FF5A36]/5 p-8 text-center shadow-sm">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#FF5A36]/15 text-[#FF5A36]">
             <FiAlertCircle className="h-7 w-7" />
           </div>
-          <h2 className="mt-4 text-xl font-bold text-amber-900">Advisor Access Required</h2>
-          <p className="mt-2 text-sm text-amber-800 max-w-md mx-auto">
-            Store listing applications are reserved for Advisors. As a User, you can post a Campaign requirement!
+          <h2 className="mt-4 text-xl font-bold font-heading text-[#201A2B]">Creator Access Required</h2>
+          <p className="mt-2 text-sm text-[#7A7286] max-w-md mx-auto">
+            Store listing applications are reserved for Creators. As a Business, you can post a Campaign requirement!
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-4">
             <Link
               to="/campaign/apply"
-              className="rounded-xl bg-amber-700 px-6 py-3 text-sm font-bold text-white shadow-md hover:bg-amber-800 transition"
+              className="rounded-[12px] bg-[#FF5A36] px-6 py-3 text-sm font-bold text-white shadow-sm hover:brightness-110 transition font-heading"
             >
               Go to Post a Campaign
             </Link>
