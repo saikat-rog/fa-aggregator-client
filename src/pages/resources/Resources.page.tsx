@@ -128,6 +128,16 @@ export function ResourcesPage() {
                   </div>
 
                   <div className="mt-3 flex flex-wrap gap-2">
+                    {item.budget ? (
+                      <span className="inline-flex items-center rounded-full bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 text-xs font-bold text-emerald-700">
+                        💰 Budget: {item.budget}
+                      </span>
+                    ) : null}
+                    {item.rewardType ? (
+                      <span className="inline-flex items-center rounded-full bg-blue-50 border border-blue-200 px-2.5 py-0.5 text-xs font-bold text-blue-700">
+                        🎁 Reward: {item.rewardType}
+                      </span>
+                    ) : null}
                     {item.category ? (
                       <span className="inline-flex items-center rounded-full bg-indigo-50 border border-indigo-200 px-2.5 py-0.5 text-xs font-bold text-indigo-700">
                         🏷️ {item.category}
@@ -136,16 +146,6 @@ export function ResourcesPage() {
                     {item.campaignGoal ? (
                       <span className="inline-flex items-center rounded-full bg-purple-50 border border-purple-200 px-2.5 py-0.5 text-xs font-bold text-purple-700">
                         🎯 Goal: {item.campaignGoal}
-                      </span>
-                    ) : null}
-                    {item.rewardType ? (
-                      <span className="inline-flex items-center rounded-full bg-blue-50 border border-blue-200 px-2.5 py-0.5 text-xs font-bold text-blue-700">
-                        🎁 Reward: {item.rewardType}
-                      </span>
-                    ) : null}
-                    {item.budget ? (
-                      <span className="inline-flex items-center rounded-full bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 text-xs font-bold text-emerald-700">
-                        💰 Budget: {item.budget}
                       </span>
                     ) : null}
                   </div>
@@ -231,7 +231,7 @@ export function ResourcesPage() {
                   ) : null}
 
                   {item.detailedRequirements ? (
-                    <div className="mt-3 text-sm text-slate-600 rounded-xl bg-slate-50 p-3 border border-slate-100"><span className="font-bold text-slate-700 block mb-1">Detailed Requirements:</span> <p className="whitespace-pre-wrap leading-relaxed">{item.detailedRequirements}</p></div>
+                    <div className="mt-3 text-sm text-slate-600 rounded-xl bg-slate-50 p-3 border border-slate-100"><span className="font-bold text-slate-700 block mb-1">What should creators do?</span> <p className="whitespace-pre-wrap leading-relaxed">{item.detailedRequirements}</p></div>
                   ) : null}
                 </div>
 

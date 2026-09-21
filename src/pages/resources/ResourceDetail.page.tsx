@@ -195,7 +195,7 @@ export function ResourceDetailPage() {
           >
             <FiArrowLeft className="h-5 w-5 stroke-[2.2]" />
           </Link>
-          {requirement?.postedByAdvisorUsername ? (
+          {isStorePage && requirement?.postedByAdvisorUsername ? (
             <Link
               to={`/${requirement.postedByAdvisorUsername}`}
               className="flex items-center justify-center h-11 w-11 rounded-full bg-white text-slate-700 shadow-xs hover:bg-slate-50 hover:shadow-sm transition border border-slate-200/70 cursor-pointer"
@@ -306,7 +306,7 @@ export function ResourceDetailPage() {
             <div className="text-center space-y-3 pt-1">
               {/* Circular Avatar / Logo with Gold Ring */}
               <div className="relative mx-auto h-28 w-28 sm:h-32 sm:w-32 rounded-full p-1.5 bg-[#FFCC00] shadow-md flex items-center justify-center">
-                {requirement.instagramProfilePictureUrl ? (
+                {isStorePage && requirement.instagramProfilePictureUrl ? (
                   <img
                     src={getProxiedImageUrl(requirement.instagramProfilePictureUrl)}
                     alt={requirement.companyName}
@@ -317,9 +317,7 @@ export function ResourceDetailPage() {
                   />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center rounded-full bg-slate-900 text-3xl font-black text-white border-2 border-white uppercase tracking-wider">
-                    {(requirement.postedByAdvisorName || requirement.companyName || "S")
-                      .charAt(0)
-                      .toUpperCase()}
+                    {(requirement.companyName || "C").charAt(0).toUpperCase()}
                   </div>
                 )}
               </div>
@@ -327,19 +325,29 @@ export function ResourceDetailPage() {
               {/* Main Title & Subtitle */}
               <div className="space-y-1">
                 <h1 className="text-2xl sm:text-[28px] font-black text-slate-900 tracking-tight">
-                  {requirement.postedByAdvisorName || requirement.companyName}
+                  {requirement.companyName}
                 </h1>
                 <p className="text-sm font-medium text-slate-600">
-                  {requirement.postedByAdvisorName
-                    ? `${isStorePage ? "Store Listing" : "Campaign Requirement"} for ${requirement.companyName}`
-                    : requirement.storeUsername
-                      ? `@${requirement.storeUsername}`
-                      : `${isStorePage ? "Store Listing" : "Campaign Requirement"}`}
+                  {requirement.storeUsername
+                    ? `@${requirement.storeUsername}`
+                    : isStorePage
+                      ? "Store Listing"
+                      : "Campaign Requirement"}
                 </p>
 
-                {/* Badges: Category, Goal, Reward, Budget (Only for Campaigns) */}
+                {/* Badges: Budget, Reward, Category, Goal (Only for Campaigns) */}
                 {!isStorePage && requirement.type !== "store" ? (
                   <div className="flex flex-wrap items-center justify-center gap-2 pt-1.5">
+                    {requirement.budget ? (
+                      <span className="inline-flex items-center rounded-full bg-emerald-50 border border-emerald-200 px-3 py-1 text-xs font-bold text-emerald-700">
+                        💰 Budget: {requirement.budget}
+                      </span>
+                    ) : null}
+                    {requirement.rewardType ? (
+                      <span className="inline-flex items-center rounded-full bg-blue-50 border border-blue-200 px-3 py-1 text-xs font-bold text-blue-700">
+                        🎁 Reward: {requirement.rewardType}
+                      </span>
+                    ) : null}
                     {requirement.category ? (
                       <span className="inline-flex items-center rounded-full bg-indigo-50 border border-indigo-200 px-3 py-1 text-xs font-bold text-indigo-700">
                         🏷️ {requirement.category}
@@ -350,22 +358,13 @@ export function ResourceDetailPage() {
                         🎯 Goal: {requirement.campaignGoal}
                       </span>
                     ) : null}
-                    {requirement.rewardType ? (
-                      <span className="inline-flex items-center rounded-full bg-blue-50 border border-blue-200 px-3 py-1 text-xs font-bold text-blue-700">
-                        🎁 Reward: {requirement.rewardType}
-                      </span>
-                    ) : null}
-                    {requirement.budget ? (
-                      <span className="inline-flex items-center rounded-full bg-emerald-50 border border-emerald-200 px-3 py-1 text-xs font-bold text-emerald-700">
-                        💰 Budget: {requirement.budget}
-                      </span>
-                    ) : null}
                   </div>
                 ) : null}
               </div>
 
-              {/* Social Icons Row (Circled in green in reference image) */}
-              {requirement.socialLinks &&
+              {/* Social Icons Row (Only for Stores with socialLinks) */}
+              {isStorePage &&
+              requirement.socialLinks &&
               (requirement.socialLinks.youtube?.trim() ||
                 requirement.socialLinks.telegram?.trim() ||
                 requirement.socialLinks.instagram?.trim()) ? (
@@ -419,7 +418,7 @@ export function ResourceDetailPage() {
 
             {/* Action Pills Stack */}
             <div className="space-y-3.5 pt-1">
-              {/* Pill 1: Official Link / Store Link / Login to Access */}
+              {/* Pill 1: Official Link / Target URL */}
               {isAuthenticated ? (
                 (requirement.url || (requirement as any).personalWebsite || (requirement as any).website) ? (
                   <button
@@ -436,7 +435,7 @@ export function ResourceDetailPage() {
                         ? "Opening Link..."
                         : isStorePage
                           ? "Access Official Store Link"
-                          : "Access Official Link"}
+                          : "Website/Target URL"}
                     </span>
                     <FiExternalLink className="h-5 w-5 text-slate-600 group-hover:text-blue-700 transition" />
                   </button>
@@ -451,14 +450,14 @@ export function ResourceDetailPage() {
                     <FiLock className="h-5 w-5 stroke-[2.2]" />
                   </div>
                   <span className="flex-1 text-center font-bold text-slate-900 text-sm sm:text-base px-3 truncate">
-                    Log in to Access Official Link
+                    {isStorePage ? "Log in to Access Official Link" : "Website/Target URL"}
                   </span>
                   <FiLock className="h-5 w-5 text-slate-500 group-hover:text-blue-700 transition" />
                 </button>
               )}
 
-              {/* Pill 2a: View Instagram Profile (Above Telegram) */}
-              {requirement.socialLinks?.instagram?.trim() ? (
+              {/* Store Social Media Pills (Only for Store pages) */}
+              {isStorePage && requirement.socialLinks?.instagram?.trim() ? (
                 <a
                   href={`https://instagram.com/${requirement.socialLinks.instagram
                     .trim()
@@ -477,8 +476,7 @@ export function ResourceDetailPage() {
                 </a>
               ) : null}
 
-              {/* Pill 2b: Join Telegram Group */}
-              {requirement.socialLinks?.telegram?.trim() ? (
+              {isStorePage && requirement.socialLinks?.telegram?.trim() ? (
                 <a
                   href={`https://t.me/${requirement.socialLinks.telegram
                     .trim()
@@ -497,8 +495,7 @@ export function ResourceDetailPage() {
                 </a>
               ) : null}
 
-              {/* Pill 2c: View YouTube Channel (Below Telegram) */}
-              {requirement.socialLinks?.youtube?.trim() ? (
+              {isStorePage && requirement.socialLinks?.youtube?.trim() ? (
                 <a
                   href={`https://youtube.com/${
                     requirement.socialLinks.youtube.trim().startsWith("@")
@@ -519,33 +516,7 @@ export function ResourceDetailPage() {
                 </a>
               ) : null}
 
-              {/* Pill 3: Advisor Profile */}
-              {requirement.postedByAdvisorUsername || requirement.postedByAdvisorName ? (
-                <Link
-                  to={
-                    requirement.postedByAdvisorUsername
-                      ? `/${requirement.postedByAdvisorUsername}`
-                      : "#"
-                  }
-                  className="group w-full rounded-full bg-[#ECEEF2] hover:bg-[#E2E6EC] border border-slate-200/80 p-2 sm:p-2.5 pr-5 sm:pr-6 flex items-center justify-between shadow-2xs transition-all duration-150 active:scale-[0.99] cursor-pointer"
-                >
-                  <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-full bg-[#F59E0B] text-white font-extrabold text-base shadow-xs">
-                    {(requirement.postedByAdvisorName || requirement.postedByAdvisorUsername || "S")
-                      .charAt(0)
-                      .toUpperCase()}
-                  </div>
-                  <span className="flex-1 text-center font-bold text-slate-900 text-sm sm:text-base px-3 truncate">
-                    Advisor Profile (
-                    {requirement.postedByAdvisorUsername
-                      ? `@${requirement.postedByAdvisorUsername}`
-                      : requirement.postedByAdvisorName}
-                    )
-                  </span>
-                  <FiUser className="h-5 w-5 text-slate-600 group-hover:text-amber-600 transition" />
-                </Link>
-              ) : null}
-
-              {/* Pill 4: Detailed Requirements (Accordion) */}
+              {/* Detailed Requirements / What should creators do? (Accordion) */}
               {requirement.detailedRequirements ? (
                 <div className="overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-2xs">
                   <button
@@ -557,7 +528,7 @@ export function ResourceDetailPage() {
                       <FiFileText className="h-5 w-5 stroke-[2.2]" />
                     </div>
                     <span className="flex-1 text-center font-bold text-slate-900 text-sm sm:text-base px-3 truncate">
-                      Detailed Requirements
+                      {isStorePage ? "Detailed Requirements" : "What should creators do?"}
                     </span>
                     <div className="flex h-6 w-6 items-center justify-center text-slate-600 transition">
                       <FiChevronDown
@@ -574,7 +545,7 @@ export function ResourceDetailPage() {
                       <div className="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
                         <FiFileText className="h-4 w-4 text-blue-600" />
                         <span>
-                          {isStorePage ? "Store Overview & Details" : "Campaign Brief & Scope"}
+                          {isStorePage ? "Store Overview & Details" : "What should creators do?"}
                         </span>
                       </div>
                       <p className="text-sm font-medium text-slate-700 leading-relaxed whitespace-pre-wrap">
@@ -585,24 +556,29 @@ export function ResourceDetailPage() {
                 </div>
               ) : null}
 
-              {/* Additional Pill: Apply by Message (For Campaigns) */}
-              {!isStorePage ? (
-                <button
-                  type="button"
-                  onClick={handleApplyByMessageClick}
+              {/* Advisor Attribution Pill (Only for Store pages) */}
+              {isStorePage && (requirement.postedByAdvisorUsername || requirement.postedByAdvisorName) ? (
+                <Link
+                  to={
+                    requirement.postedByAdvisorUsername
+                      ? `/${requirement.postedByAdvisorUsername}`
+                      : "#"
+                  }
                   className="group w-full rounded-full bg-[#ECEEF2] hover:bg-[#E2E6EC] border border-slate-200/80 p-2 sm:p-2.5 pr-5 sm:pr-6 flex items-center justify-between shadow-2xs transition-all duration-150 active:scale-[0.99] cursor-pointer"
                 >
-                  <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-full bg-slate-900 text-white shadow-xs">
-                    <FiMessageSquare className="h-5 w-5 stroke-[2.2]" />
+                  <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-full bg-[#F59E0B] text-white font-extrabold text-base shadow-xs">
+                    {(requirement.postedByAdvisorName || requirement.postedByAdvisorUsername || "A")
+                      .charAt(0)
+                      .toUpperCase()}
                   </div>
                   <span className="flex-1 text-center font-bold text-slate-900 text-sm sm:text-base px-3 truncate">
-                    Apply by Message
+                    Posted by @{requirement.postedByAdvisorUsername || requirement.postedByAdvisorName}
                   </span>
-                  <FiMessageSquare className="h-5 w-5 text-slate-600 group-hover:text-slate-900 transition" />
-                </button>
+                  <FiUser className="h-5 w-5 text-slate-600 group-hover:text-amber-600 transition" />
+                </Link>
               ) : null}
 
-              {/* Additional Pill: Contact Store Email (if email exists) */}
+              {/* Contact Business Email (if email exists) */}
               {requirement.businessEmail ? (
                 <a
                   href={`mailto:${requirement.businessEmail}`}
@@ -616,6 +592,23 @@ export function ResourceDetailPage() {
                   </span>
                   <FiMail className="h-5 w-5 text-emerald-600 group-hover:scale-110 transition" />
                 </a>
+              ) : null}
+
+              {/* Bottom Pill: JOIN (For Campaigns) */}
+              {!isStorePage ? (
+                <button
+                  type="button"
+                  onClick={handleApplyByMessageClick}
+                  className="group w-full rounded-full bg-slate-900 hover:bg-slate-800 text-white p-2 sm:p-2.5 pr-5 sm:pr-6 flex items-center justify-between shadow-md transition-all duration-150 active:scale-[0.99] cursor-pointer"
+                >
+                  <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-full bg-white/20 text-white shadow-xs">
+                    <FiMessageSquare className="h-5 w-5 stroke-[2.2]" />
+                  </div>
+                  <span className="flex-1 text-center font-bold text-white text-sm sm:text-base px-3 truncate">
+                    JOIN
+                  </span>
+                  <FiMessageSquare className="h-5 w-5 text-white/80 group-hover:text-white transition" />
+                </button>
               ) : null}
             </div>
 
