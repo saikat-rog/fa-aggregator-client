@@ -16,6 +16,11 @@ import {
   FiCheckCircle,
   FiLock,
   FiChevronDown,
+  FiDollarSign,
+  FiGift,
+  FiTag,
+  FiTarget,
+  FiGlobe,
 } from "react-icons/fi";
 import { FaInstagram, FaYoutube, FaTelegram } from "react-icons/fa6";
 import { submitCampaignApplicationApi } from "../../services/campaignApplications.service";
@@ -184,45 +189,47 @@ export function ResourceDetailPage() {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#F4F5F8] py-6 px-4 flex flex-col items-center justify-between font-sans text-slate-800">
-      <div className="w-full max-w-md space-y-6 mx-auto">
-        {/* Top Header Bar: Back Button on left, Profile/Avatar on right */}
-        <div className="flex items-center justify-between px-1">
+    <div className="min-h-screen pb-16 text-[#201A2B]">
+      <div className="w-full max-w-xl space-y-5 mx-auto px-4 pt-4 sm:pt-6">
+        {/* Top Header Bar: Back Button & Advisor Profile Link */}
+        <div className="flex items-center justify-between">
           <Link
             to={isStorePage ? "/store" : "/campaign"}
-            className="flex items-center justify-center h-11 w-11 rounded-full bg-white text-slate-700 shadow-xs hover:bg-slate-50 hover:shadow-sm transition border border-slate-200/70 cursor-pointer"
+            className="inline-flex items-center gap-2 text-xs font-bold font-heading text-[#7A7286] hover:text-[#FF5A36] transition"
             title={isStorePage ? "Back to All Stores" : "Back to All Campaigns"}
           >
-            <FiArrowLeft className="h-5 w-5 stroke-[2.2]" />
+            <FiArrowLeft className="h-4 w-4" />
+            <span>{isStorePage ? "Back to All Stores" : "Back to All Campaigns"}</span>
           </Link>
           {isStorePage && requirement?.postedByAdvisorUsername ? (
             <Link
               to={`/${requirement.postedByAdvisorUsername}`}
-              className="flex items-center justify-center h-11 w-11 rounded-full bg-white text-slate-700 shadow-xs hover:bg-slate-50 hover:shadow-sm transition border border-slate-200/70 cursor-pointer"
+              className="inline-flex items-center gap-1.5 rounded-full bg-white border border-[#E7E1D6] px-3 py-1.5 text-xs font-bold font-heading text-[#201A2B] hover:border-[#6C4BFF] hover:text-[#6C4BFF] shadow-2xs transition"
               title="Advisor Profile"
             >
-              <FiUser className="h-5 w-5 stroke-[2.2]" />
+              <FiUser className="h-3.5 w-3.5" />
+              <span>@{requirement.postedByAdvisorUsername}</span>
             </Link>
           ) : (
-            <div className="h-11 w-11" />
+            <div className="h-8" />
           )}
         </div>
 
         {isLoading ? (
-          <div className="rounded-3xl border border-slate-200 bg-white p-10 text-center text-slate-600 shadow-xs">
-            <div className="mx-auto h-9 w-9 animate-spin rounded-full border-4 border-blue-200 border-t-blue-700" />
-            <p className="mt-4 text-sm font-semibold text-slate-700">
+          <div className="rounded-[28px] border border-[#E7E1D6] bg-white p-12 text-center shadow-sm">
+            <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-[#F1ECFF] border-t-[#6C4BFF]" />
+            <p className="mt-4 text-xs font-bold font-heading uppercase tracking-wider text-[#7A7286]">
               {isStorePage ? "Loading store details..." : "Loading campaign details..."}
             </p>
           </div>
         ) : null}
 
         {error ? (
-          <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-8 sm:p-10 text-center shadow-xl shadow-slate-200/50">
+          <div className="relative overflow-hidden rounded-[28px] border border-[#E7E1D6] bg-white p-8 sm:p-10 text-center shadow-sm">
             {/* Decorative background glow */}
             <div
-              className={`pointer-events-none absolute -top-16 left-1/2 -translate-x-1/2 h-36 w-36 rounded-full blur-3xl opacity-30 ${
-                isStorePage ? "bg-amber-400" : "bg-blue-400"
+              className={`pointer-events-none absolute -top-16 left-1/2 -translate-x-1/2 h-36 w-36 rounded-full blur-3xl opacity-20 ${
+                isStorePage ? "bg-[#FF5A36]" : "bg-[#6C4BFF]"
               }`}
             />
 
@@ -231,8 +238,8 @@ export function ResourceDetailPage() {
               <div
                 className={`flex h-20 w-20 items-center justify-center rounded-3xl ${
                   isStorePage
-                    ? "bg-amber-50 border border-amber-200/70 text-amber-600"
-                    : "bg-blue-50 border border-blue-200/70 text-blue-600"
+                    ? "bg-[#FFF0ED] border border-[#FFD0C6] text-[#FF5A36]"
+                    : "bg-[#F1ECFF] border border-[#D9CEFF] text-[#6C4BFF]"
                 } shadow-inner`}
               >
                 {isStorePage ? (
@@ -247,22 +254,22 @@ export function ResourceDetailPage() {
             </div>
 
             {/* Status Pill */}
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600 mb-3">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-[#FAF8F5] border border-[#E7E1D6] px-3 py-1 text-xs font-bold font-heading text-[#7A7286] mb-3">
               <span className="h-1.5 w-1.5 rounded-full bg-rose-500 animate-pulse" />
               <span>{isStorePage ? "Store Not Found" : "Campaign Not Found"}</span>
             </div>
 
             {/* Heading */}
-            <h2 className="text-2xl font-black text-slate-900 tracking-tight">
+            <h2 className="font-heading text-2xl font-extrabold text-[#201A2B] tracking-tight">
               {isStorePage ? "Store Unavailable" : "Campaign Unavailable"}
             </h2>
 
             {/* Subtext */}
-            <p className="mt-2 text-sm text-slate-600 leading-relaxed max-w-xs mx-auto">
+            <p className="mt-2 text-sm text-[#7A7286] leading-relaxed max-w-xs mx-auto">
               {identifier ? (
                 <>
                   The {isStorePage ? "store" : "campaign"}{" "}
-                  <span className="font-semibold text-slate-800 font-mono">
+                  <span className="font-semibold text-[#201A2B] font-mono-code">
                     @{identifier}
                   </span>{" "}
                   does not exist or is no longer active.
@@ -279,7 +286,7 @@ export function ResourceDetailPage() {
             <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
               <Link
                 to={isStorePage ? "/store" : "/campaign"}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-700 hover:bg-blue-800 px-5 py-3 text-sm font-bold text-white shadow-md transition active:scale-95"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full btn-coral px-6 py-3 text-xs font-bold shadow-xs transition active:scale-95 cursor-pointer"
               >
                 {isStorePage ? (
                   <FiShoppingBag className="h-4 w-4" />
@@ -291,7 +298,7 @@ export function ResourceDetailPage() {
 
               <Link
                 to="/"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 px-5 py-3 text-sm font-bold text-slate-700 transition"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full border border-[#E7E1D6] bg-white hover:bg-[#FAF8F5] px-6 py-3 text-xs font-bold font-heading text-[#201A2B] transition"
               >
                 <FiHome className="h-4 w-4" />
                 <span>Home</span>
@@ -301,11 +308,11 @@ export function ResourceDetailPage() {
         ) : null}
 
         {!isLoading && !error && requirement ? (
-          <main className="space-y-6">
+          <main className="rounded-[28px] border border-[#E7E1D6] bg-white p-6 sm:p-8 shadow-sm space-y-6">
             {/* Profile Avatar, Title & Subtitle Section */}
             <div className="text-center space-y-3 pt-1">
-              {/* Circular Avatar / Logo with Gold Ring */}
-              <div className="relative mx-auto h-28 w-28 sm:h-32 sm:w-32 rounded-full p-1.5 bg-[#FFCC00] shadow-md flex items-center justify-center">
+              {/* Circular Avatar / Logo with Brand Gradient Ring */}
+              <div className="relative mx-auto h-24 w-24 sm:h-28 sm:w-28 rounded-full p-1 bg-linear-to-tr from-[#FF5A36] via-[#FFB800] to-[#6C4BFF] shadow-sm flex items-center justify-center">
                 {isStorePage && requirement.instagramProfilePictureUrl ? (
                   <img
                     src={getProxiedImageUrl(requirement.instagramProfilePictureUrl)}
@@ -316,18 +323,18 @@ export function ResourceDetailPage() {
                     }}
                   />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center rounded-full bg-slate-900 text-3xl font-black text-white border-2 border-white uppercase tracking-wider">
+                  <div className="flex h-full w-full items-center justify-center rounded-full bg-[#201A2B] text-2xl sm:text-3xl font-heading font-extrabold text-white border-2 border-white uppercase tracking-wider">
                     {(requirement.companyName || "C").charAt(0).toUpperCase()}
                   </div>
                 )}
               </div>
 
-              {/* Main Title & Subtitle */}
-              <div className="space-y-1">
-                <h1 className="text-2xl sm:text-[28px] font-black text-slate-900 tracking-tight">
+              {/* Main Title, Subtitle & Top Round Badges */}
+              <div className="space-y-1.5">
+                <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#201A2B] tracking-tight">
                   {requirement.companyName}
                 </h1>
-                <p className="text-sm font-medium text-slate-600">
+                <p className="font-mono-code text-xs sm:text-sm font-semibold text-[#7A7286]">
                   {requirement.storeUsername
                     ? `@${requirement.storeUsername}`
                     : isStorePage
@@ -335,26 +342,26 @@ export function ResourceDetailPage() {
                       : "Campaign Requirement"}
                 </p>
 
-                {/* Badges: Budget, Reward, Category, Goal (Only for Campaigns) */}
+                {/* Small Round Badges at the top (Kept intact) */}
                 {!isStorePage && requirement.type !== "store" ? (
-                  <div className="flex flex-wrap items-center justify-center gap-2 pt-1.5">
+                  <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
                     {requirement.budget ? (
-                      <span className="inline-flex items-center rounded-full bg-emerald-50 border border-emerald-200 px-3 py-1 text-xs font-bold text-emerald-700">
+                      <span className="badge-pill bg-[#E8F8F0] border border-[#B3E6D0] text-[#1F9D6B] font-mono-code text-[11px] font-bold">
                         💰 Budget: {requirement.budget}
                       </span>
                     ) : null}
                     {requirement.rewardType ? (
-                      <span className="inline-flex items-center rounded-full bg-blue-50 border border-blue-200 px-3 py-1 text-xs font-bold text-blue-700">
+                      <span className="badge-pill bg-[#F1ECFF] border border-[#D9CEFF] text-[#6C4BFF] font-heading text-[11px] font-bold">
                         🎁 Reward: {requirement.rewardType}
                       </span>
                     ) : null}
                     {requirement.category ? (
-                      <span className="inline-flex items-center rounded-full bg-indigo-50 border border-indigo-200 px-3 py-1 text-xs font-bold text-indigo-700">
+                      <span className="badge-pill bg-[#FFF0ED] border border-[#FFD0C6] text-[#FF5A36] font-heading text-[11px] font-bold">
                         🏷️ {requirement.category}
                       </span>
                     ) : null}
                     {requirement.campaignGoal ? (
-                      <span className="inline-flex items-center rounded-full bg-purple-50 border border-purple-200 px-3 py-1 text-xs font-bold text-purple-700">
+                      <span className="badge-pill bg-[#F8F5FE] border border-[#E4D7FC] text-[#8B5CF6] font-heading text-[11px] font-bold">
                         🎯 Goal: {requirement.campaignGoal}
                       </span>
                     ) : null}
@@ -368,7 +375,7 @@ export function ResourceDetailPage() {
               (requirement.socialLinks.youtube?.trim() ||
                 requirement.socialLinks.telegram?.trim() ||
                 requirement.socialLinks.instagram?.trim()) ? (
-                <div className="flex items-center justify-center gap-3.5 pt-2">
+                <div className="flex items-center justify-center gap-3 pt-2">
                   {requirement.socialLinks.youtube?.trim() ? (
                     <a
                       href={`https://youtube.com/${
@@ -378,7 +385,7 @@ export function ResourceDetailPage() {
                       }`}
                       target="_blank"
                       rel="noreferrer"
-                      className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200/80 bg-white text-2xl text-[#FF0000] shadow-xs transition hover:scale-105 hover:shadow-md cursor-pointer"
+                      className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#E7E1D6] bg-white text-xl text-[#FF0000] shadow-2xs transition hover:scale-105 hover:border-[#FF0000] cursor-pointer"
                       title="YouTube Channel"
                     >
                       <FaYoutube />
@@ -392,7 +399,7 @@ export function ResourceDetailPage() {
                         .replace(/^@/, "")}`}
                       target="_blank"
                       rel="noreferrer"
-                      className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200/80 bg-white text-2xl text-[#229ED9] shadow-xs transition hover:scale-105 hover:shadow-md cursor-pointer"
+                      className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#E7E1D6] bg-white text-xl text-[#229ED9] shadow-2xs transition hover:scale-105 hover:border-[#229ED9] cursor-pointer"
                       title="Telegram Channel"
                     >
                       <FaTelegram />
@@ -406,7 +413,7 @@ export function ResourceDetailPage() {
                         .replace(/^@/, "")}`}
                       target="_blank"
                       rel="noreferrer"
-                      className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200/80 bg-white text-2xl text-[#E4405F] shadow-xs transition hover:scale-105 hover:shadow-md cursor-pointer"
+                      className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#E7E1D6] bg-white text-xl text-[#E4405F] shadow-2xs transition hover:scale-105 hover:border-[#E4405F] cursor-pointer"
                       title="Instagram Profile"
                     >
                       <FaInstagram />
@@ -417,203 +424,361 @@ export function ResourceDetailPage() {
             </div>
 
             {/* Action Pills Stack */}
-            <div className="space-y-3.5 pt-1">
-              {/* Pill 1: Official Link / Target URL */}
-              {isAuthenticated ? (
-                (requirement.url || (requirement as any).personalWebsite || (requirement as any).website) ? (
-                  <button
-                    type="button"
-                    disabled={tracking}
-                    onClick={() => void onOpenResourceLink()}
-                    className="group w-full rounded-full bg-[#ECEEF2] hover:bg-[#E2E6EC] border border-slate-200/80 p-2 sm:p-2.5 pr-5 sm:pr-6 flex items-center justify-between shadow-2xs transition-all duration-150 active:scale-[0.99] cursor-pointer"
-                  >
-                    <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-full bg-[#0066FF] text-white shadow-xs">
-                      <FiExternalLink className="h-5 w-5 stroke-[2.2]" />
-                    </div>
-                    <span className="flex-1 text-center font-bold text-slate-900 text-sm sm:text-base px-3 truncate">
-                      {tracking
-                        ? "Opening Link..."
-                        : isStorePage
-                          ? "Access Official Store Link"
-                          : "Website/Target URL"}
-                    </span>
-                    <FiExternalLink className="h-5 w-5 text-slate-600 group-hover:text-blue-700 transition" />
-                  </button>
-                ) : null
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setShowAdvisorAuthModal(true)}
-                  className="group w-full rounded-full bg-[#ECEEF2] hover:bg-[#E2E6EC] border border-slate-200/80 p-2 sm:p-2.5 pr-5 sm:pr-6 flex items-center justify-between shadow-2xs transition-all duration-150 active:scale-[0.99] cursor-pointer"
-                >
-                  <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-full bg-[#0066FF] text-white shadow-xs">
-                    <FiLock className="h-5 w-5 stroke-[2.2]" />
-                  </div>
-                  <span className="flex-1 text-center font-bold text-slate-900 text-sm sm:text-base px-3 truncate">
-                    {isStorePage ? "Log in to Access Official Link" : "Website/Target URL"}
-                  </span>
-                  <FiLock className="h-5 w-5 text-slate-500 group-hover:text-blue-700 transition" />
-                </button>
-              )}
-
-              {/* Store Social Media Pills (Only for Store pages) */}
-              {isStorePage && requirement.socialLinks?.instagram?.trim() ? (
-                <a
-                  href={`https://instagram.com/${requirement.socialLinks.instagram
-                    .trim()
-                    .replace(/^@/, "")}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="group w-full rounded-full bg-[#ECEEF2] hover:bg-[#E2E6EC] border border-slate-200/80 p-2 sm:p-2.5 pr-5 sm:pr-6 flex items-center justify-between shadow-2xs transition-all duration-150 active:scale-[0.99] cursor-pointer"
-                >
-                  <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-full bg-linear-to-tr from-[#FD1D1D] via-[#E1306C] to-[#833AB4] text-white shadow-xs">
-                    <FaInstagram className="h-5 w-5 text-white" />
-                  </div>
-                  <span className="flex-1 text-center font-bold text-slate-900 text-sm sm:text-base px-3 truncate">
-                    View Instagram Profile
-                  </span>
-                  <FaInstagram className="h-5 w-5 text-[#E4405F] group-hover:scale-110 transition" />
-                </a>
-              ) : null}
-
-              {isStorePage && requirement.socialLinks?.telegram?.trim() ? (
-                <a
-                  href={`https://t.me/${requirement.socialLinks.telegram
-                    .trim()
-                    .replace(/^@/, "")}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="group w-full rounded-full bg-[#ECEEF2] hover:bg-[#E2E6EC] border border-slate-200/80 p-2 sm:p-2.5 pr-5 sm:pr-6 flex items-center justify-between shadow-2xs transition-all duration-150 active:scale-[0.99] cursor-pointer"
-                >
-                  <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-full bg-[#0088CC] text-white shadow-xs">
-                    <FaTelegram className="h-5 w-5 text-white" />
-                  </div>
-                  <span className="flex-1 text-center font-bold text-slate-900 text-sm sm:text-base px-3 truncate">
-                    Join Telegram Group
-                  </span>
-                  <FaTelegram className="h-5 w-5 text-[#0088CC] group-hover:scale-110 transition" />
-                </a>
-              ) : null}
-
-              {isStorePage && requirement.socialLinks?.youtube?.trim() ? (
-                <a
-                  href={`https://youtube.com/${
-                    requirement.socialLinks.youtube.trim().startsWith("@")
-                      ? requirement.socialLinks.youtube.trim()
-                      : `@${requirement.socialLinks.youtube.trim()}`
-                  }`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="group w-full rounded-full bg-[#ECEEF2] hover:bg-[#E2E6EC] border border-slate-200/80 p-2 sm:p-2.5 pr-5 sm:pr-6 flex items-center justify-between shadow-2xs transition-all duration-150 active:scale-[0.99] cursor-pointer"
-                >
-                  <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-full bg-[#FF0000] text-white shadow-xs">
-                    <FaYoutube className="h-5 w-5 text-white" />
-                  </div>
-                  <span className="flex-1 text-center font-bold text-slate-900 text-sm sm:text-base px-3 truncate">
-                    View YouTube Channel
-                  </span>
-                  <FaYoutube className="h-5 w-5 text-[#FF0000] group-hover:scale-110 transition" />
-                </a>
-              ) : null}
-
-              {/* Detailed Requirements / What should creators do? (Accordion) */}
-              {requirement.detailedRequirements ? (
-                <div className="overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-2xs">
-                  <button
-                    type="button"
-                    onClick={() => setIsDetailsOpen((prev) => !prev)}
-                    className="w-full rounded-full bg-[#ECEEF2] hover:bg-[#E2E6EC] p-2 sm:p-2.5 pr-5 sm:pr-6 flex items-center justify-between transition-all duration-150 cursor-pointer"
-                  >
-                    <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-full bg-[#1E293B] text-white shadow-xs">
-                      <FiFileText className="h-5 w-5 stroke-[2.2]" />
-                    </div>
-                    <span className="flex-1 text-center font-bold text-slate-900 text-sm sm:text-base px-3 truncate">
-                      {isStorePage ? "Detailed Requirements" : "What should creators do?"}
-                    </span>
-                    <div className="flex h-6 w-6 items-center justify-center text-slate-600 transition">
-                      <FiChevronDown
-                        className={`h-5 w-5 transition-transform duration-200 ${
-                          isDetailsOpen ? "rotate-180" : ""
-                        }`}
-                      />
-                    </div>
-                  </button>
-
-                  {/* Accordion Content */}
-                  {isDetailsOpen ? (
-                    <div className="p-5 border-t border-slate-100 bg-white text-left animate-in fade-in slide-in-from-top-2 duration-150">
-                      <div className="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-                        <FiFileText className="h-4 w-4 text-blue-600" />
-                        <span>
-                          {isStorePage ? "Store Overview & Details" : "What should creators do?"}
+            <div className="space-y-3 pt-1">
+              {isStorePage ? (
+                /* STORE PAGE STACK */
+                <>
+                  {/* Store Official Link */}
+                  {isAuthenticated ? (
+                    (requirement.url || (requirement as any).personalWebsite || (requirement as any).website) ? (
+                      <button
+                        type="button"
+                        disabled={tracking}
+                        onClick={() => void onOpenResourceLink()}
+                        className="group w-full rounded-full bg-[#FAF8F5] hover:bg-[#F3EFEA] border border-[#E7E1D6] p-2 sm:p-2.5 pr-5 flex items-center justify-between shadow-2xs transition-all duration-150 active:scale-[0.99] cursor-pointer"
+                      >
+                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#201A2B] text-white shadow-xs">
+                          <FiExternalLink className="h-5 w-5 stroke-[2.2]" />
+                        </div>
+                        <span className="flex-1 text-center font-heading font-bold text-[#201A2B] text-sm sm:text-base px-3 truncate">
+                          {tracking ? "Opening Link..." : "Access Official Store Link"}
                         </span>
+                        <FiExternalLink className="h-5 w-5 text-[#7A7286] group-hover:text-[#6C4BFF] transition" />
+                      </button>
+                    ) : null
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setShowAdvisorAuthModal(true)}
+                      className="group w-full rounded-full bg-[#FAF8F5] hover:bg-[#F3EFEA] border border-[#E7E1D6] p-2 sm:p-2.5 pr-5 flex items-center justify-between shadow-2xs transition-all duration-150 active:scale-[0.99] cursor-pointer"
+                    >
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#201A2B] text-white shadow-xs">
+                        <FiLock className="h-5 w-5 stroke-[2.2]" />
                       </div>
-                      <p className="text-sm font-medium text-slate-700 leading-relaxed whitespace-pre-wrap">
-                        {requirement.detailedRequirements}
-                      </p>
+                      <span className="flex-1 text-center font-heading font-bold text-[#201A2B] text-sm sm:text-base px-3 truncate">
+                        Log in to Access Official Link
+                      </span>
+                      <FiLock className="h-5 w-5 text-[#7A7286] group-hover:text-[#6C4BFF] transition" />
+                    </button>
+                  )}
+
+                  {/* Store Social Media Pills */}
+                  {requirement.socialLinks?.instagram?.trim() ? (
+                    <a
+                      href={`https://instagram.com/${requirement.socialLinks.instagram
+                        .trim()
+                        .replace(/^@/, "")}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="group w-full rounded-full bg-[#FAF8F5] hover:bg-[#F3EFEA] border border-[#E7E1D6] p-2 sm:p-2.5 pr-5 flex items-center justify-between shadow-2xs transition-all duration-150 active:scale-[0.99] cursor-pointer"
+                    >
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-linear-to-tr from-[#FD1D1D] via-[#E1306C] to-[#833AB4] text-white shadow-xs">
+                        <FaInstagram className="h-5 w-5 text-white" />
+                      </div>
+                      <span className="flex-1 text-center font-heading font-bold text-[#201A2B] text-sm sm:text-base px-3 truncate">
+                        View Instagram Profile
+                      </span>
+                      <FaInstagram className="h-5 w-5 text-[#E4405F] group-hover:scale-110 transition" />
+                    </a>
+                  ) : null}
+
+                  {requirement.socialLinks?.telegram?.trim() ? (
+                    <a
+                      href={`https://t.me/${requirement.socialLinks.telegram
+                        .trim()
+                        .replace(/^@/, "")}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="group w-full rounded-full bg-[#FAF8F5] hover:bg-[#F3EFEA] border border-[#E7E1D6] p-2 sm:p-2.5 pr-5 flex items-center justify-between shadow-2xs transition-all duration-150 active:scale-[0.99] cursor-pointer"
+                    >
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#0088CC] text-white shadow-xs">
+                        <FaTelegram className="h-5 w-5 text-white" />
+                      </div>
+                      <span className="flex-1 text-center font-heading font-bold text-[#201A2B] text-sm sm:text-base px-3 truncate">
+                        Join Telegram Group
+                      </span>
+                      <FaTelegram className="h-5 w-5 text-[#0088CC] group-hover:scale-110 transition" />
+                    </a>
+                  ) : null}
+
+                  {requirement.socialLinks?.youtube?.trim() ? (
+                    <a
+                      href={`https://youtube.com/${
+                        requirement.socialLinks.youtube.trim().startsWith("@")
+                          ? requirement.socialLinks.youtube.trim()
+                          : `@${requirement.socialLinks.youtube.trim()}`
+                      }`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="group w-full rounded-full bg-[#FAF8F5] hover:bg-[#F3EFEA] border border-[#E7E1D6] p-2 sm:p-2.5 pr-5 flex items-center justify-between shadow-2xs transition-all duration-150 active:scale-[0.99] cursor-pointer"
+                    >
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#FF0000] text-white shadow-xs">
+                        <FaYoutube className="h-5 w-5 text-white" />
+                      </div>
+                      <span className="flex-1 text-center font-heading font-bold text-[#201A2B] text-sm sm:text-base px-3 truncate">
+                        View YouTube Channel
+                      </span>
+                      <FaYoutube className="h-5 w-5 text-[#FF0000] group-hover:scale-110 transition" />
+                    </a>
+                  ) : null}
+
+                  {/* Detailed Requirements (Store) */}
+                  {requirement.detailedRequirements ? (
+                    <div className="overflow-hidden rounded-[24px] border border-[#E7E1D6] bg-white shadow-2xs">
+                      <button
+                        type="button"
+                        onClick={() => setIsDetailsOpen((prev) => !prev)}
+                        className="w-full rounded-full bg-[#FAF8F5] hover:bg-[#F3EFEA] p-2 sm:p-2.5 pr-5 flex items-center justify-between transition-all duration-150 cursor-pointer"
+                      >
+                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#6C4BFF] text-white shadow-xs">
+                          <FiFileText className="h-5 w-5 stroke-[2.2]" />
+                        </div>
+                        <span className="flex-1 text-center font-heading font-bold text-[#201A2B] text-sm sm:text-base px-3 truncate">
+                          Store Overview & Details
+                        </span>
+                        <div className="flex h-6 w-6 items-center justify-center text-[#7A7286] transition">
+                          <FiChevronDown
+                            className={`h-5 w-5 transition-transform duration-200 ${
+                              isDetailsOpen ? "rotate-180" : ""
+                            }`}
+                          />
+                        </div>
+                      </button>
+
+                      {isDetailsOpen ? (
+                        <div className="p-5 border-t border-[#E7E1D6] bg-white text-left animate-in fade-in slide-in-from-top-2 duration-150">
+                          <div className="flex items-center gap-2 text-xs font-bold font-heading text-[#7A7286] uppercase tracking-wider mb-2">
+                            <FiFileText className="h-4 w-4 text-[#6C4BFF]" />
+                            <span>Store Overview & Details</span>
+                          </div>
+                          <p className="text-sm font-medium text-[#201A2B] leading-relaxed whitespace-pre-wrap">
+                            {requirement.detailedRequirements}
+                          </p>
+                        </div>
+                      ) : null}
                     </div>
                   ) : null}
-                </div>
-              ) : null}
 
-              {/* Advisor Attribution Pill (Only for Store pages) */}
-              {isStorePage && (requirement.postedByAdvisorUsername || requirement.postedByAdvisorName) ? (
-                <Link
-                  to={
-                    requirement.postedByAdvisorUsername
-                      ? `/${requirement.postedByAdvisorUsername}`
-                      : "#"
-                  }
-                  className="group w-full rounded-full bg-[#ECEEF2] hover:bg-[#E2E6EC] border border-slate-200/80 p-2 sm:p-2.5 pr-5 sm:pr-6 flex items-center justify-between shadow-2xs transition-all duration-150 active:scale-[0.99] cursor-pointer"
-                >
-                  <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-full bg-[#F59E0B] text-white font-extrabold text-base shadow-xs">
-                    {(requirement.postedByAdvisorName || requirement.postedByAdvisorUsername || "A")
-                      .charAt(0)
-                      .toUpperCase()}
-                  </div>
-                  <span className="flex-1 text-center font-bold text-slate-900 text-sm sm:text-base px-3 truncate">
-                    Posted by @{requirement.postedByAdvisorUsername || requirement.postedByAdvisorName}
-                  </span>
-                  <FiUser className="h-5 w-5 text-slate-600 group-hover:text-amber-600 transition" />
-                </Link>
-              ) : null}
+                  {/* Advisor Attribution Pill */}
+                  {(requirement.postedByAdvisorUsername || requirement.postedByAdvisorName) ? (
+                    <Link
+                      to={
+                        requirement.postedByAdvisorUsername
+                          ? `/${requirement.postedByAdvisorUsername}`
+                          : "#"
+                      }
+                      className="group w-full rounded-full bg-[#FAF8F5] hover:bg-[#F3EFEA] border border-[#E7E1D6] p-2 sm:p-2.5 pr-5 flex items-center justify-between shadow-2xs transition-all duration-150 active:scale-[0.99] cursor-pointer"
+                    >
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#FF5A36] text-white font-heading font-extrabold text-base shadow-xs">
+                        {(requirement.postedByAdvisorName || requirement.postedByAdvisorUsername || "A")
+                          .charAt(0)
+                          .toUpperCase()}
+                      </div>
+                      <span className="flex-1 text-center font-heading font-bold text-[#201A2B] text-sm sm:text-base px-3 truncate">
+                        Posted by @{requirement.postedByAdvisorUsername || requirement.postedByAdvisorName}
+                      </span>
+                      <FiUser className="h-5 w-5 text-[#7A7286] group-hover:text-[#FF5A36] transition" />
+                    </Link>
+                  ) : null}
 
-              {/* Contact Business Email (if email exists) */}
-              {requirement.businessEmail ? (
-                <a
-                  href={`mailto:${requirement.businessEmail}`}
-                  className="group w-full rounded-full bg-[#ECEEF2] hover:bg-[#E2E6EC] border border-slate-200/80 p-2 sm:p-2.5 pr-5 sm:pr-6 flex items-center justify-between shadow-2xs transition-all duration-150 active:scale-[0.99]"
-                >
-                  <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-white shadow-xs">
-                    <FiMail className="h-5 w-5 stroke-[2.2]" />
-                  </div>
-                  <span className="flex-1 text-center font-bold text-slate-900 text-sm sm:text-base px-3 truncate">
-                    Contact Email ({requirement.businessEmail})
-                  </span>
-                  <FiMail className="h-5 w-5 text-emerald-600 group-hover:scale-110 transition" />
-                </a>
-              ) : null}
+                  {/* Contact Business Email */}
+                  {requirement.businessEmail ? (
+                    <a
+                      href={`mailto:${requirement.businessEmail}`}
+                      className="group w-full rounded-full bg-[#FAF8F5] hover:bg-[#F3EFEA] border border-[#E7E1D6] p-2 sm:p-2.5 pr-5 flex items-center justify-between shadow-2xs transition-all duration-150 active:scale-[0.99]"
+                    >
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#1F9D6B] text-white shadow-xs">
+                        <FiMail className="h-5 w-5 stroke-[2.2]" />
+                      </div>
+                      <span className="flex-1 text-center font-heading font-bold text-[#201A2B] text-sm sm:text-base px-3 truncate">
+                        Contact Email ({requirement.businessEmail})
+                      </span>
+                      <FiMail className="h-5 w-5 text-[#1F9D6B] group-hover:scale-110 transition" />
+                    </a>
+                  ) : null}
+                </>
+              ) : (
+                /* CAMPAIGN PAGE STACK (Exact Sequence Requested) */
+                <>
+                  {/* 1. Show Budget block */}
+                  {requirement.budget ? (
+                    <div className="w-full rounded-full bg-[#FAF8F5] hover:bg-[#F3EFEA] border border-[#E7E1D6] p-2 sm:p-2.5 pr-5 flex items-center justify-between shadow-2xs transition">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#1F9D6B] text-white shadow-xs">
+                        <FiDollarSign className="h-5 w-5 stroke-[2.2]" />
+                      </div>
+                      <div className="flex-1 text-center px-3 truncate">
+                        <span className="font-heading text-xs font-bold text-[#7A7286] uppercase tracking-wider block sm:inline sm:mr-2">
+                          Budget:
+                        </span>
+                        <span className="font-heading font-extrabold text-[#201A2B] text-sm sm:text-base">
+                          {requirement.budget}
+                        </span>
+                      </div>
+                      <div className="h-5 w-5 shrink-0 opacity-0" />
+                    </div>
+                  ) : null}
 
-              {/* Bottom Pill: JOIN (For Campaigns) */}
-              {!isStorePage ? (
-                <button
-                  type="button"
-                  onClick={handleApplyByMessageClick}
-                  className="group w-full rounded-full bg-slate-900 hover:bg-slate-800 text-white p-2 sm:p-2.5 pr-5 sm:pr-6 flex items-center justify-between shadow-md transition-all duration-150 active:scale-[0.99] cursor-pointer"
-                >
-                  <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-full bg-white/20 text-white shadow-xs">
-                    <FiMessageSquare className="h-5 w-5 stroke-[2.2]" />
-                  </div>
-                  <span className="flex-1 text-center font-bold text-white text-sm sm:text-base px-3 truncate">
-                    JOIN
-                  </span>
-                  <FiMessageSquare className="h-5 w-5 text-white/80 group-hover:text-white transition" />
-                </button>
-              ) : null}
+                  {/* 2. Show Reward type block */}
+                  {requirement.rewardType ? (
+                    <div className="w-full rounded-full bg-[#FAF8F5] hover:bg-[#F3EFEA] border border-[#E7E1D6] p-2 sm:p-2.5 pr-5 flex items-center justify-between shadow-2xs transition">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#6C4BFF] text-white shadow-xs">
+                        <FiGift className="h-5 w-5 stroke-[2.2]" />
+                      </div>
+                      <div className="flex-1 text-center px-3 truncate">
+                        <span className="font-heading text-xs font-bold text-[#7A7286] uppercase tracking-wider block sm:inline sm:mr-2">
+                          Reward:
+                        </span>
+                        <span className="font-heading font-extrabold text-[#201A2B] text-sm sm:text-base">
+                          {requirement.rewardType}
+                        </span>
+                      </div>
+                      <div className="h-5 w-5 shrink-0 opacity-0" />
+                    </div>
+                  ) : null}
+
+                  {/* 3. Show Category block */}
+                  {requirement.category ? (
+                    <div className="w-full rounded-full bg-[#FAF8F5] hover:bg-[#F3EFEA] border border-[#E7E1D6] p-2 sm:p-2.5 pr-5 flex items-center justify-between shadow-2xs transition">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#FF5A36] text-white shadow-xs">
+                        <FiTag className="h-5 w-5 stroke-[2.2]" />
+                      </div>
+                      <div className="flex-1 text-center px-3 truncate">
+                        <span className="font-heading text-xs font-bold text-[#7A7286] uppercase tracking-wider block sm:inline sm:mr-2">
+                          Category:
+                        </span>
+                        <span className="font-heading font-extrabold text-[#201A2B] text-sm sm:text-base">
+                          {requirement.category}
+                        </span>
+                      </div>
+                      <div className="h-5 w-5 shrink-0 opacity-0" />
+                    </div>
+                  ) : null}
+
+                  {/* 4. Show Campaign Goal block */}
+                  {requirement.campaignGoal ? (
+                    <div className="w-full rounded-full bg-[#FAF8F5] hover:bg-[#F3EFEA] border border-[#E7E1D6] p-2 sm:p-2.5 pr-5 flex items-center justify-between shadow-2xs transition">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#8B5CF6] text-white shadow-xs">
+                        <FiTarget className="h-5 w-5 stroke-[2.2]" />
+                      </div>
+                      <div className="flex-1 text-center px-3 truncate">
+                        <span className="font-heading text-xs font-bold text-[#7A7286] uppercase tracking-wider block sm:inline sm:mr-2">
+                          Campaign Goal:
+                        </span>
+                        <span className="font-heading font-extrabold text-[#201A2B] text-sm sm:text-base">
+                          {requirement.campaignGoal}
+                        </span>
+                      </div>
+                      <div className="h-5 w-5 shrink-0 opacity-0" />
+                    </div>
+                  ) : null}
+
+                  {/* 5. Show Website */}
+                  {isAuthenticated ? (
+                    (requirement.url || (requirement as any).personalWebsite || (requirement as any).website) ? (
+                      <button
+                        type="button"
+                        disabled={tracking}
+                        onClick={() => void onOpenResourceLink()}
+                        className="group w-full rounded-full bg-[#FAF8F5] hover:bg-[#F3EFEA] border border-[#E7E1D6] p-2 sm:p-2.5 pr-5 flex items-center justify-between shadow-2xs transition-all duration-150 active:scale-[0.99] cursor-pointer"
+                      >
+                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#201A2B] text-white shadow-xs">
+                          <FiGlobe className="h-5 w-5 stroke-[2.2]" />
+                        </div>
+                        <span className="flex-1 text-center font-heading font-bold text-[#201A2B] text-sm sm:text-base px-3 truncate">
+                          {tracking ? "Opening Website..." : "Website"}
+                        </span>
+                        <FiExternalLink className="h-5 w-5 text-[#7A7286] group-hover:text-[#6C4BFF] transition" />
+                      </button>
+                    ) : null
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setShowAdvisorAuthModal(true)}
+                      className="group w-full rounded-full bg-[#FAF8F5] hover:bg-[#F3EFEA] border border-[#E7E1D6] p-2 sm:p-2.5 pr-5 flex items-center justify-between shadow-2xs transition-all duration-150 active:scale-[0.99] cursor-pointer"
+                    >
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#201A2B] text-white shadow-xs">
+                        <FiLock className="h-5 w-5 stroke-[2.2]" />
+                      </div>
+                      <span className="flex-1 text-center font-heading font-bold text-[#201A2B] text-sm sm:text-base px-3 truncate">
+                        Log in to View Website
+                      </span>
+                      <FiLock className="h-5 w-5 text-[#7A7286] group-hover:text-[#6C4BFF] transition" />
+                    </button>
+                  )}
+
+                  {/* 6. Show What creators do (Detailed Requirements Accordion) */}
+                  {requirement.detailedRequirements ? (
+                    <div className="overflow-hidden rounded-[24px] border border-[#E7E1D6] bg-white shadow-2xs">
+                      <button
+                        type="button"
+                        onClick={() => setIsDetailsOpen((prev) => !prev)}
+                        className="w-full rounded-full bg-[#FAF8F5] hover:bg-[#F3EFEA] p-2 sm:p-2.5 pr-5 flex items-center justify-between transition-all duration-150 cursor-pointer"
+                      >
+                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#6C4BFF] text-white shadow-xs">
+                          <FiFileText className="h-5 w-5 stroke-[2.2]" />
+                        </div>
+                        <span className="flex-1 text-center font-heading font-bold text-[#201A2B] text-sm sm:text-base px-3 truncate">
+                          What should creators do?
+                        </span>
+                        <div className="flex h-6 w-6 items-center justify-center text-[#7A7286] transition">
+                          <FiChevronDown
+                            className={`h-5 w-5 transition-transform duration-200 ${
+                              isDetailsOpen ? "rotate-180" : ""
+                            }`}
+                          />
+                        </div>
+                      </button>
+
+                      {isDetailsOpen ? (
+                        <div className="p-5 border-t border-[#E7E1D6] bg-white text-left animate-in fade-in slide-in-from-top-2 duration-150">
+                          <div className="flex items-center gap-2 text-xs font-bold font-heading text-[#7A7286] uppercase tracking-wider mb-2">
+                            <FiFileText className="h-4 w-4 text-[#6C4BFF]" />
+                            <span>What should creators do?</span>
+                          </div>
+                          <p className="text-sm font-medium text-[#201A2B] leading-relaxed whitespace-pre-wrap">
+                            {requirement.detailedRequirements}
+                          </p>
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : null}
+
+                  {/* 7. Show Contact or Business Email */}
+                  {requirement.businessEmail ? (
+                    <a
+                      href={`mailto:${requirement.businessEmail}`}
+                      className="group w-full rounded-full bg-[#FAF8F5] hover:bg-[#F3EFEA] border border-[#E7E1D6] p-2 sm:p-2.5 pr-5 flex items-center justify-between shadow-2xs transition-all duration-150 active:scale-[0.99]"
+                    >
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#1F9D6B] text-white shadow-xs">
+                        <FiMail className="h-5 w-5 stroke-[2.2]" />
+                      </div>
+                      <span className="flex-1 text-center font-heading font-bold text-[#201A2B] text-sm sm:text-base px-3 truncate">
+                        Contact Email ({requirement.businessEmail})
+                      </span>
+                      <FiMail className="h-5 w-5 text-[#1F9D6B] group-hover:scale-110 transition" />
+                    </a>
+                  ) : null}
+
+                  {/* 8. Show Join campaign button */}
+                  <button
+                    type="button"
+                    onClick={handleApplyByMessageClick}
+                    className="group w-full rounded-full btn-coral p-2.5 sm:p-3 pr-6 flex items-center justify-between shadow-md hover:shadow-lg transition-all duration-150 active:scale-[0.99] cursor-pointer"
+                  >
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/20 text-white shadow-xs">
+                      <FiMessageSquare className="h-5 w-5 stroke-[2.2]" />
+                    </div>
+                    <span className="flex-1 text-center font-heading font-extrabold text-white text-sm sm:text-base tracking-wider uppercase px-3 truncate">
+                      JOIN CAMPAIGN
+                    </span>
+                    <FiMessageSquare className="h-5 w-5 text-white/80 group-hover:text-white transition" />
+                  </button>
+                </>
+              )}
             </div>
 
             {/* Social Share & Copy Link Section */}
-            <div className="pt-3 pb-2 flex flex-col items-center justify-center space-y-3">
+            <div className="pt-2 pb-1 flex flex-col items-center justify-center space-y-3">
               <SocialShareButtons
                 url={shareUrl}
                 title={
@@ -629,40 +794,42 @@ export function ResourceDetailPage() {
 
       {/* Message Modal for Direct Application without Login */}
       {showMessageModal ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs">
-          <div className="relative w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl space-y-5">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#201A2B]/60 p-4 backdrop-blur-xs">
+          <div className="relative w-full max-w-md rounded-[28px] border border-[#E7E1D6] bg-white p-6 sm:p-8 shadow-2xl space-y-5">
             <button
               type="button"
               onClick={() => setShowMessageModal(false)}
-              className="absolute right-5 top-5 flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 transition cursor-pointer"
+              className="absolute right-5 top-5 flex h-9 w-9 items-center justify-center rounded-full bg-[#FAF8F5] text-[#7A7286] hover:bg-[#E7E1D6] hover:text-[#201A2B] transition cursor-pointer"
             >
               <FiX className="h-5 w-5" />
             </button>
 
             <div>
-              <h3 className="text-xl font-bold text-slate-900">
+              <h3 className="font-heading text-xl font-extrabold text-[#201A2B]">
                 Apply to {requirement?.companyName}
               </h3>
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="text-xs text-[#7A7286] mt-1">
                 {isAuthenticated
-                  ? "Send your application message directly to the campaign manager."
-                  : "No login required. Send your application message directly to the campaign manager."}
+                  ? "Send your application proposal directly to the campaign manager."
+                  : "No login required. Send your application proposal directly to the campaign manager."}
               </p>
             </div>
 
             {msgSent ? (
-              <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-emerald-800 text-center space-y-2">
-                <FiCheckCircle className="h-8 w-8 text-emerald-600 mx-auto" />
-                <p className="font-bold text-base">Application Submitted Successfully!</p>
-                <p className="text-xs text-emerald-700">
-                  Your proposal has been delivered directly to the campaign manager's dashboard.
+              <div className="rounded-[20px] border border-[#B3E6D0] bg-[#E8F8F0] p-6 text-center space-y-2">
+                <FiCheckCircle className="h-10 w-10 text-[#1F9D6B] mx-auto" />
+                <p className="font-heading font-extrabold text-base text-[#1F9D6B]">
+                  Application Submitted Successfully!
+                </p>
+                <p className="text-xs text-[#1F9D6B]/90 leading-relaxed">
+                  Your proposal has been delivered directly to the campaign manager's dashboard and email.
                 </p>
                 <button
                   type="button"
                   onClick={() => setShowMessageModal(false)}
-                  className="mt-3 rounded-xl bg-emerald-700 px-5 py-2 text-xs font-bold text-white shadow-xs cursor-pointer"
+                  className="mt-3 rounded-full bg-[#1F9D6B] px-6 py-2.5 text-xs font-heading font-bold text-white shadow-xs cursor-pointer hover:opacity-90"
                 >
-                  Close
+                  Done
                 </button>
               </div>
             ) : (
@@ -673,14 +840,18 @@ export function ResourceDetailPage() {
                   </div>
                 ) : null}
                 {isAuthenticated ? (
-                  <div className="rounded-2xl border border-blue-100 bg-blue-50/70 p-3.5 flex flex-col gap-1 text-xs space-y-1">
-                    <span className="font-bold text-blue-950">Applying as {msgName || localStorage.getItem("userName") || getLoggedInUserEmail() || "Applicant"}</span>
-                    <div className="text-blue-800 font-medium">Email: {msgEmail || getLoggedInUserEmail() || "Account Email"}</div>
+                  <div className="rounded-2xl border border-[#D9CEFF] bg-[#F1ECFF] p-3.5 flex flex-col gap-1 text-xs">
+                    <span className="font-heading font-bold text-[#6C4BFF]">
+                      Applying as {msgName || localStorage.getItem("userName") || getLoggedInUserEmail() || "Applicant"}
+                    </span>
+                    <div className="text-[#201A2B] font-medium font-mono-code">
+                      Email: {msgEmail || getLoggedInUserEmail() || "Account Email"}
+                    </div>
                   </div>
                 ) : (
                   <>
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">
+                      <label className="block text-xs font-heading font-bold text-[#201A2B] mb-1">
                         Your Name *
                       </label>
                       <input
@@ -689,11 +860,11 @@ export function ResourceDetailPage() {
                         value={msgName}
                         onChange={(e) => setMsgName(e.target.value)}
                         placeholder="e.g. John Doe"
-                        className="w-full rounded-xl border border-slate-200 p-3 text-sm outline-none focus:border-blue-600"
+                        className="w-full rounded-xl border border-[#E7E1D6] bg-[#FAF8F5] p-3 text-sm text-[#201A2B] outline-none focus:border-[#6C4BFF] focus:bg-white"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">
+                      <label className="block text-xs font-heading font-bold text-[#201A2B] mb-1">
                         Your Email *
                       </label>
                       <input
@@ -702,14 +873,14 @@ export function ResourceDetailPage() {
                         value={msgEmail}
                         onChange={(e) => setMsgEmail(e.target.value)}
                         placeholder="you@domain.com"
-                        className="w-full rounded-xl border border-slate-200 p-3 text-sm outline-none focus:border-blue-600"
+                        className="w-full rounded-xl border border-[#E7E1D6] bg-[#FAF8F5] p-3 text-sm text-[#201A2B] outline-none focus:border-[#6C4BFF] focus:bg-white"
                       />
                     </div>
                   </>
                 )}
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                  <label className="block text-xs font-heading font-bold text-[#201A2B] mb-1">
                     Phone Number *
                   </label>
                   <input
@@ -724,8 +895,8 @@ export function ResourceDetailPage() {
                     className={`w-full rounded-xl border ${
                       msgPhone.trim() && !isValidPhone(msgPhone)
                         ? "border-rose-400 bg-rose-50/20"
-                        : "border-slate-200"
-                    } p-3 text-sm outline-none focus:border-blue-600`}
+                        : "border-[#E7E1D6] bg-[#FAF8F5]"
+                    } p-3 text-sm text-[#201A2B] outline-none focus:border-[#6C4BFF] focus:bg-white`}
                   />
                   {msgPhone.trim() && !isValidPhone(msgPhone) ? (
                     <p className="mt-1 text-xs text-rose-600 font-medium">
@@ -735,8 +906,8 @@ export function ResourceDetailPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Application Message / Proposal *
+                  <label className="block text-xs font-heading font-bold text-[#201A2B] mb-1">
+                    Application Proposal *
                   </label>
                   <textarea
                     required
@@ -744,14 +915,14 @@ export function ResourceDetailPage() {
                     value={msgText}
                     onChange={(e) => setMsgText(e.target.value)}
                     placeholder="Introduce yourself and explain why you're a great fit for this campaign..."
-                    className="w-full rounded-xl border border-slate-200 p-3 text-sm outline-none focus:border-blue-600"
+                    className="w-full rounded-xl border border-[#E7E1D6] bg-[#FAF8F5] p-3 text-sm text-[#201A2B] outline-none focus:border-[#6C4BFF] focus:bg-white"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={isSubmittingApp}
-                  className="w-full rounded-2xl bg-blue-700 py-3.5 text-sm font-bold text-white shadow-md hover:bg-blue-800 transition disabled:opacity-60 cursor-pointer"
+                  className="w-full rounded-full btn-coral py-3.5 text-sm font-heading font-bold shadow-md transition disabled:opacity-60 cursor-pointer"
                 >
                   {isSubmittingApp ? "Submitting Proposal..." : "Submit Application Proposal"}
                 </button>
@@ -763,24 +934,24 @@ export function ResourceDetailPage() {
 
       {/* Auth Prompt Dialog Modal */}
       {showAdvisorAuthModal ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs">
-          <div className="relative w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl space-y-5 text-center">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#201A2B]/60 p-4 backdrop-blur-xs">
+          <div className="relative w-full max-w-md rounded-[28px] border border-[#E7E1D6] bg-white p-6 sm:p-8 shadow-2xl space-y-5 text-center">
             <button
               type="button"
               onClick={() => setShowAdvisorAuthModal(false)}
-              className="absolute right-5 top-5 flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 transition cursor-pointer"
+              className="absolute right-5 top-5 flex h-9 w-9 items-center justify-center rounded-full bg-[#FAF8F5] text-[#7A7286] hover:bg-[#E7E1D6] hover:text-[#201A2B] transition cursor-pointer"
             >
               <FiX className="h-5 w-5" />
             </button>
 
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-blue-50 text-blue-700">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#F1ECFF] text-[#6C4BFF]">
               <FiLock className="h-7 w-7" />
             </div>
             <div className="space-y-2">
-              <h3 className="text-xl font-bold text-slate-900">
+              <h3 className="font-heading text-xl font-extrabold text-[#201A2B]">
                 Login Required
               </h3>
-              <p className="text-sm text-slate-600 leading-relaxed max-w-xs mx-auto">
+              <p className="text-sm text-[#7A7286] leading-relaxed max-w-xs mx-auto">
                 Please log in to submit your application proposal to this campaign.
               </p>
             </div>
@@ -788,14 +959,14 @@ export function ResourceDetailPage() {
               <button
                 type="button"
                 onClick={() => navigate("/auth")}
-                className="w-full rounded-2xl bg-blue-700 py-3.5 text-sm font-bold text-white shadow-md hover:bg-blue-800 transition cursor-pointer"
+                className="w-full rounded-full btn-coral py-3.5 text-sm font-heading font-bold shadow-md transition cursor-pointer"
               >
                 Log In
               </button>
               <button
                 type="button"
                 onClick={() => setShowAdvisorAuthModal(false)}
-                className="w-full rounded-2xl bg-slate-100 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-200 transition cursor-pointer"
+                className="w-full rounded-full bg-[#FAF8F5] border border-[#E7E1D6] py-2.5 text-xs font-heading font-bold text-[#7A7286] hover:bg-[#E7E1D6] hover:text-[#201A2B] transition cursor-pointer"
               >
                 Cancel
               </button>
@@ -805,11 +976,11 @@ export function ResourceDetailPage() {
       ) : null}
 
       {/* Footer Badge */}
-      <footer className="pt-8 pb-2 text-center text-xs font-semibold text-slate-600">
+      <footer className="pt-8 pb-2 text-center text-xs font-heading font-bold text-[#7A7286]">
         <div className="inline-flex items-center gap-2">
           <span>{isStorePage ? "Start your store with" : "Start your campaign with"}</span>
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/80 bg-white px-3 py-1 text-xs font-bold text-slate-900 shadow-xs">
-            <FiZap className="h-3.5 w-3.5 fill-blue-600 text-blue-600" />
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-[#E7E1D6] bg-white px-3 py-1 text-xs font-bold font-heading text-[#201A2B] shadow-2xs">
+            <FiZap className="h-3.5 w-3.5 fill-[#FF5A36] text-[#FF5A36]" />
             Folksmint
           </span>
         </div>
