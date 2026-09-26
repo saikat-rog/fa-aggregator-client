@@ -10,6 +10,7 @@ import { ExpertiseIndicesPanel } from "./panels/ExpertiseIndicesPanel";
 import { BlogsPanel } from "./panels/BlogsPanel";
 import { BusinessRequirementsPanel } from "./panels/BusinessRequirementsPanel";
 import { CampaignApplicationsPanel } from "./panels/CampaignApplicationsPanel";
+import { PricingPanel } from "./panels/PricingPanel";
 
 export function AdminPageContent() {
   const [params, setParams] = useSearchParams();
@@ -47,6 +48,7 @@ export function AdminPageContent() {
     blogs: "Blogs",
     requirements: "Requirements",
     "campaign-applications": "Campaign Applications",
+    pricing: "Pricing & Plans",
   };
 
   return (
@@ -75,6 +77,7 @@ export function AdminPageContent() {
       {view === "blogs" ? <BlogsPanel params={params} setParam={setParam} setManyParams={setManyParams} /> : null}
       {view === "requirements" ? <BusinessRequirementsPanel params={params} setParam={setParam} setManyParams={setManyParams} /> : null}
       {view === "campaign-applications" ? <CampaignApplicationsPanel params={params} setParam={setParam} setManyParams={setManyParams} /> : null}
+      {view === "pricing" ? <PricingPanel /> : null}
     </div>
   );
 }

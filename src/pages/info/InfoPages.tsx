@@ -1,7 +1,8 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { CheckCircle2, Wallet, ArrowRight, Users, LayoutDashboard, Megaphone } from "lucide-react";
+import { CheckCircle2, Check, Wallet, ArrowRight, Users, LayoutDashboard, Megaphone, ExternalLink } from "lucide-react";
 import { ReachRadar } from "../../components/home/ReachRadar";
+import { getPricingPlansApi, type PricingPlan } from "../../services/pricing.service";
 
 export const PLANS = [
   {
@@ -17,6 +18,8 @@ export const PLANS = [
       "Standard visibility to creators",
       "Barter or paid campaigns",
     ],
+    buttonText: "Get Started Free",
+    paymentLink: "",
   },
   {
     name: "Growth",
@@ -31,6 +34,8 @@ export const PLANS = [
       "Priority placement to nearby creators",
       "Faster application turnaround",
     ],
+    buttonText: "Subscribe to Growth",
+    paymentLink: "",
   },
   {
     name: "Pro / Studio",
@@ -45,6 +50,8 @@ export const PLANS = [
       "Access to high-profile, invite-only creators",
       "Team-managed posting & local marketing",
     ],
+    buttonText: "Book a Sprint",
+    paymentLink: "",
   },
 ];
 
@@ -63,6 +70,26 @@ const CREATOR_FEES = [
 const ESCROW_FLOW = ["Business pays platform", "Held in escrow", "Content confirmed live", "Creator paid, minus 5–10%"];
 
 export function PricingPage() {
+  const [plans, setPlans] = React.useState<PricingPlan[] | typeof PLANS>(PLANS);
+  const [, setLoading] = React.useState<boolean>(true);
+  const [isAuthenticated, setIsAuthenticated] = React.useState<boolean>(() =>
+    Boolean(typeof window !== "undefined" && localStorage.getItem("token"))
+  );
+
+  React.useEffect(() => {
+    setIsAuthenticated(Boolean(localStorage.getItem("token")));
+    getPricingPlansApi()
+      .then((data) => {
+        if (data && data.length > 0) {
+          setPlans(data);
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to load live pricing plans:", err);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
   return (
     <div className="space-y-8">
       <section className="bg-white border border-[#E7E1D6] rounded-[22px] p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-8">
@@ -80,43 +107,104 @@ export function PricingPage() {
       </section>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {PLANS.map((p, i) => (
-          <div
-            key={p.name}
-            className={`relative bg-white border rounded-[20px] p-6 md:p-8 flex flex-col ${
-              p.tag === "violet"
-                ? "border-[#6C4BFF] shadow-[0_8px_24px_rgba(108,75,255,0.12)]"
-                : p.tag === "coral"
-                ? "border-[#FF5A36] shadow-[0_8px_24px_rgba(255,90,54,0.12)]"
-                : "border-[#E7E1D6]"
-            }`}
-          >
-            <div className="font-mono-code text-xs text-[#7A7286] absolute top-6 right-6 font-semibold">
-              0{i + 1}
+        {plans.map((p, i) => {
+          const isViolet = p.tag === "violet";
+          const isCoral = p.tag === "coral";
+          const isFree =
+            (p as PricingPlan).planId === "free" || p.name.toLowerCase().trim() === "free";
+          const buttonText =
+            p.buttonText || (isFree ? "Get Started Free" : isCoral ? "Book a Sprint" : "Choose Plan");
+
+          const hasPaymentLink = Boolean(p.paymentLink && p.paymentLink.trim() !== "");
+
+          return (
+            <div
+              key={(p as PricingPlan)._id || p.name}
+              className={`relative bg-white border rounded-[20px] p-6 md:p-8 flex flex-col ${
+                isViolet
+                  ? "border-[#6C4BFF] shadow-[0_8px_24px_rgba(108,75,255,0.12)]"
+                  : isCoral
+                  ? "border-[#FF5A36] shadow-[0_8px_24px_rgba(255,90,54,0.12)]"
+                  : "border-[#E7E1D6]"
+              }`}
+            >
+              <div className="font-mono-code text-xs text-[#7A7286] absolute top-6 right-6 font-semibold">
+                0{i + 1}
+              </div>
+              <div className="font-heading font-bold text-lg text-[#201A2B] uppercase tracking-wide">
+                {p.name}
+              </div>
+              <div className="font-heading font-extrabold text-3xl text-[#201A2B] my-2">
+                {p.price}
+                <span className="text-xs font-medium text-[#7A7286]"> / {p.period}</span>
+              </div>
+              <div className={`font-mono-code text-[11px] font-semibold mb-3 ${isCoral ? "text-[#D6431E]" : "text-[#5A3FE0]"}`}>
+                {p.audience}
+              </div>
+              <p className="text-sm text-[#7A7286] leading-relaxed mb-6">
+                {p.pitch}
+              </p>
+
+              <div className="space-y-3 mb-6 pt-4 border-t border-[#E7E1D6] flex-1">
+                {(p.features || []).map((f: string) => (
+                  <div key={f} className="flex items-start gap-2.5 text-sm text-[#4C4557]">
+                    <CheckCircle2 className="h-4 w-4 text-[#1F9D6B] shrink-0 mt-0.5" />
+                    <span>{f}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Action / Payment Button */}
+              <div className="mt-auto pt-4 border-t border-[#F0EAE1]">
+                {isFree ? (
+                  isAuthenticated ? (
+                    <button
+                      type="button"
+                      disabled
+                      className="w-full inline-flex items-center justify-center gap-2 rounded-xl py-3 px-4 font-heading font-bold text-sm tracking-wide bg-[#EAF7EE] text-[#137A50] border border-[#BDE5CA] cursor-default select-none shadow-sm"
+                    >
+                      <Check className="h-4 w-4" />
+                      <span>Active</span>
+                    </button>
+                  ) : (
+                    <Link
+                      to="/auth"
+                      className="w-full inline-flex items-center justify-center gap-2 rounded-xl py-3 px-4 font-heading font-bold text-sm tracking-wide bg-[#201A2B] hover:bg-[#342D40] text-white shadow-sm transition"
+                    >
+                      <span>{buttonText}</span>
+                      <ArrowRight className="h-4 w-4 opacity-80" />
+                    </Link>
+                  )
+                ) : hasPaymentLink ? (
+                  <a
+                    href={p.paymentLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`w-full inline-flex items-center justify-center gap-2 rounded-xl py-3 px-4 font-heading font-bold text-sm tracking-wide transition shadow-sm ${
+                      isCoral
+                        ? "bg-[#FF5A36] hover:bg-[#E04826] text-white shadow-[0_4px_14px_rgba(255,90,54,0.25)]"
+                        : isViolet
+                        ? "bg-[#6C4BFF] hover:bg-[#5A3FE0] text-white shadow-[0_4px_14px_rgba(108,75,255,0.25)]"
+                        : "bg-[#201A2B] hover:bg-[#342D40] text-white"
+                    }`}
+                  >
+                    <span>{buttonText}</span>
+                    <ExternalLink className="h-4 w-4 opacity-80" />
+                  </a>
+                ) : (
+                  <button
+                    type="button"
+                    disabled
+                    title="Payment link is currently disabled / not set"
+                    className="w-full inline-flex items-center justify-center gap-2 rounded-xl py-3 px-4 font-heading font-bold text-sm tracking-wide bg-[#F4F1EC] text-[#A59EAD] border border-[#E7E1D6] cursor-not-allowed select-none opacity-80"
+                  >
+                    <span>{buttonText}</span>
+                  </button>
+                )}
+              </div>
             </div>
-            <div className="font-heading font-bold text-lg text-[#201A2B] uppercase tracking-wide">
-              {p.name}
-            </div>
-            <div className="font-heading font-extrabold text-3xl text-[#201A2B] my-2">
-              {p.price}
-              <span className="text-xs font-medium text-[#7A7286]"> / {p.period}</span>
-            </div>
-            <div className={`font-mono-code text-[11px] font-semibold mb-3 ${p.tag === "coral" ? "text-[#D6431E]" : "text-[#5A3FE0]"}`}>
-              {p.audience}
-            </div>
-            <p className="text-sm text-[#7A7286] leading-relaxed mb-6">
-              {p.pitch}
-            </p>
-            <div className="space-y-3 mt-auto pt-4 border-t border-[#E7E1D6]">
-              {p.features.map((f) => (
-                <div key={f} className="flex items-start gap-2.5 text-sm text-[#4C4557]">
-                  <CheckCircle2 className="h-4 w-4 text-[#1F9D6B] shrink-0 mt-0.5" />
-                  <span>{f}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <div className="bg-white border border-[#E7E1D6] rounded-[20px] p-6 md:p-8">
