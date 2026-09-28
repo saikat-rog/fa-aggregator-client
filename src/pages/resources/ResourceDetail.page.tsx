@@ -286,7 +286,7 @@ export function ResourceDetailPage() {
             <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
               <Link
                 to={isStorePage ? "/store" : "/campaign"}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full btn-coral px-6 py-3 text-xs font-bold shadow-xs transition active:scale-95 cursor-pointer"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-[#2563EB] hover:bg-[#1D4ED8] text-white px-6 py-3 text-xs font-bold shadow-xs transition active:scale-95 cursor-pointer"
               >
                 {isStorePage ? (
                   <FiShoppingBag className="h-4 w-4" />
@@ -763,7 +763,7 @@ export function ResourceDetailPage() {
                   <button
                     type="button"
                     onClick={handleApplyByMessageClick}
-                    className="group w-full rounded-full btn-coral p-2.5 sm:p-3 pr-6 flex items-center justify-between shadow-md hover:shadow-lg transition-all duration-150 active:scale-[0.99] cursor-pointer"
+                    className="group w-full rounded-full bg-[#2563EB] hover:bg-[#1D4ED8] text-white p-2.5 sm:p-3 pr-6 flex items-center justify-between shadow-md hover:shadow-lg transition-all duration-150 active:scale-[0.99] cursor-pointer"
                   >
                     <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/20 text-white shadow-xs">
                       <FiMessageSquare className="h-5 w-5 stroke-[2.2]" />
@@ -922,7 +922,7 @@ export function ResourceDetailPage() {
                 <button
                   type="submit"
                   disabled={isSubmittingApp}
-                  className="w-full rounded-full btn-coral py-3.5 text-sm font-heading font-bold shadow-md transition disabled:opacity-60 cursor-pointer"
+                  className="w-full rounded-full bg-[#2563EB] hover:bg-[#1D4ED8] text-white py-3.5 text-sm font-heading font-bold shadow-md transition disabled:opacity-60 cursor-pointer"
                 >
                   {isSubmittingApp ? "Submitting Proposal..." : "Submit Application Proposal"}
                 </button>
@@ -959,7 +959,7 @@ export function ResourceDetailPage() {
               <button
                 type="button"
                 onClick={() => navigate("/auth")}
-                className="w-full rounded-full btn-coral py-3.5 text-sm font-heading font-bold shadow-md transition cursor-pointer"
+                className="w-full rounded-full bg-[#2563EB] hover:bg-[#1D4ED8] text-white py-3.5 text-sm font-heading font-bold shadow-md transition cursor-pointer"
               >
                 Log In
               </button>
