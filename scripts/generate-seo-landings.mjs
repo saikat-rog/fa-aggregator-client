@@ -8,7 +8,28 @@ const PROFILES_SITEMAP_PATH = path.join(ROOT, "public/sitemap-profiles.xml");
 const BLOGS_SITEMAP_PATH = path.join(ROOT, "public/sitemap-blogs.xml");
 const SITEMAP_INDEX_PATH = path.join(ROOT, "public/sitemap-index.xml");
 const ROBOTS_PATH = path.join(ROOT, "public/robots.txt");
-const ENV_LOCAL_PATH = path.join(ROOT, ".env.local");
+const isProd =
+  process.env.NODE_ENV === "production" ||
+  process.env.MODE === "production" ||
+  process.env.APP_ENV === "production" ||
+  process.env.APP_ENV === "prod" ||
+  process.argv.includes("--prod") ||
+  process.argv.includes("--production") ||
+  process.argv.some((arg) => arg.startsWith("--mode=prod"));
+
+const getEnvFiles = () => {
+  if (isProd) {
+    return [
+      path.join(ROOT, ".env"),
+      path.join(ROOT, ".env.production"),
+      path.join(ROOT, ".env.prod"),
+    ];
+  }
+  return [
+    path.join(ROOT, ".env"),
+    path.join(ROOT, ".env.local"),
+  ];
+};
 
 const toSlug = (value) =>
   value
@@ -29,9 +50,9 @@ const escapeText = (value) =>
 
 const PROFILE_SITEMAP_CHUNK_SIZE = 50000;
 
-const readEnvLocal = async () => {
+const parseEnvFile = async (filePath) => {
   try {
-    const raw = await fs.readFile(ENV_LOCAL_PATH, "utf8");
+    const raw = await fs.readFile(filePath, "utf8");
     const map = {};
     raw.split(/\r?\n/).forEach((line) => {
       const trimmed = line.trim();
@@ -48,19 +69,30 @@ const readEnvLocal = async () => {
   }
 };
 
+const loadEnv = async () => {
+  let merged = {};
+  const files = getEnvFiles();
+  for (const file of files) {
+    const parsed = await parseEnvFile(file);
+    merged = { ...merged, ...parsed };
+  }
+  return {
+    ...merged,
+    ...process.env,
+  };
+};
+
 const run = async () => {
-  const envLocal = await readEnvLocal();
-  const apiBase =
-    envLocal.VITE_SERVER_URL;
+  const env = await loadEnv();
+  const apiBase = env.VITE_SERVER_URL;
 
   if (!apiBase) {
     throw new Error(
-      "Missing Server URL",
+      "Missing Server URL. Please set VITE_SERVER_URL in your environment or in a .env / .env.local / .env.prod file.",
     );
   }
 
-  const siteOrigin =
-    envLocal.VITE_FRONTEND_URL 
+  const siteOrigin = env.VITE_FRONTEND_URL;
 
   const endpoint = `${apiBase.replace(/\/$/, "")}/advisor/form-options`;
   const response = await fetch(endpoint);

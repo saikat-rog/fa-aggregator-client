@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "seo:generate": "node scripts/generate-seo-landings.mjs"
+    "seo:generate": "node scripts/generate-seo-landings.mjs",
+    "seo:generate:prod": "node scripts/generate-seo-landings.mjs --prod"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.0",
