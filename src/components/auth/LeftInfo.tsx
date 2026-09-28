@@ -1,73 +1,74 @@
-import { FiShield, FiZap, FiUsers, FiCheckCircle } from "react-icons/fi";
-import { Radio } from "lucide-react";
+import { FiShield, FiZap, FiUsers, FiMapPin } from "react-icons/fi";
 
 const LeftInfo = () => {
   return (
-    <section className="relative flex flex-col justify-between overflow-hidden rounded-[24px] bg-[#201A2B] p-7 text-white shadow-xl border border-[#E7E1D6]">
-      {/* Decorative gradient overlay & glow shapes */}
-      <div className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-[#6C4BFF]/20 blur-2xl" />
-      <div className="pointer-events-none absolute -bottom-16 -left-16 h-64 w-64 rounded-full bg-[#FF5A36]/20 blur-2xl" />
-
-      <div className="relative z-10 space-y-6">
-        <div>
-          <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#FF5A36] text-white">
-              <Radio className="h-3.5 w-3.5" />
-            </div>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/10 px-3 py-0.5 text-[11px] font-bold font-mono-code uppercase tracking-wider text-white/90 backdrop-blur-md">
-              <FiShield className="h-3 w-3 text-[#FF5A36]" />
-              Secure Auth Portal
-            </span>
-          </div>
-
-          <h1 className="mt-4 text-3xl font-extrabold font-heading tracking-tight text-white sm:text-4xl">
-            Welcome to <span className="bg-gradient-to-r from-[#FF5A36] to-[#6C4BFF] bg-clip-text text-transparent">Folksmint</span>
-          </h1>
-          <p className="mt-2.5 text-sm text-white/80 leading-relaxed">
-            The premier marketplace connecting local businesses with nearby creators for real store footfall and viral promotion.
-          </p>
+    <div className="bg-[var(--card)] p-6 sm:p-8 lg:p-10 border-b lg:border-b-0 lg:border-r border-[var(--line)] flex flex-col justify-between">
+      <div>
+        <div className="flex items-center gap-2.5">
+          <span className="brand-mark !w-8 !h-8 !rounded-lg">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#fff" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="19" r="1.3" fill="#fff" stroke="none" />
+              <path d="M8.3 15.3a5.2 5.2 0 0 1 7.4 0" />
+              <path d="M5.1 12.1a9.6 9.6 0 0 1 13.8 0" />
+            </svg>
+          </span>
+          <span className="font-heading font-bold text-base text-[var(--ink)]">Folksmint</span>
         </div>
 
+        <h1 className="mt-6 text-2xl sm:text-3xl font-extrabold font-heading text-[var(--ink)] leading-snug">
+          Grow your local brand or creator career.
+        </h1>
+        <p className="mt-2 text-xs sm:text-sm text-[var(--muted)] leading-relaxed">
+          The all-in-one platform connecting nearby shops, local businesses, and verified creators for real footfall and campaigns.
+        </p>
+
         {/* Feature Cards Grid */}
-        <div className="space-y-3 pt-2">
-          <div className="flex items-start gap-3.5 rounded-2xl border border-white/10 bg-white/5 p-3.5 backdrop-blur-md transition hover:bg-white/10">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#FF5A36]/20 text-[#FF5A36]">
-              <FiZap className="h-5 w-5" />
+        <div className="mt-6 space-y-3.5">
+          <div className="flex items-start gap-3.5 rounded-xl border border-[var(--line)] bg-white p-4 shadow-xs">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--card)] text-[var(--indigo)] font-bold">
+              <FiZap className="h-4 w-4" />
             </div>
             <div>
-              <h3 className="text-sm font-bold font-heading text-white">Instant 1-Click Access</h3>
-              <p className="mt-0.5 text-xs text-white/70">
-                Log in seamlessly with your Google Account for both Businesses and Creators.
+              <h3 className="text-xs sm:text-sm font-bold font-heading text-[var(--ink)]">1-Click Google Sign-In</h3>
+              <p className="mt-0.5 text-xs text-[var(--muted)] leading-relaxed">
+                Log in instantly with your Google Account — no password needed.
               </p>
             </div>
           </div>
 
-          <div className="flex items-start gap-3.5 rounded-2xl border border-white/10 bg-white/5 p-3.5 backdrop-blur-md transition hover:bg-white/10">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#6C4BFF]/20 text-[#6C4BFF]">
-              <FiUsers className="h-5 w-5" />
+          <div className="flex items-start gap-3.5 rounded-xl border border-[var(--line)] bg-white p-4 shadow-xs">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--card)] text-[var(--indigo)] font-bold">
+              <FiUsers className="h-4 w-4" />
             </div>
             <div>
-              <h3 className="text-sm font-bold font-heading text-white">Dual Persona Hub</h3>
-              <p className="mt-0.5 text-xs text-white/70">
-                Seamlessly toggle between posting business campaigns or applying as a creative partner.
+              <h3 className="text-xs sm:text-sm font-bold font-heading text-[var(--ink)]">Dual Persona Hub</h3>
+              <p className="mt-0.5 text-xs text-[var(--muted)] leading-relaxed">
+                Switch seamlessly between posting business briefs or managing your creator store.
               </p>
             </div>
           </div>
 
-          <div className="flex items-start gap-3.5 rounded-2xl border border-white/10 bg-white/5 p-3.5 backdrop-blur-md transition hover:bg-white/10">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#1F9D6B]/20 text-[#1F9D6B]">
-              <FiCheckCircle className="h-5 w-5" />
+          <div className="flex items-start gap-3.5 rounded-xl border border-[var(--line)] bg-white p-4 shadow-xs">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--card)] text-[var(--indigo)] font-bold">
+              <FiMapPin className="h-4 w-4" />
             </div>
             <div>
-              <h3 className="text-sm font-bold font-heading text-white">Hyperlocal PIN Matching</h3>
-              <p className="mt-0.5 text-xs text-white/70">
-                Matches are calculated based on your 6-digit PIN code without intrusive location tracking.
+              <h3 className="text-xs sm:text-sm font-bold font-heading text-[var(--ink)]">Hyperlocal PIN Matching</h3>
+              <p className="mt-0.5 text-xs text-[var(--muted)] leading-relaxed">
+                Discover creators and campaigns matched by your 6-digit PIN code.
               </p>
             </div>
           </div>
         </div>
       </div>
-    </section>
+
+      <div className="mt-8 pt-4 border-t border-[var(--line)] flex items-center justify-between text-xs text-[var(--muted)]">
+        <span className="flex items-center gap-1.5 font-medium">
+          <FiShield className="text-[var(--indigo)] h-3.5 w-3.5" /> Secure Google OAuth 2.0
+        </span>
+        <span>Folksmint &copy; 2026</span>
+      </div>
+    </div>
   );
 };
 

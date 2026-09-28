@@ -1,73 +1,62 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { CheckCircle2, Check, Wallet, ArrowRight, Users, LayoutDashboard, Megaphone, ExternalLink } from "lucide-react";
-import { ReachRadar } from "../../components/home/ReachRadar";
+import { CheckCircle2, Check, ArrowRight, ExternalLink } from "lucide-react";
 import { getPricingPlansApi, type PricingPlan } from "../../services/pricing.service";
 
 export const PLANS = [
   {
-    name: "Free",
-    price: "₹0",
-    period: "month",
+    name: "Free Trial",
+    price: "$0",
+    period: "14 days",
     tag: "gray",
-    audience: "FOR BUSINESSES · TRY THE MARKETPLACE",
-    pitch: "Enough to test whether local creators actually move the needle, before committing to anything.",
+    audience: "FOR EVERYONE · EXPLORE FOLKSMINT",
+    pitch: "Create an account, browse all campaigns & creators, and test our dashboard tools completely free.",
     features: [
-      "1 active campaign per month",
-      "Basic applicant dashboard",
-      "Standard visibility to creators",
-      "Barter or paid campaigns",
+      "Browse all creators & open campaigns",
+      "Full access to dashboard tools",
+      "Submit or receive initial applications",
+      "Cancel anytime before trial ends",
     ],
-    buttonText: "Get Started Free",
+    buttonText: "Start 14-Day Free Trial",
     paymentLink: "",
   },
   {
-    name: "Growth",
-    price: "₹299",
+    name: "Folksmint Business",
+    price: "$19",
     period: "month",
     tag: "violet",
-    audience: "FOR BUSINESSES · RUN CAMPAIGNS ON REPEAT",
-    pitch: "For businesses that want a steady stream of local creators, not a one-off experiment.",
+    audience: "FOR LOCAL BUSINESSES · REPLACES 6+ APPS",
+    pitch: "Everything AI marketing does — SEO score audit, keyword analysis, AI social posting, review replies, and daily WhatsApp reports.",
     features: [
-      "Unlimited active campaigns",
-      "Full analytics dashboard",
-      "Priority placement to nearby creators",
-      "Faster application turnaround",
+      "Free Google Score & SEO analysis",
+      "Competitor analysis for nearby businesses",
+      "AI social posting to Facebook & Instagram",
+      "Personalized Google review replies",
+      "Daily performance reports on WhatsApp",
+      "Post unlimited paid campaigns & gigs",
     ],
-    buttonText: "Subscribe to Growth",
+    buttonText: "Join Folksmint Business",
     paymentLink: "",
   },
   {
-    name: "Pro / Studio",
-    price: "From ₹50,000",
-    period: "90-day sprint",
+    name: "Folksmint Creator",
+    price: "$29",
+    period: "month",
     tag: "coral",
-    audience: "FOR BUSINESSES · A 90-DAY GROWTH SPRINT",
-    pitch: "We start with a diagnostic report — infra, interiors, pricing, schemes, and advertising — then run a fully managed 90-day campaign against it, with a checkpoint every 30 days so you always know where things stand.",
+    audience: "FOR CREATORS · COMPLETE COMMERCE SUITE",
+    pitch: "Replaces Linktree, Calendly, Kajabi, and Manychat — mobile biolink store, booking calendar, course builder, and AutoDMs.",
     features: [
-      "Professional photography & design",
-      "Video and ad shoots",
-      "Access to high-profile, invite-only creators",
-      "Team-managed posting & local marketing",
+      "Mobile 'Link-in-Bio' storefront",
+      "Calendar invites & 1-tap bookings",
+      "Integrated course builder",
+      "Audience analytics & email list builder",
+      "Instagram AutoDMs integration",
+      "Exclusive creator community & coaching",
     ],
-    buttonText: "Book a Sprint",
+    buttonText: "Join Folksmint Creator",
     paymentLink: "",
   },
 ];
-
-const STUDIO_TIMELINE = [
-  { day: "Day 0", title: "Diagnostic report", body: "A written audit — infra, interiors, pricing, schemes, ads — with specific, actionable recommendations across everything, not just creator campaigns." },
-  { day: "Day 30", title: "Checkpoint 1 — early movement", body: "First read on what's shifting, what isn't, and why — shown against your baseline, not promised as a fixed number." },
-  { day: "Day 60", title: "Checkpoint 2 — trend & comparison", body: "Scale what's working, adjust what isn't. Benchmarked against comparable local competitors so the trend has real context." },
-  { day: "Day 90", title: "Final report", body: "Full before/after comparison against your original diagnostic and the local market — the complete picture, not a guarantee." },
-];
-
-const CREATOR_FEES = [
-  { rate: "Free", tag: "CREATORS · BARTER DEALS", body: "Always free for both sides. No platform fee, ever, on a barter match — this is most of early volume." },
-  { rate: "5–10%", tag: "CREATORS · PAID DEALS ONLY", body: "A payment-protection fee, charged only when cash actually changes hands — never on barter, never upfront." },
-];
-
-const ESCROW_FLOW = ["Business pays platform", "Held in escrow", "Content confirmed live", "Creator paid, minus 5–10%"];
 
 export function PricingPage() {
   const [plans, setPlans] = React.useState<PricingPlan[] | typeof PLANS>(PLANS);
@@ -91,19 +80,17 @@ export function PricingPage() {
   }, []);
 
   return (
-    <div className="space-y-8">
-      <section className="bg-white border border-[#E7E1D6] rounded-[22px] p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-8">
-        <div className="max-w-xl">
-          <h1 className="font-heading text-3xl md:text-4xl font-bold tracking-tight text-[#201A2B]">
-            Pricing
-          </h1>
-          <p className="mt-3 text-base text-[#7A7286] leading-relaxed">
-            Businesses pay to grow, creators pay only when they earn. Barter — the majority of early volume — stays free for everyone.
-          </p>
+    <div className="max-w-[1040px] mx-auto px-6 py-10 space-y-10">
+      <section className="text-center max-w-2xl mx-auto">
+        <div className="text-[var(--indigo)] font-bold text-[0.9rem] mb-2 uppercase tracking-wide">
+          Simple Pricing
         </div>
-        <div className="shrink-0">
-          <ReachRadar size={180} pulsing />
-        </div>
+        <h1 className="font-heading text-3xl md:text-4xl font-extrabold tracking-tight text-[var(--ink)]">
+          Everything you run, in one plan
+        </h1>
+        <p className="mt-3 text-base text-[var(--muted)] leading-relaxed">
+          No more paying for 6+ different apps. Pick the plan tailored for your local business or your creator career. Both come with a 14-day free trial.
+        </p>
       </section>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -111,65 +98,65 @@ export function PricingPage() {
           const isViolet = p.tag === "violet";
           const isCoral = p.tag === "coral";
           const isFree =
-            (p as PricingPlan).planId === "free" || p.name.toLowerCase().trim() === "free";
+            (p as PricingPlan).planId === "free" || p.name.toLowerCase().includes("free");
           const buttonText =
-            p.buttonText || (isFree ? "Get Started Free" : isCoral ? "Book a Sprint" : "Choose Plan");
+            p.buttonText || (isFree ? "Start Free Trial" : isCoral ? "Join as Creator" : "Join as Business");
 
           const hasPaymentLink = Boolean(p.paymentLink && p.paymentLink.trim() !== "");
 
           return (
             <div
               key={(p as PricingPlan)._id || p.name}
-              className={`relative bg-white border rounded-[20px] p-6 md:p-8 flex flex-col ${
+              className={`relative bg-[var(--card)] border rounded-[20px] p-6 md:p-8 flex flex-col shadow-sm transition hover:border-[var(--indigo)] ${
                 isViolet
-                  ? "border-[#6C4BFF] shadow-[0_8px_24px_rgba(108,75,255,0.12)]"
+                  ? "border-[var(--indigo)] shadow-[0_4px_24px_rgba(37,99,235,0.12)]"
                   : isCoral
-                  ? "border-[#FF5A36] shadow-[0_8px_24px_rgba(255,90,54,0.12)]"
-                  : "border-[#E7E1D6]"
+                  ? "border-[var(--navy)] shadow-[0_4px_24px_rgba(29,78,216,0.12)]"
+                  : "border-[var(--line)]"
               }`}
             >
-              <div className="font-mono-code text-xs text-[#7A7286] absolute top-6 right-6 font-semibold">
+              <div className="font-mono text-xs text-[var(--muted)] absolute top-6 right-6 font-semibold">
                 0{i + 1}
               </div>
-              <div className="font-heading font-bold text-lg text-[#201A2B] uppercase tracking-wide">
+              <div className="font-heading font-bold text-lg text-[var(--ink)]">
                 {p.name}
               </div>
-              <div className="font-heading font-extrabold text-3xl text-[#201A2B] my-2">
+              <div className="font-heading font-extrabold text-3xl text-[var(--ink)] my-2">
                 {p.price}
-                <span className="text-xs font-medium text-[#7A7286]"> / {p.period}</span>
+                <span className="text-xs font-medium text-[var(--muted)]"> / {p.period}</span>
               </div>
-              <div className={`font-mono-code text-[11px] font-semibold mb-3 ${isCoral ? "text-[#D6431E]" : "text-[#5A3FE0]"}`}>
+              <div className="text-[11px] font-bold text-[var(--indigo)] uppercase tracking-wide mb-3">
                 {p.audience}
               </div>
-              <p className="text-sm text-[#7A7286] leading-relaxed mb-6">
+              <p className="text-sm text-[var(--muted)] leading-relaxed mb-6">
                 {p.pitch}
               </p>
 
-              <div className="space-y-3 mb-6 pt-4 border-t border-[#E7E1D6] flex-1">
+              <div className="space-y-3 mb-6 pt-4 border-t border-[var(--line)] flex-1">
                 {(p.features || []).map((f: string) => (
-                  <div key={f} className="flex items-start gap-2.5 text-sm text-[#4C4557]">
-                    <CheckCircle2 className="h-4 w-4 text-[#1F9D6B] shrink-0 mt-0.5" />
+                  <div key={f} className="flex items-start gap-2.5 text-sm text-[var(--ink)]">
+                    <CheckCircle2 className="h-4 w-4 text-[var(--indigo)] shrink-0 mt-0.5" />
                     <span>{f}</span>
                   </div>
                 ))}
               </div>
 
               {/* Action / Payment Button */}
-              <div className="mt-auto pt-4 border-t border-[#F0EAE1]">
+              <div className="mt-auto pt-4 border-t border-[var(--line)]">
                 {isFree ? (
                   isAuthenticated ? (
                     <button
                       type="button"
                       disabled
-                      className="w-full inline-flex items-center justify-center gap-2 rounded-xl py-3 px-4 font-heading font-bold text-sm tracking-wide bg-[#EAF7EE] text-[#137A50] border border-[#BDE5CA] cursor-default select-none shadow-sm"
+                      className="w-full inline-flex items-center justify-center gap-2 rounded-full py-3 px-4 font-heading font-bold text-sm bg-emerald-50 text-emerald-700 border border-emerald-200 cursor-default select-none shadow-sm"
                     >
                       <Check className="h-4 w-4" />
-                      <span>Active</span>
+                      <span>Active Plan</span>
                     </button>
                   ) : (
                     <Link
                       to="/auth"
-                      className="w-full inline-flex items-center justify-center gap-2 rounded-xl py-3 px-4 font-heading font-bold text-sm tracking-wide bg-[#201A2B] hover:bg-[#342D40] text-white shadow-sm transition"
+                      className="w-full inline-flex items-center justify-center gap-2 rounded-full py-3 px-4 font-heading font-bold text-sm bg-[var(--navy)] text-white hover:opacity-95 shadow-sm transition"
                     >
                       <span>{buttonText}</span>
                       <ArrowRight className="h-4 w-4 opacity-80" />
@@ -180,77 +167,24 @@ export function PricingPage() {
                     href={p.paymentLink}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`w-full inline-flex items-center justify-center gap-2 rounded-xl py-3 px-4 font-heading font-bold text-sm tracking-wide transition shadow-sm ${
-                      isCoral
-                        ? "bg-[#FF5A36] hover:bg-[#E04826] text-white shadow-[0_4px_14px_rgba(255,90,54,0.25)]"
-                        : isViolet
-                        ? "bg-[#6C4BFF] hover:bg-[#5A3FE0] text-white shadow-[0_4px_14px_rgba(108,75,255,0.25)]"
-                        : "bg-[#201A2B] hover:bg-[#342D40] text-white"
-                    }`}
+                    className="w-full inline-flex items-center justify-center gap-2 rounded-full py-3 px-4 font-heading font-bold text-sm bg-[var(--navy)] text-white hover:opacity-95 shadow-sm transition"
                   >
                     <span>{buttonText}</span>
                     <ExternalLink className="h-4 w-4 opacity-80" />
                   </a>
                 ) : (
-                  <button
-                    type="button"
-                    disabled
-                    title="Payment link is currently disabled / not set"
-                    className="w-full inline-flex items-center justify-center gap-2 rounded-xl py-3 px-4 font-heading font-bold text-sm tracking-wide bg-[#F4F1EC] text-[#A59EAD] border border-[#E7E1D6] cursor-not-allowed select-none opacity-80"
+                  <Link
+                    to={isCoral ? "/auth?role=advisor" : "/auth?role=user"}
+                    className="w-full inline-flex items-center justify-center gap-2 rounded-full py-3 px-4 font-heading font-bold text-sm bg-[var(--navy)] text-white hover:opacity-95 shadow-sm transition"
                   >
                     <span>{buttonText}</span>
-                  </button>
+                    <ArrowRight className="h-4 w-4 opacity-80" />
+                  </Link>
                 )}
               </div>
             </div>
           );
         })}
-      </div>
-
-      <div className="bg-white border border-[#E7E1D6] rounded-[20px] p-6 md:p-8">
-        <h2 className="font-heading font-bold text-xl text-[#201A2B]">
-          Pro / Studio — the 90-day sprint, step by step
-        </h2>
-        <p className="text-sm text-[#7A7286] mt-1 mb-6">
-          A checkpoint every 30 days, so you always know where things stand.
-        </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {STUDIO_TIMELINE.map((t) => (
-            <div key={t.day} className="bg-[#FDFCFA] border border-[#E7E1D6] rounded-[14px] p-4">
-              <div className="font-mono-code font-bold text-xs text-[#D6431E] mb-1.5">{t.day}</div>
-              <div className="font-heading font-bold text-sm text-[#201A2B] mb-1.5">{t.title}</div>
-              <p className="text-xs text-[#7A7286] leading-relaxed">{t.body}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="bg-white border border-[#E7E1D6] rounded-[20px] p-6 md:p-8">
-        <h2 className="font-heading font-bold text-xl text-[#201A2B]">
-          For creators
-        </h2>
-        <p className="text-sm text-[#7A7286] mt-1 mb-6">
-          Always free on barter. A protection fee only when real money moves.
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          {CREATOR_FEES.map((f) => (
-            <div key={f.tag} className="bg-[#FDFCFA] border border-[#E7E1D6] rounded-[16px] p-5">
-              <div className="font-heading font-extrabold text-2xl text-[#5A3FE0]">{f.rate}</div>
-              <div className="font-mono-code text-[11px] font-semibold text-[#7A7286] my-1.5">{f.tag}</div>
-              <p className="text-xs text-[#7A7286] leading-relaxed">{f.body}</p>
-            </div>
-          ))}
-        </div>
-        <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
-          {ESCROW_FLOW.map((step, i) => (
-            <React.Fragment key={step}>
-              <span className="bg-[#F1ECFF] text-[#5A3FE0] font-heading font-semibold text-xs px-3.5 py-2 rounded-full">
-                {step}
-              </span>
-              {i < ESCROW_FLOW.length - 1 && <ArrowRight className="h-4 w-4 text-[#E7E1D6] shrink-0" />}
-            </React.Fragment>
-          ))}
-        </div>
       </div>
     </div>
   );
@@ -258,76 +192,49 @@ export function PricingPage() {
 
 const TESTIMONIALS = [
   {
-    name: "Meera Kapoor",
-    role: "Food creator",
-    location: "Agra, Uttar Pradesh",
-    quote: "I had 6,000 followers and no idea how to turn that into anything. My first barter deal was a free brunch for a reel — three weeks later a café offered me a paid post. That never happened before this.",
-    stat: "3 paid deals",
-    statLabel: "in first 2 months",
+    name: "Meera R.",
+    role: "Café Owner",
+    location: "Pune",
+    quote: "We filled a 6-creator campaign in under a week — Folksmint handled the applications so we didn't have to chase anyone.",
   },
   {
-    name: "Kettle & Crumb Café",
-    role: "Business, Café / Restaurant",
-    location: "Agra, Uttar Pradesh",
-    quote: "We tried boosting Instagram posts for months with barely any local walk-ins to show for it. One weekend campaign with two nearby creators brought in more actual footfall than our entire ad budget that quarter.",
-    stat: "+22%",
-    statLabel: "weekend footfall",
+    name: "Rohan M.",
+    role: "Fitness Creator",
+    location: "Bengaluru",
+    quote: "My biolink store finally looks like it belongs to a real business, not a link dump. Bookings went up almost immediately.",
   },
   {
-    name: "Arjun Mehta",
-    role: "Fitness creator",
-    location: "New Delhi, Delhi",
-    quote: "The biolink page alone was worth signing up for — one link for my Instagram, YouTube, and the brands I've worked with. Businesses actually check my work before accepting.",
-    stat: "4.8K",
-    statLabel: "profile clicks",
-  },
-  {
-    name: "Glow Salon",
-    role: "Business, Salon / Spa",
-    location: "New Delhi, Delhi",
-    quote: "Being able to see a creator's actual location and engagement before accepting made this feel real, not random. We only work with people who are genuinely nearby now.",
-    stat: "12 campaigns",
-    statLabel: "run to date",
+    name: "Karan B.",
+    role: "Local Retailer",
+    location: "Delhi",
+    quote: "Verified clicks means I'm not paying for bots. It's the first affiliate tool that felt honest about what I was buying.",
   },
 ];
 
 export function TestimonialsPage() {
   return (
-    <div className="space-y-8">
-      <section className="bg-white border border-[#E7E1D6] rounded-[22px] p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-8">
-        <div className="max-w-xl">
-          <h1 className="font-heading text-3xl md:text-4xl font-bold tracking-tight text-[#201A2B]">
-            Success stories
-          </h1>
-          <p className="mt-3 text-base text-[#7A7286] leading-relaxed">
-            Real stories showing how local creators and businesses build thriving partnerships.
-          </p>
+    <div className="max-w-[1040px] mx-auto px-6 py-10 space-y-8">
+      <section className="text-center max-w-2xl mx-auto">
+        <div className="text-[var(--indigo)] font-bold text-[0.9rem] mb-2 uppercase tracking-wide">
+          Testimonials
         </div>
-        <div className="shrink-0">
-          <ReachRadar size={180} pulsing />
-        </div>
+        <h1 className="font-heading text-3xl md:text-4xl font-extrabold tracking-tight text-[var(--ink)]">
+          What people are saying
+        </h1>
+        <p className="mt-3 text-base text-[var(--muted)] leading-relaxed">
+          See how local shop owners and creators streamline marketing and grow their revenues on Folksmint.
+        </p>
       </section>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="testi-grid">
         {TESTIMONIALS.map((t) => (
-          <div key={t.name} className="bg-white border border-[#E7E1D6] rounded-[18px] p-6 flex flex-col justify-between">
-            <div>
-              <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-[#FF5A36] to-[#6C4BFF] text-white font-heading font-bold text-base flex items-center justify-center mb-4">
-                {t.name.charAt(0)}
-              </div>
-              <p className="text-sm text-[#4C4557] italic leading-relaxed mb-6">
-                "{t.quote}"
-              </p>
-            </div>
-            <div className="flex items-end justify-between border-t border-[#E7E1D6] pt-4">
-              <div>
-                <div className="font-heading font-bold text-sm text-[#201A2B]">{t.name}</div>
-                <div className="text-xs text-[#7A7286] mt-0.5">{t.role} · {t.location}</div>
-              </div>
-              <div className="text-right">
-                <div className="font-heading font-extrabold text-base text-[#5A3FE0]">{t.stat}</div>
-                <div className="text-[10px] text-[#7A7286]">{t.statLabel}</div>
-              </div>
+          <div key={t.name} className="testi-card">
+            <div className="absolute inset-0 bg-gradient-to-tr from-[#1D4ED8] to-[#2563EB]" />
+            <div className="testi-scrim" />
+            <div className="testi-text">
+              <p>"{t.quote}"</p>
+              <div className="testi-who">{t.name}</div>
+              <div className="testi-role">{t.role} · {t.location}</div>
             </div>
           </div>
         ))}
@@ -335,67 +242,43 @@ export function TestimonialsPage() {
     </div>
   );
 }
-
-const REVENUE_STREAMS = [
-  { icon: Users, tag: "Always free", title: "Barter deals, for everyone", body: "No platform fee, ever, on a barter match between a business and a creator — this is most of the early volume, and it stays free permanently." },
-  { icon: Wallet, tag: "5–10%, paid deals only", title: "A payment-protection fee", body: "Charged only when cash actually changes hands, never on barter and never upfront: the business pays in advance, funds sit in escrow, and once the content is confirmed live, the creator is paid minus 5–10%." },
-  { icon: LayoutDashboard, tag: "₹299/month, optional", title: "Growth plan for businesses", body: "Unlimited active campaigns, a full analytics dashboard, priority placement to nearby creators, and faster application turnaround." },
-  { icon: Megaphone, tag: "From ₹50,000", title: "Pro / Studio — a managed 90-day sprint", body: "A done-for-you engagement: a diagnostic report, professional photo/video production, invite-only creator access, and a team-managed campaign with checkpoints every 30 days." },
-];
 
 export function RevenueModelPage() {
   return (
-    <div className="max-w-3xl mx-auto bg-white border border-[#E7E1D6] rounded-[20px] p-6 md:p-10 space-y-6">
+    <div className="max-w-3xl mx-auto px-6 py-10 space-y-6">
       <div>
-        <h1 className="font-heading text-2xl md:text-3xl font-bold text-[#201A2B]">
-          How we make money
+        <div className="text-[var(--indigo)] font-bold text-[0.9rem] mb-2 uppercase tracking-wide">
+          Platform Economics
+        </div>
+        <h1 className="font-heading text-2xl md:text-3xl font-bold text-[var(--ink)]">
+          How Folksmint Works
         </h1>
-        <p className="text-sm text-[#7A7286] mt-1">
-          Transparently, and only when you do. Incentives stay aligned with creators and businesses.
+        <p className="text-sm text-[var(--muted)] mt-1">
+          Simple SaaS subscription with zero hidden fees and verified click tracking.
         </p>
       </div>
 
-      <div className="divide-y divide-[#E7E1D6]">
-        {REVENUE_STREAMS.map((r) => (
-          <div key={r.title} className="py-5 flex items-start gap-4">
-            <div className="h-10 w-10 rounded-xl bg-[#F1ECFF] text-[#5A3FE0] flex items-center justify-center shrink-0">
-              <r.icon className="h-5 w-5" />
-            </div>
-            <div>
-              <span className="badge-pill bg-[#E4F5EC] text-[#137A50] text-[10px] mb-1.5">
-                {r.tag}
-              </span>
-              <div className="font-heading font-bold text-base text-[#201A2B] mt-1">{r.title}</div>
-              <p className="text-xs text-[#7A7286] leading-relaxed mt-1">{r.body}</p>
-            </div>
-          </div>
-        ))}
-      </div>
+      <div className="space-y-4">
+        <div className="bg-[var(--card)] border border-[var(--line)] rounded-[18px] p-6">
+          <h3 className="font-heading font-bold text-lg text-[var(--ink)] mb-2">Folksmint Business ($19/mo)</h3>
+          <p className="text-sm text-[var(--muted)] leading-relaxed">
+            Local businesses pay a simple flat monthly subscription to replace their SEO audit tools, social post schedulers, and review-reply management with built-in AI.
+          </p>
+        </div>
 
-      <div className="pt-4 border-t border-[#E7E1D6]">
-        <Link
-          to="/pricing"
-          className="inline-flex items-center gap-2 rounded-xl bg-[#6C4BFF] px-5 py-2.5 text-sm font-bold text-white hover:bg-[#5A3FE0] transition"
-        >
-          See full pricing <ArrowRight className="h-4 w-4" />
-        </Link>
-      </div>
-    </div>
-  );
-}
+        <div className="bg-[var(--card)] border border-[var(--line)] rounded-[18px] p-6">
+          <h3 className="font-heading font-bold text-lg text-[var(--ink)] mb-2">Folksmint Creator ($29/mo)</h3>
+          <p className="text-sm text-[var(--muted)] leading-relaxed">
+            Creators replace multiple separate subscriptions (Linktree, Calendly, Kajabi, Manychat) with a single, high-converting biolink store, 1-tap checkout, and coaching tools.
+          </p>
+        </div>
 
-export function LegalPage({ title, updated, sections }: { title: string; updated: string; sections: { heading: string; body: string }[] }) {
-  return (
-    <div className="max-w-3xl mx-auto bg-white border border-[#E7E1D6] rounded-[20px] p-6 md:p-10">
-      <h1 className="font-heading text-2xl md:text-3xl font-bold text-[#201A2B]">{title}</h1>
-      <p className="text-xs text-[#7A7286] mt-1 mb-6">Last updated {updated}</p>
-      <div className="space-y-6">
-        {sections.map((s) => (
-          <div key={s.heading}>
-            <h2 className="font-heading font-bold text-base text-[#201A2B] mb-1.5">{s.heading}</h2>
-            <p className="text-sm text-[#7A7286] leading-relaxed">{s.body}</p>
-          </div>
-        ))}
+        <div className="bg-[var(--card)] border border-[var(--line)] rounded-[18px] p-6">
+          <h3 className="font-heading font-bold text-lg text-[var(--ink)] mb-2">Campaigns & Protection</h3>
+          <p className="text-sm text-[var(--muted)] leading-relaxed">
+            Businesses post gigs and payouts are safely held until creator deliverables are marked complete. No bot clicks or fraudulent impressions.
+          </p>
+        </div>
       </div>
     </div>
   );
@@ -403,29 +286,133 @@ export function LegalPage({ title, updated, sections }: { title: string; updated
 
 export function TermsPage() {
   return (
-    <LegalPage
-      title="Terms & Conditions"
-      updated="September 2026"
-      sections={[
-        { heading: "Marketplace Terms", body: "Our platform connects creators and businesses for marketing collaborations. We facilitate transparent communication and deal matching." },
-        { heading: "Authentic Representations", body: "Businesses and creators agree to provide genuine metrics, location pincodes, and portfolios." },
-        { heading: "Payment & Escrow", body: "Paid campaigns utilize payment protection ensuring creators are compensated once agreed deliverables are verified live." },
-        { heading: "Content Standards", body: "All content produced under campaigns must comply with local consumer protection guidelines and advertising standards." },
-      ]}
-    />
+    <div id="page-terms">
+      <section id="terms" className="legal-page">
+        <div className="wrap">
+          <Link to="/" style={{ color: "var(--indigo)", fontWeight: 600, textDecoration: "none", fontSize: ".9rem" }}>
+            ← Back to Folksmint
+          </Link>
+          <h2 style={{ margin: "20px 0 30px" }}>
+            Terms and Conditions
+          </h2>
+
+          <div className="legal-section">
+            <h3>Acceptance of Terms</h3>
+            <p>
+              By creating a Folksmint account, you agree to these terms. If you don't agree, please don't use the platform.
+            </p>
+          </div>
+
+          <div className="legal-section">
+            <h3>Using Folksmint</h3>
+            <p>
+              Businesses and creators must provide accurate profile information and use the platform only for legitimate campaigns and collaborations.
+            </p>
+          </div>
+
+          <div className="legal-section">
+            <h3>Payments &amp; Fees</h3>
+            <p>
+              Subscription fees are billed per your chosen plan. Campaign payouts to creators are held by Folksmint until deliverables are marked complete, then released.
+            </p>
+          </div>
+
+          <div className="legal-section">
+            <h3>Responsibilities</h3>
+            <p>
+              Businesses are responsible for the campaigns they post; creators are responsible for delivering what they agree to. Folksmint is not a party to the underlying agreement between them.
+            </p>
+          </div>
+
+          <div className="legal-section">
+            <h3>Termination</h3>
+            <p>
+              Either side may cancel their subscription at any time. We may suspend accounts that violate these terms or engage in fraudulent click activity.
+            </p>
+          </div>
+
+          <div className="legal-section">
+            <h3>Limitation of Liability</h3>
+            <p>
+              Folksmint is provided "as is." We aren't liable for disputes between businesses and creators beyond facilitating the campaign and payment process.
+            </p>
+          </div>
+
+          <div className="legal-section">
+            <h3>Changes to These Terms</h3>
+            <p>
+              We may update these terms from time to time; continued use of Folksmint after changes means you accept the updated terms.
+            </p>
+          </div>
+
+          <div className="legal-section">
+            <h3>Contact Us</h3>
+            <p>
+              Questions about these terms can be sent to legal@folksmint.com.
+            </p>
+          </div>
+        </div>
+      </section>
+    </div>
   );
 }
 
 export function PrivacyPage() {
   return (
-    <LegalPage
-      title="Privacy Policy"
-      updated="September 2026"
-      sections={[
-        { heading: "Information Collected", body: "We collect basic profile details including name, business name, public social handles, and location pincode to facilitate local discovery." },
-        { heading: "Location & Pincode Usage", body: "Pincodes are used purely to calculate geographic proximity and display relevant local opportunities." },
-        { heading: "Data Protection", body: "We do not sell personal data to third parties. Contact details are shared only when businesses initiate explicit connections." },
-      ]}
-    />
+    <div id="page-privacy">
+      <section id="privacy" className="legal-page">
+        <div className="wrap">
+          <Link to="/" style={{ color: "var(--indigo)", fontWeight: 600, textDecoration: "none", fontSize: ".9rem" }}>
+            ← Back to Folksmint
+          </Link>
+          <h2 style={{ margin: "20px 0 30px" }}>
+            Privacy Policy
+          </h2>
+
+          <div className="legal-section">
+            <h3>Overview</h3>
+            <p>
+              Folksmint collects only the information needed to run campaigns, process payments, and connect businesses with creators. This page explains what we collect and how it's used.
+            </p>
+          </div>
+
+          <div className="legal-section">
+            <h3>Information We Collect</h3>
+            <p>
+              Account details (name, email, phone, pincode), campaign and payment activity, and basic usage data such as pages visited and clicks tracked for verified-click billing.
+            </p>
+          </div>
+
+          <div className="legal-section">
+            <h3>How We Use It</h3>
+            <p>
+              To match businesses with relevant creators, process payouts, prevent fraud on verified clicks, and send you campaign or account updates you've opted into.
+            </p>
+          </div>
+
+          <div className="legal-section">
+            <h3>Data Sharing</h3>
+            <p>
+              We share only what's necessary with payment processors and, when you apply to or accept a campaign, with the other party involved. We do not sell your personal data.
+            </p>
+          </div>
+
+          <div className="legal-section">
+            <h3>Your Rights</h3>
+            <p>
+              You can request a copy of your data, ask us to correct it, or delete your account at any time from your dashboard settings or by contacting us.
+            </p>
+          </div>
+
+          <div className="legal-section">
+            <h3>Contact Us</h3>
+            <p>
+              Questions about this policy can be sent to privacy@folksmint.com.
+            </p>
+          </div>
+        </div>
+      </section>
+    </div>
   );
 }
+

@@ -3,16 +3,19 @@ import RightAuthForms from '../../components/auth/RightAuthForms'
 
 export function AuthPage() {
   return (
-    <div className="relative mx-auto my-4 max-w-5xl px-2 py-4 sm:px-4">
+    <div className="flex min-h-[calc(100vh-76px)] items-center justify-center px-4 py-8 sm:py-12">
       {/* Background ambient decorative glows */}
-      <div className="pointer-events-none absolute -top-12 left-1/4 h-72 w-72 rounded-full bg-[#FF5A36]/10 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-12 right-1/4 h-72 w-72 rounded-full bg-[#6C4BFF]/10 blur-3xl" />
+      <div className="pointer-events-none absolute -top-12 left-1/4 h-72 w-72 rounded-full bg-[#2563EB]/5 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-12 right-1/4 h-72 w-72 rounded-full bg-[#1D4ED8]/5 blur-3xl" />
 
-      <div className="relative grid gap-6 lg:grid-cols-[1.05fr_1fr] lg:items-stretch">
+      <div className="relative w-full max-w-[940px] overflow-hidden rounded-[24px] border border-[var(--line)] bg-white shadow-xl grid lg:grid-cols-[0.95fr_1.05fr]">
         <LeftInfo />
         <RightAuthForms />
       </div>
     </div>
   )
 }
+
+
+
 
