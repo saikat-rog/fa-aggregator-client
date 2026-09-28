@@ -41,7 +41,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     { to: "/store", label: "Biolinks Store" },
     { to: "/campaign", label: "Campaigns" },
     { to: "/blogs", label: "Blog" },
-    { to: "/pricing", label: "Pricing" },
     ...(isAuthenticated
       ? role === "advisor"
         ? [
@@ -266,7 +265,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <Link to="/campaign">Campaigns</Link>
               <Link to="/auth">Sign In</Link>
               <Link to="/blogs">Blog</Link>
-              <Link to="/pricing">Pricing</Link>
               <Link to="/privacy">Privacy Policy</Link>
               <Link to="/terms">Terms and Conditions</Link>
               <Link to="/stories">Success Stories</Link>

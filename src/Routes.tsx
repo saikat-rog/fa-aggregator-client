@@ -24,7 +24,6 @@ import { StoreApplyPage } from "./pages/store/StoreApply.page";
 import { CampaignApplyPage } from "./pages/resources/CampaignApply.page";
 import CampaignApplicationsPage from "./pages/campaign/CampaignApplications.page";
 import {
-  PricingPage,
   TestimonialsPage,
   RevenueModelPage,
   TermsPage,
@@ -97,7 +96,6 @@ function App() {
             <Route path="/resources/:id" element={<ResourceDetailRedirect />} />
             <Route path="/creators" element={<DiscoverCreatorsPage />} />
             <Route path="/discover" element={<DiscoverCreatorsPage />} />
-            <Route path="/pricing" element={<PricingPage />} />
             <Route path="/stories" element={<TestimonialsPage />} />
             <Route path="/how-we-make-money" element={<RevenueModelPage />} />
             <Route path="/terms" element={<TermsPage />} />

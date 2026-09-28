@@ -1,11 +1,22 @@
 import { useEffect, useState } from "react";
-import { FiCreditCard, FiPlus, FiTrash2, FiExternalLink, FiCheck, FiRefreshCw, FiInfo } from "react-icons/fi";
+import {
+  FiCreditCard,
+  FiPlus,
+  FiTrash2,
+  FiCheck,
+  FiRefreshCw,
+  FiLayers,
+  FiDollarSign,
+  FiEye,
+} from "react-icons/fi";
 import {
   getPricingPlansAdminApi,
   updatePricingPlanAdminApi,
   createPricingPlanAdminApi,
   deletePricingPlanAdminApi,
   type PricingPlan,
+  type PricingCategory,
+  type PricingItem,
 } from "../../../services/pricing.service";
 import {
   inputClassName,
@@ -21,7 +32,6 @@ export function PricingPanel() {
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [savingId, setSavingId] = useState<string | null>(null);
   const [editingPlan, setEditingPlan] = useState<PricingPlan | null>(null);
-  const [newFeatureText, setNewFeatureText] = useState("");
 
   const load = async () => {
     setLoading(true);
@@ -47,10 +57,6 @@ export function PricingPanel() {
     load();
   }, []);
 
-  const isFreePlan = Boolean(
-    editingPlan && (editingPlan.planId === "free" || editingPlan.name.toLowerCase().trim() === "free")
-  );
-
   const handleSave = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!editingPlan) return;
@@ -62,19 +68,24 @@ export function PricingPanel() {
     try {
       const updated = await updatePricingPlanAdminApi(editingPlan._id, {
         name: editingPlan.name,
-        price: isFreePlan ? "₹0" : editingPlan.price,
+        kicker: editingPlan.kicker,
+        heading: editingPlan.heading,
+        subheading: editingPlan.subheading,
+        price: editingPlan.price,
         period: editingPlan.period,
-        tag: editingPlan.tag,
-        audience: editingPlan.audience,
-        pitch: editingPlan.pitch,
-        features: editingPlan.features,
-        paymentLink: isFreePlan ? "" : editingPlan.paymentLink,
+        originalTotal: editingPlan.originalTotal,
+        originalTotalLabel: editingPlan.originalTotalLabel,
+        joinLabel: editingPlan.joinLabel,
+        trialNote: editingPlan.trialNote,
         buttonText: editingPlan.buttonText,
+        buttonLink: editingPlan.buttonLink,
+        paymentLink: editingPlan.paymentLink,
+        categories: editingPlan.categories,
         isActive: editingPlan.isActive,
         order: editingPlan.order,
       });
 
-      setSuccessMsg(`Plan "${updated.name}" updated successfully!`);
+      setSuccessMsg(`Section / Plan "${updated.name}" updated successfully!`);
       setTimeout(() => setSuccessMsg(null), 4000);
       await load();
     } catch (err: any) {
@@ -92,11 +103,26 @@ export function PricingPanel() {
       setLoading(true);
       await createPricingPlanAdminApi({
         name: name.trim(),
-        price: "₹999",
-        period: "month",
-        tag: "violet",
-        buttonText: "Choose Plan",
-        features: ["Feature 1", "Feature 2"],
+        kicker: "For Businesses",
+        heading: "Custom Solutions for Teams",
+        subheading: "Complete suite tailored to your scale.",
+        price: "$49",
+        period: "mo",
+        originalTotal: "$299/mo",
+        originalTotalLabel: "What you'd spend otherwise",
+        joinLabel: `Join ${name.trim()}`,
+        trialNote: "✨ 14-day free trial, cancel anytime",
+        buttonText: "Start My Free Trial →",
+        buttonLink: "/auth",
+        categories: [
+          {
+            title: "Core Features",
+            items: [
+              { emoji: "⚡", title: "Feature 1", description: "Description for feature 1", price: "$20" },
+              { emoji: "🚀", title: "Feature 2", description: "Description for feature 2", price: "$30" },
+            ],
+          },
+        ],
       });
       await load();
     } catch (err: any) {
@@ -106,7 +132,7 @@ export function PricingPanel() {
   };
 
   const handleDelete = async (id: string, name: string) => {
-    if (!window.confirm(`Are you sure you want to delete "${name}" plan? This cannot be undone.`)) return;
+    if (!window.confirm(`Are you sure you want to delete "${name}"? This cannot be undone.`)) return;
 
     try {
       setLoading(true);
@@ -118,28 +144,85 @@ export function PricingPanel() {
     }
   };
 
-  const handleAddFeature = () => {
-    if (!editingPlan || !newFeatureText.trim()) return;
+  // Category management
+  const handleAddCategory = () => {
+    if (!editingPlan) return;
+    const newCategory: PricingCategory = {
+      title: "New Category",
+      items: [
+        { emoji: "✨", title: "New Item", description: "Item description", price: "$10" },
+      ],
+    };
     setEditingPlan({
       ...editingPlan,
-      features: [...(editingPlan.features || []), newFeatureText.trim()],
+      categories: [...(editingPlan.categories || []), newCategory],
     });
-    setNewFeatureText("");
   };
 
-  const handleRemoveFeature = (index: number) => {
+  const handleRemoveCategory = (catIdx: number) => {
     if (!editingPlan) return;
-    const updated = [...editingPlan.features];
-    updated.splice(index, 1);
-    setEditingPlan({ ...editingPlan, features: updated });
+    const updated = [...(editingPlan.categories || [])];
+    updated.splice(catIdx, 1);
+    setEditingPlan({ ...editingPlan, categories: updated });
   };
 
-  const handleUpdateFeature = (index: number, val: string) => {
+  const handleUpdateCategoryTitle = (catIdx: number, title: string) => {
     if (!editingPlan) return;
-    const updated = [...editingPlan.features];
-    updated[index] = val;
-    setEditingPlan({ ...editingPlan, features: updated });
+    const updated = [...(editingPlan.categories || [])];
+    updated[catIdx] = { ...updated[catIdx], title };
+    setEditingPlan({ ...editingPlan, categories: updated });
   };
+
+  // Item management inside categories
+  const handleAddItem = (catIdx: number) => {
+    if (!editingPlan) return;
+    const updated = [...(editingPlan.categories || [])];
+    const category = updated[catIdx];
+    if (!category) return;
+    const newItem: PricingItem = {
+      emoji: "✨",
+      title: "New Item",
+      description: "Description of item",
+      price: "$10",
+    };
+    updated[catIdx] = {
+      ...category,
+      items: [...(category.items || []), newItem],
+    };
+    setEditingPlan({ ...editingPlan, categories: updated });
+  };
+
+  const handleRemoveItem = (catIdx: number, itemIdx: number) => {
+    if (!editingPlan) return;
+    const updated = [...(editingPlan.categories || [])];
+    const category = updated[catIdx];
+    if (!category) return;
+    const items = [...(category.items || [])];
+    items.splice(itemIdx, 1);
+    updated[catIdx] = { ...category, items };
+    setEditingPlan({ ...editingPlan, categories: updated });
+  };
+
+  const handleUpdateItem = (
+    catIdx: number,
+    itemIdx: number,
+    field: keyof PricingItem,
+    val: string
+  ) => {
+    if (!editingPlan) return;
+    const updated = [...(editingPlan.categories || [])];
+    const category = updated[catIdx];
+    if (!category) return;
+    const items = [...(category.items || [])];
+    items[itemIdx] = { ...items[itemIdx], [field]: val };
+    updated[catIdx] = { ...category, items };
+    setEditingPlan({ ...editingPlan, categories: updated });
+  };
+
+  const isDefaultSection =
+    editingPlan?.planId === "business" ||
+    editingPlan?.planId === "creators" ||
+    editingPlan?.planId === "creator";
 
   return (
     <div className="space-y-6">
@@ -147,10 +230,10 @@ export function PricingPanel() {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
           <div>
             <h3 className="inline-flex items-center gap-2 text-lg font-bold text-slate-800">
-              <FiCreditCard className="text-blue-700 h-5 w-5" /> Pricing Plans & Payment Links
+              <FiCreditCard className="text-blue-700 h-5 w-5" /> Homepage Pricing Sections
             </h3>
             <p className="text-xs text-slate-500 mt-1">
-              Configure prices, recurring intervals, and custom payment links displayed on <code>/pricing</code>.
+              Configure prices, itemized costs, titles, and payment links for "For local business" and "For Creators" sections.
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -166,7 +249,7 @@ export function PricingPanel() {
               onClick={handleCreateNew}
               className="inline-flex items-center gap-1.5 rounded-xl bg-blue-700 px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-blue-800 shadow-sm transition"
             >
-              <FiPlus className="h-3.5 w-3.5" /> Add Plan
+              <FiPlus className="h-3.5 w-3.5" /> Add Section / Plan
             </button>
           </div>
         </div>
@@ -182,29 +265,26 @@ export function PricingPanel() {
         <div className="mt-5 flex flex-wrap gap-2.5">
           {plans.map((p) => {
             const isSelected = editingPlan?._id === p._id;
-            const isPlanFree = p.planId === "free" || p.name.toLowerCase().trim() === "free";
             return (
               <button
                 key={p._id}
                 onClick={() => setEditingPlan(p)}
-                className={`flex items-center gap-2.5 rounded-2xl border px-4 py-2.5 text-left transition ${
+                className={`flex items-center gap-3 rounded-2xl border px-4 py-3 text-left transition ${
                   isSelected
-                    ? "border-blue-600 bg-blue-50/70 ring-2 ring-blue-500/20 shadow-sm"
+                    ? "border-blue-600 bg-blue-50/80 ring-2 ring-blue-500/20 shadow-sm"
                     : "border-slate-200 bg-slate-50 hover:bg-white hover:border-slate-300 text-slate-700"
                 }`}
               >
                 <div>
                   <div className="text-xs font-bold text-slate-900">{p.name}</div>
-                  <div className="text-[11px] font-semibold text-blue-700">
-                    {p.price} <span className="text-slate-500 font-normal">/ {p.period}</span>
+                  <div className="text-[11px] font-semibold text-blue-700 mt-0.5">
+                    {p.price} <span className="text-slate-500 font-normal">/ {p.period || "mo"}</span>
                   </div>
                 </div>
-                {isPlanFree ? (
-                  <span className="text-[10px] font-bold text-slate-500 bg-slate-200 px-1.5 py-0.5 rounded">Free</span>
-                ) : p.paymentLink ? (
-                  <span className="h-2 w-2 rounded-full bg-emerald-500 shrink-0" title="Payment link configured" />
+                {p.paymentLink ? (
+                  <span className="h-2 w-2 rounded-full bg-emerald-500 shrink-0" title="Custom payment link active" />
                 ) : (
-                  <span className="h-2 w-2 rounded-full bg-amber-400 shrink-0" title="No payment link set" />
+                  <span className="h-2 w-2 rounded-full bg-slate-300 shrink-0" title="Default auth flow" />
                 )}
               </button>
             );
@@ -217,29 +297,22 @@ export function PricingPanel() {
         <section className={panelClassName}>
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-100 pb-4 mb-5">
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Editing Plan</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Editing Section</span>
               <h4 className="text-xl font-bold text-slate-800 flex items-center gap-2">
                 {editingPlan.name}
                 <span className="text-xs font-mono font-normal text-slate-400">({editingPlan.planId})</span>
-                {isFreePlan && (
-                  <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
-                    Free Tier
-                  </span>
-                )}
               </h4>
             </div>
             <div className="flex items-center gap-2">
-              {!isFreePlan && editingPlan.paymentLink ? (
-                <a
-                  href={editingPlan.paymentLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 transition"
-                >
-                  <FiExternalLink className="h-3.5 w-3.5" /> Test Link
-                </a>
-              ) : null}
-              {plans.length > 1 && !isFreePlan && (
+              <a
+                href={`/#${editingPlan.planId === "creators" ? "creators" : "business"}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-100 transition"
+              >
+                <FiEye className="h-3.5 w-3.5" /> View on Homepage
+              </a>
+              {!isDefaultSection && (
                 <button
                   type="button"
                   onClick={() => handleDelete(editingPlan._id, editingPlan.name)}
@@ -251,195 +324,281 @@ export function PricingPanel() {
             </div>
           </div>
 
-          <form onSubmit={handleSave} className="space-y-5">
-            {/* Top Grid: Name, Price, Period, Button Text */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Plan Name *</label>
-                <input
-                  type="text"
-                  required
-                  className={`w-full ${inputClassName}`}
-                  value={editingPlan.name}
-                  onChange={(e) => setEditingPlan({ ...editingPlan, name: e.target.value })}
-                  placeholder="e.g. Growth"
-                />
+          <form onSubmit={handleSave} className="space-y-6">
+            {/* Section Header Controls */}
+            <div className="bg-slate-50/70 p-4 rounded-2xl border border-slate-200 space-y-4">
+              <div className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                <FiLayers className="h-4 w-4 text-blue-700" /> Section Headings & Copy
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Plan Display Name *</label>
+                  <input
+                    type="text"
+                    required
+                    className={`w-full ${inputClassName}`}
+                    value={editingPlan.name}
+                    onChange={(e) => setEditingPlan({ ...editingPlan, name: e.target.value })}
+                    placeholder="e.g. Folksmint Business"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Kicker Tagline *</label>
+                  <input
+                    type="text"
+                    required
+                    className={`w-full ${inputClassName}`}
+                    value={editingPlan.kicker || ""}
+                    onChange={(e) => setEditingPlan({ ...editingPlan, kicker: e.target.value })}
+                    placeholder="e.g. For local business"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Section Main Heading *</label>
+                  <input
+                    type="text"
+                    required
+                    className={`w-full ${inputClassName}`}
+                    value={editingPlan.heading || ""}
+                    onChange={(e) => setEditingPlan({ ...editingPlan, heading: e.target.value })}
+                    placeholder="e.g. Everything AI marketing does"
+                  />
+                </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Price / Amount *{" "}
-                  {isFreePlan ? (
-                    <span className="text-slate-400 font-normal">(Fixed to ₹0)</span>
-                  ) : (
-                    <span className="text-slate-400 font-normal">(Display)</span>
-                  )}
-                </label>
-                <input
-                  type="text"
-                  required
-                  disabled={isFreePlan}
-                  className={`w-full ${inputClassName} font-semibold ${
-                    isFreePlan ? "bg-slate-100 text-slate-400 cursor-not-allowed" : "text-blue-700"
-                  }`}
-                  value={isFreePlan ? "₹0" : editingPlan.price}
-                  onChange={(e) => setEditingPlan({ ...editingPlan, price: e.target.value })}
-                  placeholder="e.g. ₹299 or From ₹50,000"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Billing Period *
-                </label>
-                <input
-                  type="text"
-                  required
+                <label className="block text-xs font-bold text-slate-700 mb-1">Section Subheading / Lead Text</label>
+                <textarea
+                  rows={2}
                   className={`w-full ${inputClassName}`}
-                  value={editingPlan.period}
-                  onChange={(e) => setEditingPlan({ ...editingPlan, period: e.target.value })}
-                  placeholder="e.g. month, 90-day sprint"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Button Text *
-                </label>
-                <input
-                  type="text"
-                  required
-                  className={`w-full ${inputClassName}`}
-                  value={editingPlan.buttonText || ""}
-                  onChange={(e) => setEditingPlan({ ...editingPlan, buttonText: e.target.value })}
-                  placeholder="e.g. Subscribe to Growth"
+                  value={editingPlan.subheading || ""}
+                  onChange={(e) => setEditingPlan({ ...editingPlan, subheading: e.target.value })}
+                  placeholder="e.g. One dashboard replaces your SEO tool, your social media manager..."
                 />
               </div>
             </div>
 
-            {/* Payment Link - For paid plans only */}
-            {isFreePlan ? (
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 flex items-start gap-3">
-                <FiInfo className="h-5 w-5 text-slate-500 shrink-0 mt-0.5" />
-                <div className="text-xs text-slate-600">
-                  <span className="font-bold text-slate-800">Free Plan — No Payment Link Needed</span>
-                  <p className="mt-0.5 text-slate-500">
-                    The Free plan does not accept payment links. On the pricing page, logged-in users see "Active", while visitors are prompted to sign up via the auth page.
-                  </p>
+            {/* Pricing, Totals & Buttons */}
+            <div className="bg-slate-50/70 p-4 rounded-2xl border border-slate-200 space-y-4">
+              <div className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                <FiDollarSign className="h-4 w-4 text-emerald-600" /> Pricing, Totals & Actions
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Plan Monthly Price *</label>
+                  <input
+                    type="text"
+                    required
+                    className={`w-full ${inputClassName} font-bold text-blue-700`}
+                    value={editingPlan.price}
+                    onChange={(e) => setEditingPlan({ ...editingPlan, price: e.target.value })}
+                    placeholder="e.g. $19"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Billing Period *</label>
+                  <input
+                    type="text"
+                    required
+                    className={`w-full ${inputClassName}`}
+                    value={editingPlan.period || "mo"}
+                    onChange={(e) => setEditingPlan({ ...editingPlan, period: e.target.value })}
+                    placeholder="e.g. mo or month"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Join Offer Text *</label>
+                  <input
+                    type="text"
+                    required
+                    className={`w-full ${inputClassName}`}
+                    value={editingPlan.joinLabel || ""}
+                    onChange={(e) => setEditingPlan({ ...editingPlan, joinLabel: e.target.value })}
+                    placeholder="e.g. Join Folksmint Business"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">"Spend Otherwise" Price</label>
+                  <input
+                    type="text"
+                    className={`w-full ${inputClassName}`}
+                    value={editingPlan.originalTotal || ""}
+                    onChange={(e) => setEditingPlan({ ...editingPlan, originalTotal: e.target.value })}
+                    placeholder="e.g. $134/mo"
+                  />
                 </div>
               </div>
-            ) : (
-              <div className="rounded-2xl border border-blue-200/80 bg-blue-50/40 p-4 space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="block text-xs font-bold text-blue-900">
-                    Payment Link URL <span className="font-normal text-blue-700">(Razorpay, Stripe, WhatsApp, etc.)</span>
-                  </label>
-                  {editingPlan.paymentLink ? (
-                    <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-md">
-                      Active Link Set
-                    </span>
-                  ) : (
-                    <span className="text-[11px] font-medium text-amber-700 bg-amber-100 px-2 py-0.5 rounded-md">
-                      No Link (Button disabled on page)
-                    </span>
-                  )}
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Trial Note Label</label>
+                  <input
+                    type="text"
+                    className={`w-full ${inputClassName}`}
+                    value={editingPlan.trialNote || ""}
+                    onChange={(e) => setEditingPlan({ ...editingPlan, trialNote: e.target.value })}
+                    placeholder="e.g. ✨ 14-day free trial, cancel anytime"
+                  />
                 </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">CTA Button Text *</label>
+                  <input
+                    type="text"
+                    required
+                    className={`w-full ${inputClassName}`}
+                    value={editingPlan.buttonText || ""}
+                    onChange={(e) => setEditingPlan({ ...editingPlan, buttonText: e.target.value })}
+                    placeholder="e.g. Start My Free Trial →"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Default Link Route</label>
+                  <input
+                    type="text"
+                    className={`w-full ${inputClassName}`}
+                    value={editingPlan.buttonLink || ""}
+                    onChange={(e) => setEditingPlan({ ...editingPlan, buttonLink: e.target.value })}
+                    placeholder="e.g. /auth?role=user or /auth?role=advisor"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Optional Custom Payment Link URL <span className="font-normal text-slate-400">(Overrides button link if provided)</span>
+                </label>
                 <input
                   type="url"
-                  className={`w-full ${inputClassName} bg-white text-blue-900 placeholder:text-blue-300 font-mono text-xs`}
+                  className={`w-full ${inputClassName} font-mono text-xs`}
                   value={editingPlan.paymentLink || ""}
                   onChange={(e) => setEditingPlan({ ...editingPlan, paymentLink: e.target.value })}
-                  placeholder="https://rzp.io/l/your-plan-link or https://buy.stripe.com/..."
-                />
-                <p className="text-[11px] text-slate-500">
-                  When a user clicks the button for this plan on <code>/pricing</code>, they will be redirected directly to this payment URL in a new tab.
-                </p>
-              </div>
-            )}
-
-            {/* Tag, Audience, Pitch */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Theme Tag</label>
-                <select
-                  className={`w-full ${inputClassName}`}
-                  value={editingPlan.tag || "gray"}
-                  onChange={(e) => setEditingPlan({ ...editingPlan, tag: e.target.value })}
-                >
-                  <option value="gray">Gray (Neutral / Default)</option>
-                  <option value="violet">Violet (Growth / Recommended)</option>
-                  <option value="coral">Coral (Pro / Studio / Premium)</option>
-                </select>
-              </div>
-
-              <div className="sm:col-span-2">
-                <label className="block text-xs font-bold text-slate-700 mb-1">Target Audience Label</label>
-                <input
-                  type="text"
-                  className={`w-full ${inputClassName}`}
-                  value={editingPlan.audience || ""}
-                  onChange={(e) => setEditingPlan({ ...editingPlan, audience: e.target.value })}
-                  placeholder="e.g. FOR BUSINESSES · RUN CAMPAIGNS ON REPEAT"
+                  placeholder="https://rzp.io/l/your-link or https://buy.stripe.com/..."
                 />
               </div>
             </div>
 
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">Pitch / Summary Description</label>
-              <textarea
-                rows={2}
-                className={`w-full ${inputClassName}`}
-                value={editingPlan.pitch || ""}
-                onChange={(e) => setEditingPlan({ ...editingPlan, pitch: e.target.value })}
-                placeholder="Short value proposition summary for this plan..."
-              />
-            </div>
-
-            {/* Features List */}
-            <div className="space-y-3 pt-2">
-              <label className="block text-xs font-bold text-slate-700">Features Checklist</label>
-              <div className="space-y-2">
-                {editingPlan.features?.map((feat, idx) => (
-                  <div key={idx} className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      className={`w-full ${inputClassName}`}
-                      value={feat}
-                      onChange={(e) => handleUpdateFeature(idx, e.target.value)}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveFeature(idx)}
-                      className="p-2 text-slate-400 hover:text-red-600 transition rounded-lg hover:bg-red-50"
-                      title="Remove feature"
-                    >
-                      <FiTrash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex gap-2 mt-2">
-                <input
-                  type="text"
-                  className={`w-full ${inputClassName}`}
-                  placeholder="Add a new feature bullet..."
-                  value={newFeatureText}
-                  onChange={(e) => setNewFeatureText(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      handleAddFeature();
-                    }
-                  }}
-                />
+            {/* Feature Categories & Itemized Row Prices */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h5 className="text-sm font-bold text-slate-800">Feature Categories & Comparison Items</h5>
+                  <p className="text-xs text-slate-500">
+                    Add or update every item, title, description, emoji icon, and comparative price.
+                  </p>
+                </div>
                 <button
                   type="button"
-                  onClick={handleAddFeature}
-                  className="rounded-xl border border-slate-300 bg-slate-100 px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-200 transition"
+                  onClick={handleAddCategory}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-700 hover:bg-blue-100 transition"
                 >
-                  Add
+                  <FiPlus className="h-3.5 w-3.5" /> Add Category
                 </button>
+              </div>
+
+              <div className="space-y-5">
+                {(editingPlan.categories || []).map((cat, catIdx) => (
+                  <div
+                    key={catIdx}
+                    className="rounded-2xl border border-slate-200 bg-slate-50/50 p-4 space-y-3"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex-1">
+                        <label className="block text-[11px] font-bold uppercase text-slate-500 mb-1">
+                          Category Title {catIdx + 1}
+                        </label>
+                        <input
+                          type="text"
+                          className={`w-full font-bold text-slate-800 ${inputClassName}`}
+                          value={cat.title}
+                          onChange={(e) => handleUpdateCategoryTitle(catIdx, e.target.value)}
+                          placeholder="e.g. 📈 Visibility & audits"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveCategory(catIdx)}
+                        className="p-2 text-slate-400 hover:text-red-600 transition rounded-lg hover:bg-red-50 mt-5"
+                        title="Delete Category"
+                      >
+                        <FiTrash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+
+                    {/* Category Items */}
+                    <div className="space-y-2 pt-2">
+                      <label className="block text-[11px] font-bold uppercase text-slate-500">
+                        Itemized Features & Prices
+                      </label>
+
+                      {(cat.items || []).map((item, itemIdx) => (
+                        <div
+                          key={itemIdx}
+                          className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 bg-white p-2.5 rounded-xl border border-slate-200 shadow-2xs"
+                        >
+                          <input
+                            type="text"
+                            title="Emoji"
+                            className="w-12 text-center rounded-lg border border-slate-300 bg-slate-50 px-1 py-1.5 text-base"
+                            value={item.emoji || "✨"}
+                            onChange={(e) =>
+                              handleUpdateItem(catIdx, itemIdx, "emoji", e.target.value)
+                            }
+                            placeholder="🔍"
+                          />
+                          <input
+                            type="text"
+                            className={`flex-1 ${inputClassName}`}
+                            value={item.title}
+                            onChange={(e) =>
+                              handleUpdateItem(catIdx, itemIdx, "title", e.target.value)
+                            }
+                            placeholder="Feature Title (e.g. SEO Keyword Analysis)"
+                          />
+                          <input
+                            type="text"
+                            className={`flex-1 ${inputClassName}`}
+                            value={item.description || ""}
+                            onChange={(e) =>
+                              handleUpdateItem(catIdx, itemIdx, "description", e.target.value)
+                            }
+                            placeholder="Description / Subtitle"
+                          />
+                          <input
+                            type="text"
+                            className="w-24 font-bold text-blue-700 rounded-xl border border-slate-300 bg-slate-50 px-2 py-1.5 text-sm"
+                            value={item.price || ""}
+                            onChange={(e) =>
+                              handleUpdateItem(catIdx, itemIdx, "price", e.target.value)
+                            }
+                            placeholder="$20"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveItem(catIdx, itemIdx)}
+                            className="p-2 text-slate-400 hover:text-red-600 transition rounded-lg hover:bg-red-50 shrink-0 self-center"
+                            title="Remove Item"
+                          >
+                            <FiTrash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ))}
+
+                      <button
+                        type="button"
+                        onClick={() => handleAddItem(catIdx)}
+                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-700 hover:text-blue-800 py-1.5 px-2 rounded-lg hover:bg-blue-50/80 transition"
+                      >
+                        <FiPlus className="h-3.5 w-3.5" /> Add Item to "{cat.title || "Category"}"
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -452,7 +611,7 @@ export function PricingPanel() {
                   onChange={(e) => setEditingPlan({ ...editingPlan, isActive: e.target.checked })}
                   className="rounded text-blue-600 focus:ring-blue-500 h-4 w-4"
                 />
-                <span className="text-xs font-semibold text-slate-700">Display this plan publicly</span>
+                <span className="text-xs font-semibold text-slate-700">Display this section publicly on home</span>
               </label>
 
               <button
@@ -466,7 +625,7 @@ export function PricingPanel() {
                   </>
                 ) : (
                   <>
-                    <FiCheck className="h-4 w-4" /> Save Plan Details
+                    <FiCheck className="h-4 w-4" /> Save Section & Pricing
                   </>
                 )}
               </button>

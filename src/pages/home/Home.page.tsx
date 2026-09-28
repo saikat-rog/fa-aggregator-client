@@ -1,8 +1,84 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { HomeSeo } from "./Home.seo";
 import type { HomePageProps } from "./Home.types";
+import { getPricingPlansApi, type PricingPlan } from "../../services/pricing.service";
 export type { AdvisorApiItem } from "./Home.types";
+
+const DEFAULT_BUSINESS_PLAN: PricingPlan = {
+  _id: "default-business",
+  planId: "business",
+  name: "Folksmint Business",
+  kicker: "For local business",
+  heading: "Everything AI marketing does",
+  subheading: "One dashboard replaces your SEO tool, your social media manager, and your review-reply habit.",
+  price: "$19",
+  period: "mo",
+  originalTotal: "$134/mo",
+  originalTotalLabel: "What you'd spend otherwise",
+  joinLabel: "Join Folksmint Business",
+  trialNote: "✨ 14-day free trial, cancel anytime",
+  buttonText: "Start My Free Trial →",
+  buttonLink: "/auth?role=user",
+  paymentLink: "",
+  categories: [
+    {
+      title: "📈 Visibility & audits",
+      items: [
+        { emoji: "🔍", title: "Free Google Score Audit", description: "Full audit of your online performance", price: "$25" },
+        { emoji: "🔑", title: "SEO Keyword Analysis", description: "Targeted keywords to boost search traffic", price: "$20" },
+        { emoji: "🎯", title: "Competitor Analysis", description: "See what's working for others nearby", price: "$20" },
+      ],
+    },
+    {
+      title: "💬 Reputation & content",
+      items: [
+        { emoji: "✍️", title: "Personalized Google Review Replies", description: "On-brand replies drafted automatically", price: "$15" },
+        { emoji: "🖼️", title: "Weekly Image Updates for Google", description: "Keeps your profile fresh and current", price: "$15" },
+        { emoji: "📲", title: "AI Social Posting", description: "Captions + images, posted to FB & IG together", price: "$29" },
+        { emoji: "📊", title: "Daily Reports on WhatsApp", description: "Your numbers, delivered where you already are", price: "$10" },
+      ],
+    },
+  ],
+};
+
+const DEFAULT_CREATOR_PLAN: PricingPlan = {
+  _id: "default-creators",
+  planId: "creators",
+  name: "Folksmint Creator",
+  kicker: "For Creators",
+  heading: "Everything your creator business needs",
+  subheading: "One dashboard replaces your storefront, booking tool, course platform, and audience growth stack.",
+  price: "$29",
+  period: "mo",
+  originalTotal: "$413/mo",
+  originalTotalLabel: "What you'd spend otherwise",
+  joinLabel: "Join Folksmint Creator",
+  trialNote: "✨ 14-day free trial, cancel anytime",
+  buttonText: "Start My Free Trial →",
+  buttonLink: "/auth?role=advisor",
+  paymentLink: "",
+  categories: [
+    {
+      title: "🛍️ Storefront & sales",
+      items: [
+        { emoji: "📱", title: "Mobile \"Link-in-Bio\" Store", description: "Replaces Squarespace, Linktree", price: "$29" },
+        { emoji: "📅", title: "Calendar Invites & Bookings", description: "Replaces Calendly, Acuity", price: "$15" },
+        { emoji: "🎓", title: "Course Builder", description: "Replaces Kajabi", price: "$119" },
+      ],
+    },
+    {
+      title: "📣 Growth & community",
+      items: [
+        { emoji: "📈", title: "Audience Analytics", description: "Replaces Google Analytics", price: "$10" },
+        { emoji: "✈️", title: "Instagram AutoDMs", description: "Replaces Manychat", price: "$15" },
+        { emoji: "✉️", title: "Email List / Newsletter Builder", description: "Own your audience, not just your followers", price: "$29" },
+        { emoji: "🔒", title: "Exclusive Creator Community", description: "Access to fellow creators & swipe files", price: "$97" },
+        { emoji: "🛠️", title: "1:1 Creator Strategy Coaching", description: "Personal guidance on growing your store", price: "$99" },
+      ],
+    },
+  ],
+};
 
 const FAQ = [
   {
@@ -68,6 +144,7 @@ function NewsletterSection() {
 
 export function HomePage(_props: HomePageProps = {}) {
   const [faqOpen, setFaqOpen] = useState<number | null>(null);
+  const [pricingPlans, setPricingPlans] = useState<PricingPlan[]>([]);
   const location = useLocation();
 
   useEffect(() => {
@@ -79,6 +156,28 @@ export function HomePage(_props: HomePageProps = {}) {
       }
     }
   }, [location.hash]);
+
+  useEffect(() => {
+    getPricingPlansApi()
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setPricingPlans(data);
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to load pricing plans:", err);
+      });
+  }, []);
+
+  const businessPlan: PricingPlan =
+    pricingPlans.find((p) => p.planId === "business") ||
+    pricingPlans[0] ||
+    DEFAULT_BUSINESS_PLAN;
+
+  const creatorPlan: PricingPlan =
+    pricingPlans.find((p) => p.planId === "creators" || p.planId === "creator") ||
+    pricingPlans[1] ||
+    DEFAULT_CREATOR_PLAN;
 
   return (
     <div className="w-full" id="page-home">
@@ -107,87 +206,66 @@ export function HomePage(_props: HomePageProps = {}) {
       <section id="business">
         <div className="wrap">
           <div className="section-head">
-            <div className="kicker">For local business</div>
-            <h2>Everything AI marketing does</h2>
-            <p>One dashboard replaces your SEO tool, your social media manager, and your review-reply habit.</p>
+            <div className="kicker">{businessPlan.kicker || "For local business"}</div>
+            <h2>{businessPlan.heading || "Everything AI marketing does"}</h2>
+            <p>{businessPlan.subheading || "One dashboard replaces your SEO tool, your social media manager, and your review-reply habit."}</p>
           </div>
 
           <div className="stack-wrap stack-wrap-single">
             <div className="stack-card">
-              <div className="stack-title">📈 Visibility & audits</div>
-              <div className="stack-row">
-                <span className="emo">🔍</span>
-                <div>
-                  <div className="t">Free Google Score Audit</div>
-                  <div className="r">Full audit of your online performance</div>
-                </div>
-                <span className="price">$25</span>
-              </div>
-              <div className="stack-row">
-                <span className="emo">🔑</span>
-                <div>
-                  <div className="t">SEO Keyword Analysis</div>
-                  <div className="r">Targeted keywords to boost search traffic</div>
-                </div>
-                <span className="price">$20</span>
-              </div>
-              <div className="stack-row">
-                <span className="emo">🎯</span>
-                <div>
-                  <div className="t">Competitor Analysis</div>
-                  <div className="r">See what's working for others nearby</div>
-                </div>
-                <span className="price">$20</span>
-              </div>
-
-              <div className="stack-title">💬 Reputation & content</div>
-              <div className="stack-row">
-                <span className="emo">✍️</span>
-                <div>
-                  <div className="t">Personalized Google Review Replies</div>
-                  <div className="r">On-brand replies drafted automatically</div>
-                </div>
-                <span className="price">$15</span>
-              </div>
-              <div className="stack-row">
-                <span className="emo">🖼️</span>
-                <div>
-                  <div className="t">Weekly Image Updates for Google</div>
-                  <div className="r">Keeps your profile fresh and current</div>
-                </div>
-                <span className="price">$15</span>
-              </div>
-              <div className="stack-row">
-                <span className="emo">📲</span>
-                <div>
-                  <div className="t">AI Social Posting</div>
-                  <div className="r">Captions + images, posted to FB & IG together</div>
-                </div>
-                <span className="price">$29</span>
-              </div>
-              <div className="stack-row">
-                <span className="emo">📊</span>
-                <div>
-                  <div className="t">Daily Reports on WhatsApp</div>
-                  <div className="r">Your numbers, delivered where you already are</div>
-                </div>
-                <span className="price">$10</span>
-              </div>
+              {(businessPlan.categories || []).map((cat, catIdx) => (
+                <React.Fragment key={cat.title || catIdx}>
+                  <div className="stack-title">{cat.title}</div>
+                  {(cat.items || []).map((item, itemIdx) => (
+                    <div className="stack-row" key={item.title || itemIdx}>
+                      <span className="emo">{item.emoji || "✨"}</span>
+                      <div>
+                        <div className="t">{item.title}</div>
+                        {item.description ? <div className="r">{item.description}</div> : null}
+                      </div>
+                      {item.price ? <span className="price">{item.price}</span> : null}
+                    </div>
+                  ))}
+                </React.Fragment>
+              ))}
 
               <div className="stack-total">
                 <span className="emo">✕</span>
-                <span className="t">What you'd spend otherwise</span>
-                <span className="price">$134/mo</span>
+                <span className="t">{businessPlan.originalTotalLabel || "What you'd spend otherwise"}</span>
+                <span className="price">{businessPlan.originalTotal || "$134/mo"}</span>
               </div>
               <div className="stack-join">
                 <span className="emo">🪙</span>
-                <span className="t">Join Folksmint Business</span>
-                <span className="price">$19/mo</span>
+                <span className="t">{businessPlan.joinLabel || "Join Folksmint Business"}</span>
+                <span className="price">
+                  {businessPlan.price
+                    ? businessPlan.period
+                      ? `${businessPlan.price}/${businessPlan.period}`
+                      : businessPlan.price
+                    : "$19/mo"}
+                </span>
               </div>
-              <div className="trial-note">✨ 14-day free trial, cancel anytime</div>
-              <Link to="/auth?role=user" className="pill-btn pill-navy plan-cta">
-                Start My Free Trial →
-              </Link>
+              {businessPlan.trialNote ? (
+                <div className="trial-note">{businessPlan.trialNote}</div>
+              ) : null}
+
+              {businessPlan.paymentLink ? (
+                <a
+                  href={businessPlan.paymentLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="pill-btn pill-navy plan-cta"
+                >
+                  {businessPlan.buttonText || "Start My Free Trial →"}
+                </a>
+              ) : (
+                <Link
+                  to={businessPlan.buttonLink || "/auth?role=user"}
+                  className="pill-btn pill-navy plan-cta"
+                >
+                  {businessPlan.buttonText || "Start My Free Trial →"}
+                </Link>
+              )}
             </div>
           </div>
         </div>
@@ -197,95 +275,66 @@ export function HomePage(_props: HomePageProps = {}) {
       <section id="creators">
         <div className="wrap">
           <div className="section-head">
-            <div className="kicker">For Creators</div>
-            <h2>Everything your creator business needs</h2>
-            <p>One dashboard replaces your storefront, booking tool, course platform, and audience growth stack.</p>
+            <div className="kicker">{creatorPlan.kicker || "For Creators"}</div>
+            <h2>{creatorPlan.heading || "Everything your creator business needs"}</h2>
+            <p>{creatorPlan.subheading || "One dashboard replaces your storefront, booking tool, course platform, and audience growth stack."}</p>
           </div>
 
           <div className="stack-wrap stack-wrap-single">
             <div className="stack-card">
-              <div className="stack-title">🛍️ Storefront & sales</div>
-              <div className="stack-row">
-                <span className="emo">📱</span>
-                <div>
-                  <div className="t">Mobile "Link-in-Bio" Store</div>
-                  <div className="r">Replaces Squarespace, Linktree</div>
-                </div>
-                <span className="price">$29</span>
-              </div>
-              <div className="stack-row">
-                <span className="emo">📅</span>
-                <div>
-                  <div className="t">Calendar Invites & Bookings</div>
-                  <div className="r">Replaces Calendly, Acuity</div>
-                </div>
-                <span className="price">$15</span>
-              </div>
-              <div className="stack-row">
-                <span className="emo">🎓</span>
-                <div>
-                  <div className="t">Course Builder</div>
-                  <div className="r">Replaces Kajabi</div>
-                </div>
-                <span className="price">$119</span>
-              </div>
-
-              <div className="stack-title">📣 Growth & community</div>
-              <div className="stack-row">
-                <span className="emo">📈</span>
-                <div>
-                  <div className="t">Audience Analytics</div>
-                  <div className="r">Replaces Google Analytics</div>
-                </div>
-                <span className="price">$10</span>
-              </div>
-              <div className="stack-row">
-                <span className="emo">✈️</span>
-                <div>
-                  <div className="t">Instagram AutoDMs</div>
-                  <div className="r">Replaces Manychat</div>
-                </div>
-                <span className="price">$15</span>
-              </div>
-              <div className="stack-row">
-                <span className="emo">✉️</span>
-                <div>
-                  <div className="t">Email List / Newsletter Builder</div>
-                  <div className="r">Own your audience, not just your followers</div>
-                </div>
-                <span className="price">$29</span>
-              </div>
-              <div className="stack-row">
-                <span className="emo">🔒</span>
-                <div>
-                  <div className="t">Exclusive Creator Community</div>
-                  <div className="r">Access to fellow creators & swipe files</div>
-                </div>
-                <span className="price">$97</span>
-              </div>
-              <div className="stack-row">
-                <span className="emo">🛠️</span>
-                <div>
-                  <div className="t">1:1 Creator Strategy Coaching</div>
-                  <div className="r">Personal guidance on growing your store</div>
-                </div>
-                <span className="price">$99</span>
-              </div>
+              {(creatorPlan.categories || []).map((cat, catIdx) => (
+                <React.Fragment key={cat.title || catIdx}>
+                  <div className="stack-title">{cat.title}</div>
+                  {(cat.items || []).map((item, itemIdx) => (
+                    <div className="stack-row" key={item.title || itemIdx}>
+                      <span className="emo">{item.emoji || "✨"}</span>
+                      <div>
+                        <div className="t">{item.title}</div>
+                        {item.description ? <div className="r">{item.description}</div> : null}
+                      </div>
+                      {item.price ? <span className="price">{item.price}</span> : null}
+                    </div>
+                  ))}
+                </React.Fragment>
+              ))}
 
               <div className="stack-total">
                 <span className="emo">✕</span>
-                <span className="t">What you'd spend otherwise</span>
-                <span className="price">$413/mo</span>
+                <span className="t">{creatorPlan.originalTotalLabel || "What you'd spend otherwise"}</span>
+                <span className="price">{creatorPlan.originalTotal || "$413/mo"}</span>
               </div>
               <div className="stack-join">
                 <span className="emo">🪙</span>
-                <span className="t">Join Folksmint Creator</span>
-                <span className="price">$29/mo</span>
+                <span className="t">{creatorPlan.joinLabel || "Join Folksmint Creator"}</span>
+                <span className="price">
+                  {creatorPlan.price
+                    ? creatorPlan.period
+                      ? `${creatorPlan.price}/${creatorPlan.period}`
+                      : creatorPlan.price
+                    : "$29/mo"}
+                </span>
               </div>
-              <div className="trial-note">✨ 14-day free trial, cancel anytime</div>
-              <Link to="/auth?role=advisor" className="pill-btn pill-navy plan-cta">
-                Start My Free Trial →
-              </Link>
+              {creatorPlan.trialNote ? (
+                <div className="trial-note">{creatorPlan.trialNote}</div>
+              ) : null}
+
+              {creatorPlan.paymentLink ? (
+                <a
+                  href={creatorPlan.paymentLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="pill-btn pill-navy plan-cta"
+                >
+                  {creatorPlan.buttonText || "Start My Free Trial →"}
+                </a>
+              ) : (
+                <Link
+                  to={creatorPlan.buttonLink || "/auth?role=advisor"}
+                  className="pill-btn pill-navy plan-cta"
+                >
+                  {creatorPlan.buttonText || "Start My Free Trial →"}
+                </Link>
+              )}
             </div>
           </div>
 
@@ -473,5 +522,3 @@ export function HomePage(_props: HomePageProps = {}) {
     </div>
   );
 }
-
-

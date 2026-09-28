@@ -1,18 +1,35 @@
 import api from "../lib/api";
 import adminApi from "../lib/adminApi";
 
+export interface PricingItem {
+  emoji?: string;
+  title: string;
+  description?: string;
+  price?: string;
+}
+
+export interface PricingCategory {
+  title: string;
+  items: PricingItem[];
+}
+
 export interface PricingPlan {
   _id: string;
   planId: string;
   name: string;
+  kicker?: string;
+  heading?: string;
+  subheading?: string;
   price: string;
-  period: string;
-  tag?: string;
-  audience?: string;
-  pitch?: string;
-  features: string[];
-  paymentLink?: string;
+  period?: string;
+  originalTotal?: string;
+  originalTotalLabel?: string;
+  joinLabel?: string;
+  trialNote?: string;
   buttonText?: string;
+  buttonLink?: string;
+  paymentLink?: string;
+  categories: PricingCategory[];
   isActive?: boolean;
   order?: number;
   createdAt?: string;
@@ -22,14 +39,19 @@ export interface PricingPlan {
 export interface PricingPlanInput {
   name?: string;
   planId?: string;
+  kicker?: string;
+  heading?: string;
+  subheading?: string;
   price?: string;
   period?: string;
-  tag?: string;
-  audience?: string;
-  pitch?: string;
-  features?: string[];
-  paymentLink?: string;
+  originalTotal?: string;
+  originalTotalLabel?: string;
+  joinLabel?: string;
+  trialNote?: string;
   buttonText?: string;
+  buttonLink?: string;
+  paymentLink?: string;
+  categories?: PricingCategory[];
   isActive?: boolean;
   order?: number;
 }
