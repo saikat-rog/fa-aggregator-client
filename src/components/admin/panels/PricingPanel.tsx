@@ -8,6 +8,7 @@ import {
   FiLayers,
   FiDollarSign,
   FiEye,
+  FiTag,
 } from "react-icons/fi";
 import {
   getPricingPlansAdminApi,
@@ -24,6 +25,26 @@ import {
   statusEmptyClassName,
   statusErrorClassName,
 } from "../adminPage.shared";
+
+function calculateDiscount(price?: string, yearlyPrice?: string): number {
+  if (!price || !yearlyPrice) return 0;
+  const parseNum = (val: string) => {
+    const num = parseFloat(val.replace(/[^0-9.]/g, ""));
+    return Number.isFinite(num) ? num : 0;
+  };
+  const m = parseNum(price);
+  const y = parseNum(yearlyPrice);
+  if (m > 0 && y > 0) {
+    if (y < m) {
+      return Math.round(((m - y) / m) * 100);
+    }
+    const annualM = m * 12;
+    if (y < annualM) {
+      return Math.round(((annualM - y) / annualM) * 100);
+    }
+  }
+  return 0;
+}
 
 export function PricingPanel() {
   const [plans, setPlans] = useState<PricingPlan[]>([]);
@@ -73,12 +94,19 @@ export function PricingPanel() {
         subheading: editingPlan.subheading,
         price: editingPlan.price,
         period: editingPlan.period,
+        yearlyPrice: editingPlan.yearlyPrice,
+        yearlyPeriod: editingPlan.yearlyPeriod,
+        yearlyPaymentLink: editingPlan.yearlyPaymentLink,
+        yearlyDiscountPercent: editingPlan.yearlyDiscountPercent,
+        yearlyOriginalTotal: editingPlan.yearlyOriginalTotal,
         originalTotal: editingPlan.originalTotal,
         originalTotalLabel: editingPlan.originalTotalLabel,
         joinLabel: editingPlan.joinLabel,
         trialNote: editingPlan.trialNote,
         buttonText: editingPlan.buttonText,
         buttonLink: editingPlan.buttonLink,
+        yearlyButtonText: editingPlan.yearlyButtonText,
+        yearlyButtonLink: editingPlan.yearlyButtonLink,
         paymentLink: editingPlan.paymentLink,
         categories: editingPlan.categories,
         isActive: editingPlan.isActive,
@@ -108,12 +136,17 @@ export function PricingPanel() {
         subheading: "Complete suite tailored to your scale.",
         price: "$49",
         period: "mo",
+        yearlyPrice: "$39",
+        yearlyPeriod: "mo",
+        yearlyDiscountPercent: 20,
         originalTotal: "$299/mo",
         originalTotalLabel: "What you'd spend otherwise",
-        joinLabel: `Join ${name.trim()}`,
+        joinLabel: `Join ${name.trim()} (Monthly)`,
         trialNote: "✨ 14-day free trial, cancel anytime",
-        buttonText: "Start My Free Trial →",
+        buttonText: "Start Monthly Trial →",
         buttonLink: "/auth",
+        yearlyButtonText: "Get Yearly Plan (Save 20%) →",
+        yearlyButtonLink: "/auth?billing=yearly",
         categories: [
           {
             title: "Core Features",
@@ -224,6 +257,8 @@ export function PricingPanel() {
     editingPlan?.planId === "creators" ||
     editingPlan?.planId === "creator";
 
+  const autoDiscount = editingPlan ? calculateDiscount(editingPlan.price, editingPlan.yearlyPrice) : 0;
+
   return (
     <div className="space-y-6">
       <section className={panelClassName}>
@@ -233,7 +268,7 @@ export function PricingPanel() {
               <FiCreditCard className="text-blue-700 h-5 w-5" /> Homepage Pricing Sections
             </h3>
             <p className="text-xs text-slate-500 mt-1">
-              Configure prices, itemized costs, titles, and payment links for "For local business" and "For Creators" sections.
+              Configure monthly & yearly prices, discount percentages, dedicated monthly & yearly CTA buttons, itemized costs, and payment links.
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -265,6 +300,10 @@ export function PricingPanel() {
         <div className="mt-5 flex flex-wrap gap-2.5">
           {plans.map((p) => {
             const isSelected = editingPlan?._id === p._id;
+            const discount = (typeof p.yearlyDiscountPercent === "number" && p.yearlyDiscountPercent > 0)
+              ? p.yearlyDiscountPercent
+              : calculateDiscount(p.price, p.yearlyPrice);
+
             return (
               <button
                 key={p._id}
@@ -276,12 +315,22 @@ export function PricingPanel() {
                 }`}
               >
                 <div>
-                  <div className="text-xs font-bold text-slate-900">{p.name}</div>
+                  <div className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                    {p.name}
+                    {discount > 0 ? (
+                      <span className="text-[10px] font-extrabold bg-emerald-100 text-emerald-700 px-1.5 py-0.2 rounded-full">
+                        {discount}% OFF
+                      </span>
+                    ) : null}
+                  </div>
                   <div className="text-[11px] font-semibold text-blue-700 mt-0.5">
                     {p.price} <span className="text-slate-500 font-normal">/ {p.period || "mo"}</span>
+                    {p.yearlyPrice ? (
+                      <span className="text-emerald-700 font-normal"> · {p.yearlyPrice}/{p.yearlyPeriod || "mo"} (yr)</span>
+                    ) : null}
                   </div>
                 </div>
-                {p.paymentLink ? (
+                {p.paymentLink || p.yearlyPaymentLink ? (
                   <span className="h-2 w-2 rounded-full bg-emerald-500 shrink-0" title="Custom payment link active" />
                 ) : (
                   <span className="h-2 w-2 rounded-full bg-slate-300 shrink-0" title="Default auth flow" />
@@ -378,15 +427,15 @@ export function PricingPanel() {
               </div>
             </div>
 
-            {/* Pricing, Totals & Buttons */}
+            {/* Monthly Pricing, Totals & Monthly Button */}
             <div className="bg-slate-50/70 p-4 rounded-2xl border border-slate-200 space-y-4">
               <div className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                <FiDollarSign className="h-4 w-4 text-emerald-600" /> Pricing, Totals & Actions
+                <FiDollarSign className="h-4 w-4 text-blue-700" /> Monthly Plan & Button
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Plan Monthly Price *</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Monthly Plan Price *</label>
                   <input
                     type="text"
                     required
@@ -446,19 +495,19 @@ export function PricingPanel() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">CTA Button Text *</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Monthly CTA Button Text *</label>
                   <input
                     type="text"
                     required
                     className={`w-full ${inputClassName}`}
                     value={editingPlan.buttonText || ""}
                     onChange={(e) => setEditingPlan({ ...editingPlan, buttonText: e.target.value })}
-                    placeholder="e.g. Start My Free Trial →"
+                    placeholder="e.g. Start Monthly Trial →"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Default Link Route</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Monthly Link Route</label>
                   <input
                     type="text"
                     className={`w-full ${inputClassName}`}
@@ -471,15 +520,149 @@ export function PricingPanel() {
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Optional Custom Payment Link URL <span className="font-normal text-slate-400">(Overrides button link if provided)</span>
+                  Monthly Custom Payment Link URL <span className="font-normal text-slate-400">(Overrides button link if provided)</span>
                 </label>
                 <input
                   type="url"
                   className={`w-full ${inputClassName} font-mono text-xs`}
                   value={editingPlan.paymentLink || ""}
                   onChange={(e) => setEditingPlan({ ...editingPlan, paymentLink: e.target.value })}
-                  placeholder="https://rzp.io/l/your-link or https://buy.stripe.com/..."
+                  placeholder="https://rzp.io/l/your-monthly-link or https://buy.stripe.com/..."
                 />
+              </div>
+            </div>
+
+            {/* Yearly Pricing Configuration & Dedicated Button */}
+            <div className="bg-emerald-50/50 p-4 rounded-2xl border border-emerald-200/80 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="text-xs font-bold text-emerald-900 flex items-center gap-1.5">
+                  <FiTag className="h-4 w-4 text-emerald-700" /> Yearly Plan & Dedicated Button
+                </div>
+                {editingPlan.yearlyPrice ? (
+                  <span className="text-[11px] font-bold text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full">
+                    Yearly Button Active
+                  </span>
+                ) : (
+                  <span className="text-[11px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">
+                    Optional (Leave blank to hide yearly button on card)
+                  </span>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-emerald-900 mb-1">
+                    Yearly Plan Price
+                  </label>
+                  <input
+                    type="text"
+                    className={`w-full ${inputClassName} font-bold text-emerald-800 bg-white`}
+                    value={editingPlan.yearlyPrice || ""}
+                    onChange={(e) => setEditingPlan({ ...editingPlan, yearlyPrice: e.target.value })}
+                    placeholder="e.g. $15 (or $180)"
+                  />
+                  <p className="text-[10px] text-emerald-700 mt-1">Yearly rate displayed on card</p>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-emerald-900 mb-1">
+                    Yearly Period Unit
+                  </label>
+                  <input
+                    type="text"
+                    className={`w-full ${inputClassName} bg-white`}
+                    value={editingPlan.yearlyPeriod || "mo"}
+                    onChange={(e) => setEditingPlan({ ...editingPlan, yearlyPeriod: e.target.value })}
+                    placeholder="e.g. mo or yr"
+                  />
+                  <p className="text-[10px] text-emerald-700 mt-1">Unit after slash (e.g. /mo or /yr)</p>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-emerald-900 mb-1">
+                    Discount % Badge
+                  </label>
+                  <input
+                    type="number"
+                    min={0}
+                    max={100}
+                    className={`w-full ${inputClassName} bg-white font-semibold`}
+                    value={editingPlan.yearlyDiscountPercent ?? ""}
+                    onChange={(e) =>
+                      setEditingPlan({
+                        ...editingPlan,
+                        yearlyDiscountPercent: e.target.value === "" ? 0 : Number(e.target.value),
+                      })
+                    }
+                    placeholder="0"
+                  />
+                  <p className="text-[10px] text-emerald-700 mt-1">
+                    {autoDiscount > 0 ? `Auto-calculated: ${autoDiscount}% OFF` : "Leave 0 to auto-calculate"}
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-emerald-900 mb-1">
+                    Yearly "Spend Otherwise" Price
+                  </label>
+                  <input
+                    type="text"
+                    className={`w-full ${inputClassName} bg-white`}
+                    value={editingPlan.yearlyOriginalTotal || ""}
+                    onChange={(e) => setEditingPlan({ ...editingPlan, yearlyOriginalTotal: e.target.value })}
+                    placeholder="e.g. $114/mo"
+                  />
+                  <p className="text-[10px] text-emerald-700 mt-1">Comparison price for yearly</p>
+                </div>
+              </div>
+
+              {/* Yearly Dedicated Button Text & Links */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-emerald-900 mb-1">
+                    Yearly Dedicated Button Text
+                  </label>
+                  <input
+                    type="text"
+                    className={`w-full ${inputClassName} bg-white font-medium`}
+                    value={editingPlan.yearlyButtonText || ""}
+                    onChange={(e) => setEditingPlan({ ...editingPlan, yearlyButtonText: e.target.value })}
+                    placeholder="e.g. Get Yearly Plan (Save 21%) →"
+                  />
+                  <p className="text-[10px] text-emerald-700 mt-1">
+                    Text for the dedicated yearly CTA button
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-emerald-900 mb-1">
+                    Yearly Default Route
+                  </label>
+                  <input
+                    type="text"
+                    className={`w-full ${inputClassName} bg-white`}
+                    value={editingPlan.yearlyButtonLink || ""}
+                    onChange={(e) => setEditingPlan({ ...editingPlan, yearlyButtonLink: e.target.value })}
+                    placeholder="e.g. /auth?role=user&billing=yearly"
+                  />
+                  <p className="text-[10px] text-emerald-700 mt-1">Internal redirect if no custom link is set</p>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-emerald-900 mb-1">
+                  Yearly Custom Payment Link URL <span className="font-normal text-emerald-700">(Razorpay, Stripe yearly checkout link)</span>
+                </label>
+                <input
+                  type="url"
+                  className={`w-full ${inputClassName} bg-white text-emerald-900 placeholder:text-emerald-300 font-mono text-xs`}
+                  value={editingPlan.yearlyPaymentLink || ""}
+                  onChange={(e) => setEditingPlan({ ...editingPlan, yearlyPaymentLink: e.target.value })}
+                  placeholder="https://rzp.io/l/your-yearly-plan or https://buy.stripe.com/..."
+                />
+                <p className="text-[11px] text-emerald-600 mt-1">
+                  When a user clicks the Yearly CTA button, they are redirected directly to this URL.
+                </p>
               </div>
             </div>
 

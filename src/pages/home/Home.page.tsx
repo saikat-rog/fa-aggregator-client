@@ -14,13 +14,20 @@ const DEFAULT_BUSINESS_PLAN: PricingPlan = {
   subheading: "One dashboard replaces your SEO tool, your social media manager, and your review-reply habit.",
   price: "$19",
   period: "mo",
+  yearlyPrice: "$15",
+  yearlyPeriod: "mo",
+  yearlyDiscountPercent: 21,
+  yearlyOriginalTotal: "$114/mo",
   originalTotal: "$134/mo",
   originalTotalLabel: "What you'd spend otherwise",
-  joinLabel: "Join Folksmint Business",
+  joinLabel: "Join Folksmint Business (Monthly)",
   trialNote: "✨ 14-day free trial, cancel anytime",
-  buttonText: "Start My Free Trial →",
+  buttonText: "Start Monthly Trial →",
   buttonLink: "/auth?role=user",
+  yearlyButtonText: "Get Yearly Plan (Save 21%) →",
+  yearlyButtonLink: "/auth?role=user&billing=yearly",
   paymentLink: "",
+  yearlyPaymentLink: "",
   categories: [
     {
       title: "📈 Visibility & audits",
@@ -51,13 +58,20 @@ const DEFAULT_CREATOR_PLAN: PricingPlan = {
   subheading: "One dashboard replaces your storefront, booking tool, course platform, and audience growth stack.",
   price: "$29",
   period: "mo",
+  yearlyPrice: "$22",
+  yearlyPeriod: "mo",
+  yearlyDiscountPercent: 24,
+  yearlyOriginalTotal: "$330/mo",
   originalTotal: "$413/mo",
   originalTotalLabel: "What you'd spend otherwise",
-  joinLabel: "Join Folksmint Creator",
+  joinLabel: "Join Folksmint Creator (Monthly)",
   trialNote: "✨ 14-day free trial, cancel anytime",
-  buttonText: "Start My Free Trial →",
+  buttonText: "Start Monthly Trial →",
   buttonLink: "/auth?role=advisor",
+  yearlyButtonText: "Get Yearly Plan (Save 24%) →",
+  yearlyButtonLink: "/auth?role=advisor&billing=yearly",
   paymentLink: "",
+  yearlyPaymentLink: "",
   categories: [
     {
       title: "🛍️ Storefront & sales",
@@ -79,6 +93,30 @@ const DEFAULT_CREATOR_PLAN: PricingPlan = {
     },
   ],
 };
+
+function getYearlyDiscount(plan: PricingPlan): number {
+  if (typeof plan.yearlyDiscountPercent === "number" && plan.yearlyDiscountPercent > 0) {
+    return plan.yearlyDiscountPercent;
+  }
+  const parseNum = (val?: string) => {
+    if (!val) return 0;
+    const num = parseFloat(val.replace(/[^0-9.]/g, ""));
+    return Number.isFinite(num) ? num : 0;
+  };
+
+  const m = parseNum(plan.price);
+  const y = parseNum(plan.yearlyPrice);
+  if (m > 0 && y > 0) {
+    if (y < m) {
+      return Math.round(((m - y) / m) * 100);
+    }
+    const annualM = m * 12;
+    if (y < annualM) {
+      return Math.round(((annualM - y) / annualM) * 100);
+    }
+  }
+  return 0;
+}
 
 const FAQ = [
   {
@@ -179,6 +217,21 @@ export function HomePage(_props: HomePageProps = {}) {
     pricingPlans[1] ||
     DEFAULT_CREATOR_PLAN;
 
+  const businessDiscount = getYearlyDiscount(businessPlan);
+  const creatorDiscount = getYearlyDiscount(creatorPlan);
+
+  const businessYearlyBtnText =
+    businessPlan.yearlyButtonText ||
+    (businessDiscount > 0
+      ? `Get Yearly Plan (Save ${businessDiscount}%) →`
+      : "Get Yearly Plan →");
+
+  const creatorYearlyBtnText =
+    creatorPlan.yearlyButtonText ||
+    (creatorDiscount > 0
+      ? `Get Yearly Plan (Save ${creatorDiscount}%) →`
+      : "Get Yearly Plan →");
+
   return (
     <div className="w-full" id="page-home">
       <HomeSeo />
@@ -245,27 +298,111 @@ export function HomePage(_props: HomePageProps = {}) {
                     : "$19/mo"}
                 </span>
               </div>
+
+              {/* Yearly Price Comparison Row if configured */}
+              {businessPlan.yearlyPrice ? (
+                <div
+                  className="stack-join"
+                  style={{
+                    marginTop: "6px",
+                    background: "rgba(34, 197, 94, 0.08)",
+                    borderColor: "rgba(34, 197, 94, 0.25)",
+                  }}
+                >
+                  <span className="emo">⭐</span>
+                  <span className="t" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                    <span>Yearly Plan (Billed Annually)</span>
+                    {businessDiscount > 0 ? (
+                      <span
+                        style={{
+                          background: "#22C55E",
+                          color: "white",
+                          fontSize: "10px",
+                          fontWeight: 800,
+                          padding: "2px 7px",
+                          borderRadius: "9999px",
+                          lineHeight: 1,
+                        }}
+                      >
+                        {businessDiscount}% OFF
+                      </span>
+                    ) : null}
+                  </span>
+                  <span className="price" style={{ color: "#15803D", fontWeight: 800 }}>
+                    {businessPlan.yearlyPrice}
+                    {businessPlan.yearlyPeriod ? `/${businessPlan.yearlyPeriod}` : "/mo"}
+                  </span>
+                </div>
+              ) : null}
+
               {businessPlan.trialNote ? (
                 <div className="trial-note">{businessPlan.trialNote}</div>
               ) : null}
 
-              {businessPlan.paymentLink ? (
-                <a
-                  href={businessPlan.paymentLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="pill-btn pill-navy plan-cta"
-                >
-                  {businessPlan.buttonText || "Start My Free Trial →"}
-                </a>
-              ) : (
-                <Link
-                  to={businessPlan.buttonLink || "/auth?role=user"}
-                  className="pill-btn pill-navy plan-cta"
-                >
-                  {businessPlan.buttonText || "Start My Free Trial →"}
-                </Link>
-              )}
+              {/* Action Buttons: Monthly & Yearly */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "16px" }}>
+                {/* Monthly CTA Button */}
+                {businessPlan.paymentLink ? (
+                  <a
+                    href={businessPlan.paymentLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="pill-btn pill-navy plan-cta"
+                    style={{ width: "100%", textAlign: "center", display: "inline-flex", justifyContent: "center" }}
+                  >
+                    {businessPlan.buttonText || "Start Monthly Trial →"}
+                  </a>
+                ) : (
+                  <Link
+                    to={businessPlan.buttonLink || "/auth?role=user"}
+                    className="pill-btn pill-navy plan-cta"
+                    style={{ width: "100%", textAlign: "center", display: "inline-flex", justifyContent: "center" }}
+                  >
+                    {businessPlan.buttonText || "Start Monthly Trial →"}
+                  </Link>
+                )}
+
+                {/* Yearly CTA Button */}
+                {businessPlan.yearlyPrice ? (
+                  businessPlan.yearlyPaymentLink ? (
+                    <a
+                      href={businessPlan.yearlyPaymentLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="pill-btn plan-cta"
+                      style={{
+                        width: "100%",
+                        textAlign: "center",
+                        display: "inline-flex",
+                        justifyContent: "center",
+                        background: "#0F172A",
+                        color: "white",
+                        border: "1px solid #22C55E",
+                        boxShadow: "0 4px 14px rgba(34,197,94,0.18)",
+                      }}
+                    >
+                      {businessYearlyBtnText}
+                    </a>
+                  ) : (
+                    <Link
+                      to={businessPlan.yearlyButtonLink || "/auth?role=user&billing=yearly"}
+                      className="pill-btn plan-cta"
+                      style={{
+                        width: "100%",
+                        textAlign: "center",
+                        display: "inline-flex",
+                        justifyContent: "center",
+                        background: "#0F172A",
+                        color: "white",
+                        border: "1px solid #22C55E",
+                        boxShadow: "0 4px 14px rgba(34,197,94,0.18)",
+                      }}
+                    >
+                      {businessYearlyBtnText}
+                    </Link>
+                  )
+                ) : null}
+              </div>
             </div>
           </div>
         </div>
@@ -314,27 +451,111 @@ export function HomePage(_props: HomePageProps = {}) {
                     : "$29/mo"}
                 </span>
               </div>
+
+              {/* Yearly Price Comparison Row if configured */}
+              {creatorPlan.yearlyPrice ? (
+                <div
+                  className="stack-join"
+                  style={{
+                    marginTop: "6px",
+                    background: "rgba(34, 197, 94, 0.08)",
+                    borderColor: "rgba(34, 197, 94, 0.25)",
+                  }}
+                >
+                  <span className="emo">⭐</span>
+                  <span className="t" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                    <span>Yearly Plan (Billed Annually)</span>
+                    {creatorDiscount > 0 ? (
+                      <span
+                        style={{
+                          background: "#22C55E",
+                          color: "white",
+                          fontSize: "10px",
+                          fontWeight: 800,
+                          padding: "2px 7px",
+                          borderRadius: "9999px",
+                          lineHeight: 1,
+                        }}
+                      >
+                        {creatorDiscount}% OFF
+                      </span>
+                    ) : null}
+                  </span>
+                  <span className="price" style={{ color: "#15803D", fontWeight: 800 }}>
+                    {creatorPlan.yearlyPrice}
+                    {creatorPlan.yearlyPeriod ? `/${creatorPlan.yearlyPeriod}` : "/mo"}
+                  </span>
+                </div>
+              ) : null}
+
               {creatorPlan.trialNote ? (
                 <div className="trial-note">{creatorPlan.trialNote}</div>
               ) : null}
 
-              {creatorPlan.paymentLink ? (
-                <a
-                  href={creatorPlan.paymentLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="pill-btn pill-navy plan-cta"
-                >
-                  {creatorPlan.buttonText || "Start My Free Trial →"}
-                </a>
-              ) : (
-                <Link
-                  to={creatorPlan.buttonLink || "/auth?role=advisor"}
-                  className="pill-btn pill-navy plan-cta"
-                >
-                  {creatorPlan.buttonText || "Start My Free Trial →"}
-                </Link>
-              )}
+              {/* Action Buttons: Monthly & Yearly */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "16px" }}>
+                {/* Monthly CTA Button */}
+                {creatorPlan.paymentLink ? (
+                  <a
+                    href={creatorPlan.paymentLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="pill-btn pill-navy plan-cta"
+                    style={{ width: "100%", textAlign: "center", display: "inline-flex", justifyContent: "center" }}
+                  >
+                    {creatorPlan.buttonText || "Start Monthly Trial →"}
+                  </a>
+                ) : (
+                  <Link
+                    to={creatorPlan.buttonLink || "/auth?role=advisor"}
+                    className="pill-btn pill-navy plan-cta"
+                    style={{ width: "100%", textAlign: "center", display: "inline-flex", justifyContent: "center" }}
+                  >
+                    {creatorPlan.buttonText || "Start Monthly Trial →"}
+                  </Link>
+                )}
+
+                {/* Yearly CTA Button */}
+                {creatorPlan.yearlyPrice ? (
+                  creatorPlan.yearlyPaymentLink ? (
+                    <a
+                      href={creatorPlan.yearlyPaymentLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="pill-btn plan-cta"
+                      style={{
+                        width: "100%",
+                        textAlign: "center",
+                        display: "inline-flex",
+                        justifyContent: "center",
+                        background: "#0F172A",
+                        color: "white",
+                        border: "1px solid #22C55E",
+                        boxShadow: "0 4px 14px rgba(34,197,94,0.18)",
+                      }}
+                    >
+                      {creatorYearlyBtnText}
+                    </a>
+                  ) : (
+                    <Link
+                      to={creatorPlan.yearlyButtonLink || "/auth?role=advisor&billing=yearly"}
+                      className="pill-btn plan-cta"
+                      style={{
+                        width: "100%",
+                        textAlign: "center",
+                        display: "inline-flex",
+                        justifyContent: "center",
+                        background: "#0F172A",
+                        color: "white",
+                        border: "1px solid #22C55E",
+                        boxShadow: "0 4px 14px rgba(34,197,94,0.18)",
+                      }}
+                    >
+                      {creatorYearlyBtnText}
+                    </Link>
+                  )
+                ) : null}
+              </div>
             </div>
           </div>
 

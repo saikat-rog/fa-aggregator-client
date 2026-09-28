@@ -19,26 +19,6 @@
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --ink: #EAF1FF;
-    --muted: #9FB3D6;
-    --bg: #08152E;
-    --card: #0F213F;
-    --line: rgba(234, 241, 255, 0.14);
-    --navy: #EAF1FF;
-  }
-}
-
-:root[data-theme="dark"] {
-  --ink: #EAF1FF;
-  --muted: #9FB3D6;
-  --bg: #08152E;
-  --card: #0F213F;
-  --line: rgba(234, 241, 255, 0.14);
-  --navy: #EAF1FF;
-}
-
 * {
   box-sizing: border-box;
 }
