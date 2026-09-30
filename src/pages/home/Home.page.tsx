@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { HomeSeo } from "./Home.seo";
 import type { HomePageProps } from "./Home.types";
 import { getPricingPlansApi, type PricingPlan } from "../../services/pricing.service";
+import { subscribeNewsletterApi } from "../../services/newsletter.service";
 export type { AdvisorApiItem } from "./Home.types";
 
 const DEFAULT_BUSINESS_PLAN: PricingPlan = {
@@ -144,12 +145,32 @@ const FAQ = [
 function NewsletterSection() {
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
-  const handleSubscribe = (e: React.FormEvent) => {
+  const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email.trim() && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    const cleanEmail = email.trim();
+    if (!cleanEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+      setErrorMsg("Please enter a valid email address.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setErrorMsg("");
+      await subscribeNewsletterApi(cleanEmail, "homepage_newsletter");
       setSubscribed(true);
       setEmail("");
+    } catch (err: any) {
+      const msg =
+        err?.response?.data?.message ||
+        err?.response?.data?.msg ||
+        err?.message ||
+        "Failed to subscribe. Please try again.";
+      setErrorMsg(msg);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -160,19 +181,40 @@ function NewsletterSection() {
       <p>Curated updates with the highest-converting local collaborations. No spam.</p>
 
       {subscribed ? (
-        <p style={{ color: "var(--indigo)", fontWeight: 700 }}>✓ Subscribed!</p>
+        <div style={{ padding: "14px 18px", background: "rgba(37,99,235,0.08)", borderRadius: "14px", border: "1px solid var(--line)", textAlign: "center" }}>
+          <p style={{ color: "var(--indigo)", fontWeight: 700, margin: 0, fontSize: "1.05rem" }}>
+            ✓ You're on the list!
+          </p>
+          <p style={{ color: "var(--muted)", fontSize: "0.85rem", marginTop: "6px" }}>
+            A thank-you confirmation email is on its way to your inbox.
+          </p>
+        </div>
       ) : (
         <form onSubmit={handleSubscribe} id="nlForm" style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
           <input
             type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              if (errorMsg) setErrorMsg("");
+            }}
             placeholder="you@example.com"
             required
+            disabled={loading}
             className="nl-input"
           />
-          <button type="submit" className="pill-btn pill-navy" style={{ width: "100%", textAlign: "center" }}>
-            Subscribe
+          {errorMsg ? (
+            <p style={{ color: "var(--red)", fontSize: "0.8rem", textAlign: "left", margin: 0 }}>
+              {errorMsg}
+            </p>
+          ) : null}
+          <button
+            type="submit"
+            disabled={loading}
+            className="pill-btn pill-navy"
+            style={{ width: "100%", textAlign: "center", opacity: loading ? 0.7 : 1, cursor: loading ? "wait" : "pointer" }}
+          >
+            {loading ? "Subscribing..." : "Subscribe"}
           </button>
         </form>
       )}

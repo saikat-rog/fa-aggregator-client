@@ -237,6 +237,28 @@ const UserDashboard = () => {
 
   return (
     <div className="space-y-6">
+      {/* Dashboard Top Hero Header */}
+      <section className="rounded-[24px] border border-[var(--line)] bg-[var(--card)] p-6 md:p-8 shadow-xs relative overflow-hidden">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <div className="kicker">Business Dashboard</div>
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-[var(--navy)] mt-1 font-heading">
+              Business Dashboard
+            </h1>
+            <p className="text-xs md:text-sm text-[var(--muted)] mt-1 max-w-xl">
+              Manage your marketing campaigns, track received creator applications, and view your saved creator shortlist.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => navigate('/campaign/apply')}
+            className="pill-btn pill-navy inline-flex items-center gap-2 shrink-0"
+          >
+            <FiPlusCircle className="h-4 w-4" />
+            <span>Post a Campaign</span>
+          </button>
+        </div>
+      </section>
       <UserStatsCards
         enquiriesLoading={enquiriesLoading}
         totalEnquiries={enquiryPagination.total}
@@ -305,7 +327,7 @@ const UserDashboard = () => {
           <button
             type="button"
             onClick={() => navigate("/campaign/apply")}
-            className="btn-coral inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold shadow-xs cursor-pointer"
+            className="pill-btn pill-navy inline-flex items-center gap-1.5 text-xs py-2 px-4"
           >
             <FiPlusCircle className="h-4 w-4" />
             Post New Campaign
@@ -320,7 +342,7 @@ const UserDashboard = () => {
             <button
               type="button"
               onClick={() => navigate("/campaign/apply")}
-              className="btn-coral inline-flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-xs font-bold shadow-xs cursor-pointer"
+              className="pill-btn pill-navy inline-flex items-center gap-1.5 text-xs py-1.5 px-3.5"
             >
               <FiPlusCircle className="h-3.5 w-3.5" />
               Post a Campaign Now
@@ -503,7 +525,7 @@ const UserDashboard = () => {
                           </div>
                           <Link
                             to={`/u/campaigns/${camp._id}/applications`}
-                            className="btn-coral inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold text-white shadow-xs shrink-0"
+                            className="pill-btn pill-navy inline-flex items-center gap-1.5 text-xs py-2 px-4 shrink-0"
                           >
                             View Applications ({campApps.length}) →
                           </Link>

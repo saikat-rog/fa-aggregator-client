@@ -11,6 +11,7 @@ import { BlogsPanel } from "./panels/BlogsPanel";
 import { BusinessRequirementsPanel } from "./panels/BusinessRequirementsPanel";
 import { CampaignApplicationsPanel } from "./panels/CampaignApplicationsPanel";
 import { PricingPanel } from "./panels/PricingPanel";
+import { NewsletterPanel } from "./panels/NewsletterPanel";
 
 export function AdminPageContent() {
   const [params, setParams] = useSearchParams();
@@ -49,6 +50,7 @@ export function AdminPageContent() {
     requirements: "Requirements",
     "campaign-applications": "Campaign Applications",
     pricing: "Pricing & Plans",
+    newsletter: "Newsletter Subscribers",
   };
 
   return (
@@ -78,6 +80,7 @@ export function AdminPageContent() {
       {view === "requirements" ? <BusinessRequirementsPanel params={params} setParam={setParam} setManyParams={setManyParams} /> : null}
       {view === "campaign-applications" ? <CampaignApplicationsPanel params={params} setParam={setParam} setManyParams={setManyParams} /> : null}
       {view === "pricing" ? <PricingPanel /> : null}
+      {view === "newsletter" ? <NewsletterPanel params={params} setParam={setParam} setManyParams={setManyParams} /> : null}
     </div>
   );
 }

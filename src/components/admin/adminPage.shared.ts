@@ -1,6 +1,6 @@
-import { FiActivity, FiBookOpen, FiBriefcase, FiCreditCard, FiGrid, FiLayers, FiList, FiSend, FiTrendingUp, FiUser, FiUsers } from "react-icons/fi";
+import { FiActivity, FiBookOpen, FiBriefcase, FiCreditCard, FiGrid, FiLayers, FiList, FiMail, FiSend, FiTrendingUp, FiUser, FiUsers } from "react-icons/fi";
 
-export const views = ["users", "advisors", "applications", "industries", "categories", "markets", "expertise-indices", "blogs", "requirements", "campaign-applications", "pricing"] as const;
+export const views = ["users", "advisors", "applications", "industries", "categories", "markets", "expertise-indices", "blogs", "requirements", "campaign-applications", "pricing", "newsletter"] as const;
 export type AdminView = (typeof views)[number];
 
 export const viewIcons: Record<AdminView, React.ComponentType<{ className?: string }>> = {
@@ -15,6 +15,7 @@ export const viewIcons: Record<AdminView, React.ComponentType<{ className?: stri
   requirements: FiBriefcase,
   "campaign-applications": FiSend,
   pricing: FiCreditCard,
+  newsletter: FiMail,
 };
 
 export const getNum = (value: string | null, fallback: number) => {
@@ -58,4 +59,4 @@ export const inputClassName =
   "rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-800 outline-none ring-blue-200 transition placeholder:text-slate-400 focus:border-blue-400 focus:bg-white focus:ring-2";
 export const statusInfoClassName = "mt-4 rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-sm text-blue-700";
 export const statusErrorClassName = "mt-4 rounded-xl border border-red-100 bg-red-50 px-3 py-2 text-sm text-red-700";
-export const statusEmptyClassName = "mt-4 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500";
+export const statusEmptyClassName = "mt-4 rounded-xl border border-dashed border-slate-300 bg-slate-50/50 p-6 text-center text-sm text-slate-500";

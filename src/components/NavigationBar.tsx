@@ -44,16 +44,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     ...(isAuthenticated
       ? role === "advisor"
         ? [
-            { to: "/a/dashboard", label: "Dashboard" },
             { to: "/store/apply", label: "Apply for Store" },
           ]
         : role === "user"
         ? [
-            { to: "/u/dashboard", label: "Dashboard" },
             { to: "/campaign/apply", label: "Post a Campaign" },
           ]
-        : role === "admin"
-        ? [{ to: "/admin", label: "Admin" }]
         : []
       : []),
   ];
@@ -105,13 +101,22 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             ))}
 
             {isAuthenticated ? (
-              <button
-                onClick={handleLogout}
-                className="navcta"
-                style={{ background: "#e11d48", border: "none", cursor: "pointer" }}
-              >
-                <FiLogOut style={{ marginRight: "6px" }} /> Logout
-              </button>
+              <>
+                <Link
+                  to={role === "advisor" ? "/a/dashboard" : role === "user" ? "/u/dashboard" : "/admin"}
+                  className="navcta"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  {role === "admin" ? "Admin Panel" : "Dashboard"}
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="navcta"
+                  style={{ background: "#e11d48", border: "none", cursor: "pointer", marginTop: "10px" }}
+                >
+                  <FiLogOut style={{ marginRight: "6px" }} /> Logout
+                </button>
+              </>
             ) : (
               <Link to="/auth" className="navcta" onClick={() => setIsMobileMenuOpen(false)}>
                 Get started
