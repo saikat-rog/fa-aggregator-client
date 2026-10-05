@@ -281,6 +281,11 @@ export function HomePage(_props: HomePageProps = {}) {
       {/* Hero Section */}
       <section className="hero">
         <div className="wrap">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50/90 border border-blue-200/80 text-blue-700 text-xs sm:text-sm font-semibold mb-6 shadow-xs backdrop-blur-xs">
+            <span className="flex h-2 w-2 rounded-full bg-blue-600 animate-pulse"></span>
+            All-in-One Commerce & Growth Stack
+          </div>
+
           <div className="bag">💰</div>
           <h1>A Simpler Solution</h1>
           <p className="lead">
@@ -294,309 +299,336 @@ export function HomePage(_props: HomePageProps = {}) {
               I'm a creator
             </a>
           </div>
+
+          {/* Value Highlights Pill Bar */}
+          <div className="mt-10 pt-6 border-t border-blue-100/60 flex flex-wrap items-center justify-center gap-2 sm:gap-4 max-w-2xl mx-auto">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-200/70 text-slate-700 text-xs font-medium">
+              <span className="text-blue-600 font-bold">✓</span> 14-Day Free Trial
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-200/70 text-slate-700 text-xs font-medium">
+              <span className="text-blue-600 font-bold">✓</span> No Coding Required
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-200/70 text-slate-700 text-xs font-medium">
+              <span className="text-blue-600 font-bold">✓</span> Hyperlocal Pincode Matching
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-200/70 text-slate-700 text-xs font-medium">
+              <span className="text-blue-600 font-bold">✓</span> 1-Tap Checkout
+            </span>
+          </div>
         </div>
       </section>
 
-      {/* For Business Section */}
-      <section id="business">
-        <div className="wrap">
-          <div className="section-head">
-            <div className="kicker">{businessPlan.kicker || "For local business"}</div>
-            <h2>{businessPlan.heading || "Everything AI marketing does"}</h2>
-            <p>{businessPlan.subheading || "One dashboard replaces your SEO tool, your social media manager, and your review-reply habit."}</p>
-          </div>
-
-          <div className="stack-wrap stack-wrap-single">
-            <div className="stack-card">
-              {(businessPlan.categories || []).map((cat, catIdx) => (
-                <React.Fragment key={cat.title || catIdx}>
-                  <div className="stack-title">{cat.title}</div>
-                  {(cat.items || []).map((item, itemIdx) => (
-                    <div className="stack-row" key={item.title || itemIdx}>
-                      <span className="emo">{item.emoji || "✨"}</span>
-                      <div>
-                        <div className="t">{item.title}</div>
-                        {item.description ? <div className="r">{item.description}</div> : null}
-                      </div>
-                      {item.price ? <span className="price">{item.price}</span> : null}
-                    </div>
-                  ))}
-                </React.Fragment>
-              ))}
-
-              <div className="stack-total">
-                <span className="emo">✕</span>
-                <span className="t">{businessPlan.originalTotalLabel || "What you'd spend otherwise"}</span>
-                <span className="price">{businessPlan.originalTotal || "$134/mo"}</span>
-              </div>
-              <div className="stack-join">
-                <span className="emo">🪙</span>
-                <span className="t">{businessPlan.joinLabel || "Join Folksmint Business"}</span>
-                <span className="price">
-                  {businessPlan.price
-                    ? businessPlan.period
-                      ? `${businessPlan.price}/${businessPlan.period}`
-                      : businessPlan.price
-                    : "$19/mo"}
-                </span>
-              </div>
-
-              {/* Yearly Price Comparison Row if configured */}
-              {businessPlan.yearlyPrice ? (
-                <div
-                  className="stack-join"
-                  style={{
-                    marginTop: "6px",
-                    background: "rgba(34, 197, 94, 0.08)",
-                    borderColor: "rgba(34, 197, 94, 0.25)",
-                  }}
-                >
-                  <span className="emo">⭐</span>
-                  <span className="t" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                    <span>Yearly Plan (Billed Annually)</span>
-                    {businessDiscount > 0 ? (
-                      <span
-                        style={{
-                          background: "#22C55E",
-                          color: "white",
-                          fontSize: "10px",
-                          fontWeight: 800,
-                          padding: "2px 7px",
-                          borderRadius: "9999px",
-                          lineHeight: 1,
-                        }}
-                      >
-                        {businessDiscount}% OFF
-                      </span>
-                    ) : null}
-                  </span>
-                  <span className="price" style={{ color: "#15803D", fontWeight: 800 }}>
-                    {businessPlan.yearlyPrice}
-                    {businessPlan.yearlyPeriod ? `/${businessPlan.yearlyPeriod}` : "/mo"}
-                  </span>
+      {/* Plans Section (For Business & For Creators Side by Side on Desktop) */}
+      <section className="py-8 md:py-14">
+        <div className="max-w-[1140px] mx-auto px-4 sm:px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-8 items-stretch">
+            {/* For Business Column */}
+            <div id="business" className="flex flex-col h-full scroll-mt-24">
+              <div className="section-head !mb-6 text-center lg:text-left lg:mx-0 lg:max-w-none lg:min-h-[160px] flex flex-col justify-start">
+                <div>
+                  <div className="kicker">{businessPlan.kicker || "For local business"}</div>
                 </div>
-              ) : null}
+                <h2>{businessPlan.heading || "Everything AI marketing does"}</h2>
+                <p>{businessPlan.subheading || "One dashboard replaces your SEO tool, your social media manager, and your review-reply habit."}</p>
+              </div>
 
-              {businessPlan.trialNote ? (
-                <div className="trial-note">{businessPlan.trialNote}</div>
-              ) : null}
+              <div className="stack-card flex flex-col justify-between flex-1">
+                <div>
+                  {(businessPlan.categories || []).map((cat, catIdx) => (
+                    <React.Fragment key={cat.title || catIdx}>
+                      <div className="stack-title">{cat.title}</div>
+                      {(cat.items || []).map((item, itemIdx) => (
+                        <div className="stack-row" key={item.title || itemIdx}>
+                          <span className="emo">{item.emoji || "✨"}</span>
+                          <div>
+                            <div className="t">{item.title}</div>
+                            {item.description ? <div className="r">{item.description}</div> : null}
+                          </div>
+                          {item.price ? <span className="price">{item.price}</span> : null}
+                        </div>
+                      ))}
+                    </React.Fragment>
+                  ))}
+                </div>
 
-              {/* Action Buttons: Monthly & Yearly */}
-              <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "16px" }}>
-                {/* Monthly CTA Button */}
-                {businessPlan.paymentLink ? (
-                  <a
-                    href={businessPlan.paymentLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="pill-btn pill-navy plan-cta"
-                    style={{ width: "100%", textAlign: "center", display: "inline-flex", justifyContent: "center" }}
-                  >
-                    {businessPlan.buttonText || "Start Monthly Trial →"}
-                  </a>
-                ) : (
-                  <Link
-                    to={businessPlan.buttonLink || "/auth?role=user"}
-                    className="pill-btn pill-navy plan-cta"
-                    style={{ width: "100%", textAlign: "center", display: "inline-flex", justifyContent: "center" }}
-                  >
-                    {businessPlan.buttonText || "Start Monthly Trial →"}
-                  </Link>
-                )}
+                <div className="mt-4 pt-2 border-t border-[var(--line)]">
+                  <div className="stack-total">
+                    <span className="emo">✕</span>
+                    <span className="t">{businessPlan.originalTotalLabel || "What you'd spend otherwise"}</span>
+                    <span className="price">{businessPlan.originalTotal || "$134/mo"}</span>
+                  </div>
+                  <div className="stack-join">
+                    <span className="emo">🪙</span>
+                    <span className="t">{businessPlan.joinLabel || "Join Folksmint Business"}</span>
+                    <span className="price">
+                      {businessPlan.price
+                        ? businessPlan.period
+                          ? `${businessPlan.price}/${businessPlan.period}`
+                          : businessPlan.price
+                        : "$19/mo"}
+                    </span>
+                  </div>
 
-                {/* Yearly CTA Button */}
-                {businessPlan.yearlyPrice ? (
-                  businessPlan.yearlyPaymentLink ? (
-                    <a
-                      href={businessPlan.yearlyPaymentLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="pill-btn plan-cta"
+                  {/* Yearly Price Comparison Row if configured */}
+                  {businessPlan.yearlyPrice ? (
+                    <div
+                      className="stack-join"
                       style={{
-                        width: "100%",
-                        textAlign: "center",
-                        display: "inline-flex",
-                        justifyContent: "center",
-                        background: "#0F172A",
-                        color: "white",
-                        border: "1px solid #22C55E",
-                        boxShadow: "0 4px 14px rgba(34,197,94,0.18)",
+                        marginTop: "8px",
+                        background: "rgba(34, 197, 94, 0.08)",
+                        borderColor: "rgba(34, 197, 94, 0.25)",
                       }}
                     >
-                      {businessYearlyBtnText}
-                    </a>
-                  ) : (
-                    <Link
-                      to={businessPlan.yearlyButtonLink || "/auth?role=user&billing=yearly"}
-                      className="pill-btn plan-cta"
-                      style={{
-                        width: "100%",
-                        textAlign: "center",
-                        display: "inline-flex",
-                        justifyContent: "center",
-                        background: "#0F172A",
-                        color: "white",
-                        border: "1px solid #22C55E",
-                        boxShadow: "0 4px 14px rgba(34,197,94,0.18)",
-                      }}
-                    >
-                      {businessYearlyBtnText}
-                    </Link>
-                  )
-                ) : null}
+                      <span className="emo">⭐</span>
+                      <span className="t" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                        <span>Yearly Plan (Billed Annually)</span>
+                        {businessDiscount > 0 ? (
+                          <span
+                            style={{
+                              background: "#22C55E",
+                              color: "white",
+                              fontSize: "10px",
+                              fontWeight: 800,
+                              padding: "2px 7px",
+                              borderRadius: "9999px",
+                              lineHeight: 1,
+                            }}
+                          >
+                            {businessDiscount}% OFF
+                          </span>
+                        ) : null}
+                      </span>
+                      <span className="price" style={{ color: "#15803D", fontWeight: 800 }}>
+                        {businessPlan.yearlyPrice}
+                        {businessPlan.yearlyPeriod ? `/${businessPlan.yearlyPeriod}` : "/mo"}
+                      </span>
+                    </div>
+                  ) : null}
+
+                  {businessPlan.trialNote ? (
+                    <div className="trial-note">{businessPlan.trialNote}</div>
+                  ) : null}
+
+                  {/* Action Buttons: Monthly & Yearly */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "16px" }}>
+                    {/* Monthly CTA Button */}
+                    {businessPlan.paymentLink ? (
+                      <a
+                        href={businessPlan.paymentLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="pill-btn pill-navy plan-cta"
+                        style={{ width: "100%", textAlign: "center", display: "inline-flex", justifyContent: "center" }}
+                      >
+                        {businessPlan.buttonText || "Start Monthly Trial →"}
+                      </a>
+                    ) : (
+                      <Link
+                        to={businessPlan.buttonLink || "/auth?role=user"}
+                        className="pill-btn pill-navy plan-cta"
+                        style={{ width: "100%", textAlign: "center", display: "inline-flex", justifyContent: "center" }}
+                      >
+                        {businessPlan.buttonText || "Start Monthly Trial →"}
+                      </Link>
+                    )}
+
+                    {/* Yearly CTA Button */}
+                    {businessPlan.yearlyPrice ? (
+                      businessPlan.yearlyPaymentLink ? (
+                        <a
+                          href={businessPlan.yearlyPaymentLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="pill-btn plan-cta"
+                          style={{
+                            width: "100%",
+                            textAlign: "center",
+                            display: "inline-flex",
+                            justifyContent: "center",
+                            background: "#0F172A",
+                            color: "white",
+                            border: "1px solid #22C55E",
+                            boxShadow: "0 4px 14px rgba(34,197,94,0.18)",
+                          }}
+                        >
+                          {businessYearlyBtnText}
+                        </a>
+                      ) : (
+                        <Link
+                          to={businessPlan.yearlyButtonLink || "/auth?role=user&billing=yearly"}
+                          className="pill-btn plan-cta"
+                          style={{
+                            width: "100%",
+                            textAlign: "center",
+                            display: "inline-flex",
+                            justifyContent: "center",
+                            background: "#0F172A",
+                            color: "white",
+                            border: "1px solid #22C55E",
+                            boxShadow: "0 4px 14px rgba(34,197,94,0.18)",
+                          }}
+                        >
+                          {businessYearlyBtnText}
+                        </Link>
+                      )
+                    ) : null}
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
 
-      {/* For Creators Section */}
-      <section id="creators">
-        <div className="wrap">
-          <div className="section-head">
-            <div className="kicker">{creatorPlan.kicker || "For Creators"}</div>
-            <h2>{creatorPlan.heading || "Everything your creator business needs"}</h2>
-            <p>{creatorPlan.subheading || "One dashboard replaces your storefront, booking tool, course platform, and audience growth stack."}</p>
-          </div>
-
-          <div className="stack-wrap stack-wrap-single">
-            <div className="stack-card">
-              {(creatorPlan.categories || []).map((cat, catIdx) => (
-                <React.Fragment key={cat.title || catIdx}>
-                  <div className="stack-title">{cat.title}</div>
-                  {(cat.items || []).map((item, itemIdx) => (
-                    <div className="stack-row" key={item.title || itemIdx}>
-                      <span className="emo">{item.emoji || "✨"}</span>
-                      <div>
-                        <div className="t">{item.title}</div>
-                        {item.description ? <div className="r">{item.description}</div> : null}
-                      </div>
-                      {item.price ? <span className="price">{item.price}</span> : null}
-                    </div>
-                  ))}
-                </React.Fragment>
-              ))}
-
-              <div className="stack-total">
-                <span className="emo">✕</span>
-                <span className="t">{creatorPlan.originalTotalLabel || "What you'd spend otherwise"}</span>
-                <span className="price">{creatorPlan.originalTotal || "$413/mo"}</span>
-              </div>
-              <div className="stack-join">
-                <span className="emo">🪙</span>
-                <span className="t">{creatorPlan.joinLabel || "Join Folksmint Creator"}</span>
-                <span className="price">
-                  {creatorPlan.price
-                    ? creatorPlan.period
-                      ? `${creatorPlan.price}/${creatorPlan.period}`
-                      : creatorPlan.price
-                    : "$29/mo"}
-                </span>
-              </div>
-
-              {/* Yearly Price Comparison Row if configured */}
-              {creatorPlan.yearlyPrice ? (
-                <div
-                  className="stack-join"
-                  style={{
-                    marginTop: "6px",
-                    background: "rgba(34, 197, 94, 0.08)",
-                    borderColor: "rgba(34, 197, 94, 0.25)",
-                  }}
-                >
-                  <span className="emo">⭐</span>
-                  <span className="t" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                    <span>Yearly Plan (Billed Annually)</span>
-                    {creatorDiscount > 0 ? (
-                      <span
-                        style={{
-                          background: "#22C55E",
-                          color: "white",
-                          fontSize: "10px",
-                          fontWeight: 800,
-                          padding: "2px 7px",
-                          borderRadius: "9999px",
-                          lineHeight: 1,
-                        }}
-                      >
-                        {creatorDiscount}% OFF
-                      </span>
-                    ) : null}
-                  </span>
-                  <span className="price" style={{ color: "#15803D", fontWeight: 800 }}>
-                    {creatorPlan.yearlyPrice}
-                    {creatorPlan.yearlyPeriod ? `/${creatorPlan.yearlyPeriod}` : "/mo"}
-                  </span>
+            {/* For Creators Column */}
+            <div id="creators" className="flex flex-col h-full scroll-mt-24">
+              <div className="section-head !mb-6 text-center lg:text-left lg:mx-0 lg:max-w-none lg:min-h-[160px] flex flex-col justify-start">
+                <div>
+                  <div className="kicker">{creatorPlan.kicker || "For Creators"}</div>
                 </div>
-              ) : null}
+                <h2>{creatorPlan.heading || "Everything your creator business needs"}</h2>
+                <p>{creatorPlan.subheading || "One dashboard replaces your storefront, booking tool, course platform, and audience growth stack."}</p>
+              </div>
 
-              {creatorPlan.trialNote ? (
-                <div className="trial-note">{creatorPlan.trialNote}</div>
-              ) : null}
+              <div className="stack-card flex flex-col justify-between flex-1">
+                <div>
+                  {(creatorPlan.categories || []).map((cat, catIdx) => (
+                    <React.Fragment key={cat.title || catIdx}>
+                      <div className="stack-title">{cat.title}</div>
+                      {(cat.items || []).map((item, itemIdx) => (
+                        <div className="stack-row" key={item.title || itemIdx}>
+                          <span className="emo">{item.emoji || "✨"}</span>
+                          <div>
+                            <div className="t">{item.title}</div>
+                            {item.description ? <div className="r">{item.description}</div> : null}
+                          </div>
+                          {item.price ? <span className="price">{item.price}</span> : null}
+                        </div>
+                      ))}
+                    </React.Fragment>
+                  ))}
+                </div>
 
-              {/* Action Buttons: Monthly & Yearly */}
-              <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "16px" }}>
-                {/* Monthly CTA Button */}
-                {creatorPlan.paymentLink ? (
-                  <a
-                    href={creatorPlan.paymentLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="pill-btn pill-navy plan-cta"
-                    style={{ width: "100%", textAlign: "center", display: "inline-flex", justifyContent: "center" }}
-                  >
-                    {creatorPlan.buttonText || "Start Monthly Trial →"}
-                  </a>
-                ) : (
-                  <Link
-                    to={creatorPlan.buttonLink || "/auth?role=advisor"}
-                    className="pill-btn pill-navy plan-cta"
-                    style={{ width: "100%", textAlign: "center", display: "inline-flex", justifyContent: "center" }}
-                  >
-                    {creatorPlan.buttonText || "Start Monthly Trial →"}
-                  </Link>
-                )}
+                <div className="mt-4 pt-2 border-t border-[var(--line)]">
+                  <div className="stack-total">
+                    <span className="emo">✕</span>
+                    <span className="t">{creatorPlan.originalTotalLabel || "What you'd spend otherwise"}</span>
+                    <span className="price">{creatorPlan.originalTotal || "$413/mo"}</span>
+                  </div>
+                  <div className="stack-join">
+                    <span className="emo">🪙</span>
+                    <span className="t">{creatorPlan.joinLabel || "Join Folksmint Creator"}</span>
+                    <span className="price">
+                      {creatorPlan.price
+                        ? creatorPlan.period
+                          ? `${creatorPlan.price}/${creatorPlan.period}`
+                          : creatorPlan.price
+                        : "$29/mo"}
+                    </span>
+                  </div>
 
-                {/* Yearly CTA Button */}
-                {creatorPlan.yearlyPrice ? (
-                  creatorPlan.yearlyPaymentLink ? (
-                    <a
-                      href={creatorPlan.yearlyPaymentLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="pill-btn plan-cta"
+                  {/* Yearly Price Comparison Row if configured */}
+                  {creatorPlan.yearlyPrice ? (
+                    <div
+                      className="stack-join"
                       style={{
-                        width: "100%",
-                        textAlign: "center",
-                        display: "inline-flex",
-                        justifyContent: "center",
-                        background: "#0F172A",
-                        color: "white",
-                        border: "1px solid #22C55E",
-                        boxShadow: "0 4px 14px rgba(34,197,94,0.18)",
+                        marginTop: "8px",
+                        background: "rgba(34, 197, 94, 0.08)",
+                        borderColor: "rgba(34, 197, 94, 0.25)",
                       }}
                     >
-                      {creatorYearlyBtnText}
-                    </a>
-                  ) : (
-                    <Link
-                      to={creatorPlan.yearlyButtonLink || "/auth?role=advisor&billing=yearly"}
-                      className="pill-btn plan-cta"
-                      style={{
-                        width: "100%",
-                        textAlign: "center",
-                        display: "inline-flex",
-                        justifyContent: "center",
-                        background: "#0F172A",
-                        color: "white",
-                        border: "1px solid #22C55E",
-                        boxShadow: "0 4px 14px rgba(34,197,94,0.18)",
-                      }}
-                    >
-                      {creatorYearlyBtnText}
-                    </Link>
-                  )
-                ) : null}
+                      <span className="emo">⭐</span>
+                      <span className="t" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                        <span>Yearly Plan (Billed Annually)</span>
+                        {creatorDiscount > 0 ? (
+                          <span
+                            style={{
+                              background: "#22C55E",
+                              color: "white",
+                              fontSize: "10px",
+                              fontWeight: 800,
+                              padding: "2px 7px",
+                              borderRadius: "9999px",
+                              lineHeight: 1,
+                            }}
+                          >
+                            {creatorDiscount}% OFF
+                          </span>
+                        ) : null}
+                      </span>
+                      <span className="price" style={{ color: "#15803D", fontWeight: 800 }}>
+                        {creatorPlan.yearlyPrice}
+                        {creatorPlan.yearlyPeriod ? `/${creatorPlan.yearlyPeriod}` : "/mo"}
+                      </span>
+                    </div>
+                  ) : null}
+
+                  {creatorPlan.trialNote ? (
+                    <div className="trial-note">{creatorPlan.trialNote}</div>
+                  ) : null}
+
+                  {/* Action Buttons: Monthly & Yearly */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "16px" }}>
+                    {/* Monthly CTA Button */}
+                    {creatorPlan.paymentLink ? (
+                      <a
+                        href={creatorPlan.paymentLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="pill-btn pill-navy plan-cta"
+                        style={{ width: "100%", textAlign: "center", display: "inline-flex", justifyContent: "center" }}
+                      >
+                        {creatorPlan.buttonText || "Start Monthly Trial →"}
+                      </a>
+                    ) : (
+                      <Link
+                        to={creatorPlan.buttonLink || "/auth?role=advisor"}
+                        className="pill-btn pill-navy plan-cta"
+                        style={{ width: "100%", textAlign: "center", display: "inline-flex", justifyContent: "center" }}
+                      >
+                        {creatorPlan.buttonText || "Start Monthly Trial →"}
+                      </Link>
+                    )}
+
+                    {/* Yearly CTA Button */}
+                    {creatorPlan.yearlyPrice ? (
+                      creatorPlan.yearlyPaymentLink ? (
+                        <a
+                          href={creatorPlan.yearlyPaymentLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="pill-btn plan-cta"
+                          style={{
+                            width: "100%",
+                            textAlign: "center",
+                            display: "inline-flex",
+                            justifyContent: "center",
+                            background: "#0F172A",
+                            color: "white",
+                            border: "1px solid #22C55E",
+                            boxShadow: "0 4px 14px rgba(34,197,94,0.18)",
+                          }}
+                        >
+                          {creatorYearlyBtnText}
+                        </a>
+                      ) : (
+                        <Link
+                          to={creatorPlan.yearlyButtonLink || "/auth?role=advisor&billing=yearly"}
+                          className="pill-btn plan-cta"
+                          style={{
+                            width: "100%",
+                            textAlign: "center",
+                            display: "inline-flex",
+                            justifyContent: "center",
+                            background: "#0F172A",
+                            color: "white",
+                            border: "1px solid #22C55E",
+                            boxShadow: "0 4px 14px rgba(34,197,94,0.18)",
+                          }}
+                        >
+                          {creatorYearlyBtnText}
+                        </Link>
+                      )
+                    ) : null}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -689,7 +721,7 @@ export function HomePage(_props: HomePageProps = {}) {
       </section>
 
       {/* Testimonials */}
-      <section id="testimonials" style={{ background: "var(--card)", borderTop: "1px solid var(--line)" }}>
+      <section id="testimonials" style={{ background: "linear-gradient(180deg, #F8FAFC 0%, #FFFFFF 100%)", borderTop: "1px solid var(--line)" }}>
         <div className="wrap">
           <div className="section-head">
             <div className="kicker">Testimonials</div>
@@ -697,42 +729,75 @@ export function HomePage(_props: HomePageProps = {}) {
           </div>
 
           <div className="testi-grid">
-            <div className="testi-card">
+            <div className="testi-card group">
               <img
-                src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MDAgMzAwIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iY3NreSIgeDE9IjAiIHkxPSIwIiB4Mj0iMCIgeTI9IjEiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSIjRkZFOEM5Ii8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjRkZEMTk5Ii8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0idXJsKCNjc2t5KSIvPgogIDxyZWN0IHg9IjAiIHk9IjE1MCIgd2lkdGg9IjQwMCIgaGVpZ2h0PSIxNTAiIGZpbGw9IiNEOUMzQTMiLz4KICA8cmVjdCB4PSIyMCIgeT0iNjAiIHdpZHRoPSIzNjAiIGhlaWdodD0iMTAwIiBmaWxsPSIjN0M0QTJEIi8+CiAgPHJlY3QgeD0iMzAiIHk9IjcwIiB3aWR0aD0iOTAiIGhlaWdodD0iNzAiIGZpbGw9IiMzQjI0MTciLz4KICA8cmVjdCB4PSIxNDAiIHk9IjcwIiB3aWR0aD0iMTIwIiBoZWlnaHQ9IjcwIiBmaWxsPSIjM0IyNDE3Ii8+CiAgPHJlY3QgeD0iMjgwIiB5PSI3MCIgd2lkdGg9IjkwIiBoZWlnaHQ9IjcwIiBmaWxsPSIjM0IyNDE3Ii8+CiAgPHJlY3QgeD0iMCIgeT0iMTUwIiB3aWR0aD0iNDAwIiBoZWlnaHQ9IjE0IiBmaWxsPSIjNUIzQTIyIi8+CiAgPHJlY3QgeD0iNjAiIHk9IjE2NCIgd2lkdGg9IjI4MCIgaGVpZ2h0PSI3MCIgcng9IjQiIGZpbGw9IiNBOTc0NEMiLz4KICA8cmVjdCB4PSI2MCIgeT0iMTY0IiB3aWR0aD0iMjgwIiBoZWlnaHQ9IjEwIiBmaWxsPSIjOEM1QjM3Ii8+CiAgPGNpcmNsZSBjeD0iMTAwIiBjeT0iMTkwIiByPSIxMiIgZmlsbD0iI2ZmZiIvPgogIDxyZWN0IHg9Ijk0IiB5PSIxODYiIHdpZHRoPSIxMiIgaGVpZ2h0PSIxNCIgcng9IjIiIGZpbGw9IiM0QTJFMUEiLz4KICA8Y2lyY2xlIGN4PSIxNTAiIGN5PSIxOTIiIHI9IjEwIiBmaWxsPSIjZmZmIi8+CiAgPHJlY3QgeD0iMTQ0IiB5PSIxODgiIHdpZHRoPSIxMiIgaGVpZ2h0PSIxMiIgcng9IjIiIGZpbGw9IiM0QTJFMUEiLz4KICA8ZWxsaXBzZSBjeD0iMjIwIiBjeT0iMjAwIiByeD0iMjAiIHJ5PSI4IiBmaWxsPSIjRThCOThBIi8+CiAgPGVsbGlwc2UgY3g9IjIyMCIgY3k9IjE5NiIgcng9IjIwIiByeT0iOCIgZmlsbD0iI0Y0RDNBOCIvPgogIDxlbGxpcHNlIGN4PSIyNzAiIGN5PSIyMDAiIHJ4PSIxOCIgcnk9IjciIGZpbGw9IiNFOEI5OEEiLz4KICA8ZWxsaXBzZSBjeD0iMjcwIiBjeT0iMTk2IiByeD0iMTgiIHJ5PSI3IiBmaWxsPSIjRjREM0E4Ii8+CiAgPHJlY3QgeD0iMCIgeT0iMjM0IiB3aWR0aD0iNDAwIiBoZWlnaHQ9IjY2IiBmaWxsPSIjNUIzQTIyIi8+Cjwvc3ZnPgo="
+                src="/images/testi-cafe-meera.jpg"
                 alt="Meera R.'s cafe"
+                loading="lazy"
               />
               <div className="testi-scrim" />
               <div className="testi-text">
+                <div className="flex items-center gap-1 text-amber-400 text-xs mb-2">
+                  ★★★★★
+                </div>
                 <p>"We filled a 6-creator campaign in under a week — Folksmint handled the applications so we didn't have to chase anyone."</p>
-                <div className="testi-who">Meera R.</div>
-                <div className="testi-role">Café Owner</div>
+                <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/15">
+                  <div>
+                    <div className="testi-who">Meera R.</div>
+                    <div className="testi-role">Café Owner</div>
+                  </div>
+                  <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-blue-500/30 text-blue-200 border border-blue-400/30 backdrop-blur-xs">
+                    Verified
+                  </span>
+                </div>
               </div>
             </div>
 
-            <div className="testi-card">
+            <div className="testi-card group">
               <img
-                src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MDAgMzAwIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZ2JnIiB4MT0iMCIgeTE9IjAiIHgyPSIwIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiNEREVGRTMiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiNCOURFQzYiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWxsPSJ1cmwoI2diZykiLz4KICA8cmVjdCB4PSIwIiB5PSIyMTAiIHdpZHRoPSI0MDAiIGhlaWdodD0iOTAiIGZpbGw9IiM4RkFGOUEiLz4KICA8cmVjdCB4PSIwIiB5PSIyMDAiIHdpZHRoPSI0MDAiIGhlaWdodD0iMTIiIGZpbGw9IiM2RTkwODAiLz4KICA8cmVjdCB4PSIzMCIgeT0iNjAiIHdpZHRoPSIxMDAiIGhlaWdodD0iMTIwIiByeD0iNiIgZmlsbD0iIzJFNEEzRSIvPgogIDxyZWN0IHg9IjI3MCIgeT0iNjAiIHdpZHRoPSIxMDAiIGhlaWdodD0iMTIwIiByeD0iNiIgZmlsbD0iIzJFNEEzRSIvPgogIDxyZWN0IHg9IjE1MCIgeT0iMTAwIiB3aWR0aD0iMTAwIiBoZWlnaHQ9IjMwIiByeD0iNiIgZmlsbD0iIzFENEVEOCIvPgogIDxjaXJjbGUgY3g9IjE1MCIgY3k9IjExNSIgcj0iMTgiIGZpbGw9IiMxRDRFRDgiLz4KICA8Y2lyY2xlIGN4PSIyNTAiIGN5PSIxMTUiIHI9IjE4IiBmaWxsPSIjMUQ0RUQ4Ii8+CiAgPHJlY3QgeD0iODAiIHk9IjIyMCIgd2lkdGg9IjI0MCIgaGVpZ2h0PSIxNCIgcng9IjciIGZpbGw9IiMyNTYzRUIiLz4KICA8cmVjdCB4PSIxNDAiIHk9IjE1MCIgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxMCIgcng9IjUiIGZpbGw9IiMwRjIxM0YiLz4KICA8Y2lyY2xlIGN4PSIxNDAiIGN5PSIxNTUiIHI9IjE2IiBmaWxsPSIjMEYyMTNGIi8+CiAgPGNpcmNsZSBjeD0iMjYwIiBjeT0iMTU1IiByPSIxNiIgZmlsbD0iIzBGMjEzRiIvPgo8L3N2Zz4K"
+                src="/images/testi-fitness-rohan.jpg"
                 alt="Rohan M.'s gym"
+                loading="lazy"
               />
               <div className="testi-scrim" />
               <div className="testi-text">
+                <div className="flex items-center gap-1 text-amber-400 text-xs mb-2">
+                  ★★★★★
+                </div>
                 <p>"My biolink store finally looks like it belongs to a real business, not a link dump. Bookings went up almost immediately."</p>
-                <div className="testi-who">Rohan M.</div>
-                <div className="testi-role">Fitness Creator</div>
+                <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/15">
+                  <div>
+                    <div className="testi-who">Rohan M.</div>
+                    <div className="testi-role">Fitness Creator</div>
+                  </div>
+                  <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-blue-500/30 text-blue-200 border border-blue-400/30 backdrop-blur-xs">
+                    Verified
+                  </span>
+                </div>
               </div>
             </div>
 
-            <div className="testi-card">
+            <div className="testi-card group">
               <img
-                src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MDAgMzAwIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0icmJnIiB4MT0iMCIgeTE9IjAiIHgyPSIwIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiNFNEU5RkIiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiNDOUQ0RjciLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWxsPSJ1cmwoI3JiZykiLz4KICA8cmVjdCB4PSIwIiB5PSIyMzAiIHdpZHRoPSI0MDAiIGhlaWdodD0iNzAiIGZpbGw9IiNCNEMwRTgiLz4KICA8cmVjdCB4PSIzMCIgeT0iNTAiIHdpZHRoPSIxMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiM1QjZCODUiLz4KICA8cmVjdCB4PSIzNjAiIHk9IjUwIiB3aWR0aD0iMTAiIGhlaWdodD0iMTgwIiBmaWxsPSIjNUI2Qjg1Ii8+CiAgPHJlY3QgeD0iMzAiIHk9IjU1IiB3aWR0aD0iMzQwIiBoZWlnaHQ9IjgiIGZpbGw9IiM1QjZCODUiLz4KICA8cmVjdCB4PSI1NSIgeT0iNzAiIHdpZHRoPSI0MCIgaGVpZ2h0PSI5MCIgZmlsbD0iIzI1NjNFQiIvPgogIDxyZWN0IHg9IjEwNSIgeT0iNzAiIHdpZHRoPSI0MCIgaGVpZ2h0PSI5MCIgZmlsbD0iI0Q2NDU0NSIvPgogIDxyZWN0IHg9IjE1NSIgeT0iNzAiIHdpZHRoPSI0MCIgaGVpZ2h0PSI5MCIgZmlsbD0iI0ZCQkYyNCIvPgogIDxyZWN0IHg9IjIwNSIgeT0iNzAiIHdpZHRoPSI0MCIgaGVpZ2h0PSI5MCIgZmlsbD0iIzIyQzU1RSIvPgogIDxyZWN0IHg9IjI1NSIgeT0iNzAiIHdpZHRoPSI0MCIgaGVpZ2h0PSI5MCIgZmlsbD0iIzFENEVEOCIvPgogIDxyZWN0IHg9IjMwNSIgeT0iNzAiIHdpZHRoPSI0MCIgaGVpZ2h0PSI5MCIgZmlsbD0iIzdDM0FFRCIvPgogIDxyZWN0IHg9IjQwIiB5PSIxODAiIHdpZHRoPSIzMjAiIGhlaWdodD0iMTIiIGZpbGw9IiM4Nzk3QjgiLz4KICA8cmVjdCB4PSIxNTAiIHk9IjIwMCIgd2lkdGg9IjEwMCIgaGVpZ2h0PSIzMCIgcng9IjQiIGZpbGw9IiMxRDRFRDgiLz4KPC9zdmc+Cg=="
+                src="/images/testi-retail-karan.jpg"
                 alt="Karan B.'s shop"
+                loading="lazy"
               />
               <div className="testi-scrim" />
               <div className="testi-text">
+                <div className="flex items-center gap-1 text-amber-400 text-xs mb-2">
+                  ★★★★★
+                </div>
                 <p>"Verified clicks means I'm not paying for bots. It's the first affiliate tool that felt honest about what I was buying."</p>
-                <div className="testi-who">Karan B.</div>
-                <div className="testi-role">Local Retailer</div>
+                <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/15">
+                  <div>
+                    <div className="testi-who">Karan B.</div>
+                    <div className="testi-role">Local Retailer</div>
+                  </div>
+                  <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-blue-500/30 text-blue-200 border border-blue-400/30 backdrop-blur-xs">
+                    Verified
+                  </span>
+                </div>
               </div>
             </div>
           </div>

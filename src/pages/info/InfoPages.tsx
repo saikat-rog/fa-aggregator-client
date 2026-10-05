@@ -5,18 +5,21 @@ const TESTIMONIALS = [
     name: "Meera R.",
     role: "Café Owner",
     location: "Pune",
+    image: "/images/testi-cafe-meera.jpg",
     quote: "We filled a 6-creator campaign in under a week — Folksmint handled the applications so we didn't have to chase anyone.",
   },
   {
     name: "Rohan M.",
     role: "Fitness Creator",
     location: "Bengaluru",
+    image: "/images/testi-fitness-rohan.jpg",
     quote: "My biolink store finally looks like it belongs to a real business, not a link dump. Bookings went up almost immediately.",
   },
   {
     name: "Karan B.",
     role: "Local Retailer",
     location: "Delhi",
+    image: "/images/testi-retail-karan.jpg",
     quote: "Verified clicks means I'm not paying for bots. It's the first affiliate tool that felt honest about what I was buying.",
   },
 ];
@@ -38,8 +41,8 @@ export function TestimonialsPage() {
 
       <div className="testi-grid">
         {TESTIMONIALS.map((t) => (
-          <div key={t.name} className="testi-card">
-            <div className="absolute inset-0 bg-gradient-to-tr from-[#1D4ED8] to-[#2563EB]" />
+          <div key={t.name} className="testi-card group">
+            <img src={t.image} alt={t.name} loading="lazy" />
             <div className="testi-scrim" />
             <div className="testi-text">
               <p>"{t.quote}"</p>

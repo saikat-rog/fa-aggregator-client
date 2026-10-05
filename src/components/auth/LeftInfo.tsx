@@ -5,13 +5,13 @@ const LeftInfo = () => {
     <div className="bg-[var(--card)] p-6 sm:p-8 lg:p-10 border-b lg:border-b-0 lg:border-r border-[var(--line)] flex flex-col justify-between">
       <div>
         <div className="flex items-center gap-2.5">
-          <span className="brand-mark !w-8 !h-8 !rounded-lg">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#fff" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="19" r="1.3" fill="#fff" stroke="none" />
-              <path d="M8.3 15.3a5.2 5.2 0 0 1 7.4 0" />
-              <path d="M5.1 12.1a9.6 9.6 0 0 1 13.8 0" />
-            </svg>
-          </span>
+          <img
+            src="/favicon.svg"
+            alt="Folksmint"
+            className="w-8 h-8 rounded-lg object-contain flex-shrink-0"
+            width={32}
+            height={32}
+          />
           <span className="font-heading font-bold text-base text-[var(--ink)]">Folksmint</span>
         </div>
 

@@ -35,6 +35,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }, [location.pathname, location.hash]);
 
   const links = [
+    { to: "/", label: "Home" },
     { to: "/#business", label: "For Business" },
     { to: "/#creators", label: "For Creators" },
     { to: "/creators", label: "Browse Creators" },
@@ -76,13 +77,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <nav className="nav">
           {/* Logo */}
           <Link to="/" className="logo">
-            <span className="badge">
-              <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#fff" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="19" r="1.3" fill="#fff" stroke="none" />
-                <path d="M8.3 15.3a5.2 5.2 0 0 1 7.4 0" />
-                <path d="M5.1 12.1a9.6 9.6 0 0 1 13.8 0" />
-              </svg>
-            </span>
+            <img
+              src="/favicon.svg"
+              alt="Folksmint"
+              className="w-[34px] h-[34px] rounded-[10px] object-contain flex-shrink-0"
+              width={34}
+              height={34}
+            />
             Folksmint
           </Link>
 
@@ -93,8 +94,22 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 key={link.to}
                 to={link.to}
                 end={link.to === "/"}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className={({ isActive }) => (isActive ? "active" : "")}
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  if (link.to === "/" && location.pathname === "/" && !location.hash) {
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }
+                }}
+                className={({ isActive }) => {
+                  if (link.to.includes("#")) {
+                    const hash = link.to.substring(link.to.indexOf("#"));
+                    return location.hash === hash ? "active" : "";
+                  }
+                  if (link.to === "/") {
+                    return location.pathname === "/" && !location.hash ? "active" : "";
+                  }
+                  return isActive ? "active" : "";
+                }}
               >
                 {link.label}
               </NavLink>
@@ -177,13 +192,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             {/* Brand details */}
             <div className="foot-brand">
               <div className="logo" style={{ color: "var(--ink)" }}>
-                <span className="badge">
-                  <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#fff" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="19" r="1.3" fill="#fff" stroke="none" />
-                    <path d="M8.3 15.3a5.2 5.2 0 0 1 7.4 0" />
-                    <path d="M5.1 12.1a9.6 9.6 0 0 1 13.8 0" />
-                  </svg>
-                </span>
+                <img
+                  src="/favicon.svg"
+                  alt="Folksmint"
+                  className="w-[34px] h-[34px] rounded-[10px] object-contain flex-shrink-0"
+                  width={34}
+                  height={34}
+                />
                 Folksmint
               </div>
               <p style={{ marginTop: "12px", maxWidth: "32ch" }}>
